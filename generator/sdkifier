@@ -10,6 +10,11 @@ $sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . 
 $appName       = isset($argv[2]) ? $argv[2] : null;
 $remoteApiUri  = isset($argv[3]) ? $argv[3] : null;
 $namespace     = isset($argv[4]) ? $argv[4] : "Gone";
+$commonVersion = isset($argv[5]) ? $argv[5] : "dev-master";
+
+
+define("LIB_COMMON_VERSION", $commonVersion);
+define("APP_NAMESPACE", $namespace);
 
 if(defined("APP_CORE_NAME")) {
     $scope = APP_CORE_NAME;
@@ -19,7 +24,6 @@ if(defined("APP_CORE_NAME")) {
     define("APP_ROOT", __DIR__ . "/../");
     $scope = Gone\AppCore\App::class;
 
-    define("APP_NAMESPACE", $namespace);
     define("APP_NAME", $appName);
     define("APP_CORE_NAME", "{$namespace}\\{$appName}");
 }
