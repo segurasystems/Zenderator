@@ -10,9 +10,9 @@
     public function {{ route.function }}(
 {% if route.callbackProperties %}
 {% for callbackProperty in route.callbackProperties %}
-        ${{ callbackProperty.name }}{% if callbackProperty.default %} = "{{ callbackProperty.default }}"{% endif %}{% if not loop.last %},{% endif %}
-
+        ${{ callbackProperty.name }}{% if not callbackProperty.isMandatory %} = "{{ callbackProperty.default }}"{% endif %}{% if not loop.last %},{% endif %}
 {% endfor %}
+
 {% endif %}
     )
     {
@@ -66,7 +66,9 @@
                     "Method: {$method}\n" .
                     "GuzzleConfig: " . var_export($this->sdkClient->getGuzzle()->getConfig(), true) . "\n".
                     "URL: {$endpoint}\n" .
+{% if route.callbackProperties %}
                     "Request: " .  json_encode($propertyArray, JSON_PRETTY_PRINT) . "\n\n" .
+{% endif %}
                     var_export($body, true)
                 );
             }
