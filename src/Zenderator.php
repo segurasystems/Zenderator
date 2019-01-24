@@ -764,11 +764,12 @@ class Zenderator
         $packs            = [];
         $routeCount       = 0;
         $sharedRenderData = [
-            'app_namespace'    => APP_NAMESPACE,
-            'app_name'         => APP_NAME,
-            'app_container'    => APP_CORE_NAME,
-            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
-            'release_time'     => date("Y-m-d H:i:s"),
+            'app_namespace'     => APP_NAMESPACE,
+            'lib_common_version'=> LIB_COMMON_VERSION,
+            'app_name'          => APP_NAME,
+            'app_container'     => APP_CORE_NAME,
+            'default_base_url'  => strtolower("http://" . APP_NAME . ".segurasystems.test"),
+            'release_time'      => date("Y-m-d H:i:s"),
         ];
 
         $routes = $this->getRoutes($remoteApiUri);
