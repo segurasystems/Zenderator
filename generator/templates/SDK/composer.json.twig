@@ -1,5 +1,5 @@
 {
-    "name": "segura/lib{{ app_name|lower }}",
+    "name": "{{ app_namespace|lower }}/lib{{ app_name|lower }}",
     "authors": [
         {
             "name": "Matthew Baggett",
@@ -12,14 +12,8 @@
     ],
     "license": "proprietary",
     "time": "{{ release_time }}",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url":  "git@github.com:segurasystems/libCommon.git"
-        }
-    ],
     "require": {
-        "segura/libcommon": "dev-master"
+        "gone.io/libcommon": "dev-master"
     },
     "require-dev": {
         "kint-php/kint": "^2.0",
@@ -29,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Gone\\SDK\\{{ app_name }}\\": "src"
+            "{{ app_namespace }}\\SDK\\{{ app_name }}\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Gone\\SDK\\{{ app_name }}\\Test\\": "tests/"
+            "{{ app_namespace }}\\SDK\\{{ app_name }}\\Test\\": "tests/"
         }
     }
 }
