@@ -1073,7 +1073,6 @@
                     "Gone\\AppCore\\Test\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
                     "name": "Matthew Baggett",
