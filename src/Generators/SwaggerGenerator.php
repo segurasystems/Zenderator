@@ -7,312 +7,202 @@ use Zenderator\Zenderator;
 
 class SwaggerGenerator extends BaseGenerator
 {
-    private $baseSwagger = array (
-        'swagger' => '2.0',
-        'info' =>
-            array (
-                'description' => 'Beep',
-                'version' => '1.0.0',
-                'title' => 'Swagger Test',
+    private $baseSwagger
+        = [
+            'openapi'      => '3.0.3',
+            'info'         => [
+                'title'          => 'Swagger Test',
+                'description'    => 'Beep',
                 'termsOfService' => 'TERMS',
-                'contact' =>
-                    array (
-                        'email' => 'emails',
-                    ),
-                'license' =>
-                    array (
-                        'name' => 'AN LICENCE',
-                        'url' => 'AN URL',
-                    ),
-            ),
-        'host' => 'test.segura.cloud',
-        'basePath' => '/v1',
-        'tags' =>
-            array (
-                0 =>
-                    array (
-                        'name' => 'pet',
-                        'description' => 'Everything about your Pets',
-                        'externalDocs' =>
-                            array (
-                                'description' => 'Find out more',
-                                'url' => 'http://swagger.io',
-                            ),
-                    ),
-                1 =>
-                    array (
-                        'name' => 'store',
-                        'description' => 'Access to Petstore orders',
-                    ),
-                2 =>
-                    array (
-                        'name' => 'user',
-                        'description' => 'Operations about user',
-                        'externalDocs' =>
-                            array (
-                                'description' => 'Find out more about our store',
-                                'url' => 'http://swagger.io',
-                            ),
-                    ),
-            ),
-        'schemes' =>
-            array (
-                0 => 'https',
-                1 => 'http',
-            ),
-        'paths' =>[],
-        'securityDefinitions' =>
-            array (
-                'petstore_auth' =>
-                    array (
-                        'type' => 'oauth2',
-                        'authorizationUrl' => 'https://petstore.swagger.io/oauth/authorize',
-                        'flow' => 'implicit',
-                        'scopes' =>
-                            array (
-                                'write:pets' => 'modify pets in your account',
-                                'read:pets' => 'read your pets',
-                            ),
-                    ),
-                'api_key' =>
-                    array (
-                        'type' => 'apiKey',
-                        'name' => 'api_key',
-                        'in' => 'header',
-                    ),
-            ),
-        'definitions' =>
-            array (
-                'Order' =>
-                    array (
-                        'type' => 'object',
-                        'properties' =>
-                            array (
-                                'id' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int64',
-                                    ),
-                                'petId' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int64',
-                                    ),
-                                'quantity' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int32',
-                                    ),
-                                'shipDate' =>
-                                    array (
-                                        'type' => 'string',
-                                        'format' => 'date-time',
-                                    ),
-                                'status' =>
-                                    array (
-                                        'type' => 'string',
-                                        'description' => 'Order Status',
-                                        'enum' =>
-                                            array (
-                                                0 => 'placed',
-                                                1 => 'approved',
-                                                2 => 'delivered',
-                                            ),
-                                    ),
-                                'complete' =>
-                                    array (
-                                        'type' => 'boolean',
-                                        'default' => false,
-                                    ),
-                            ),
-                        'xml' =>
-                            array (
-                                'name' => 'Order',
-                            ),
-                    ),
-                'User' =>
-                    array (
-                        'type' => 'object',
-                        'properties' =>
-                            array (
-                                'id' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int64',
-                                    ),
-                                'username' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'firstName' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'lastName' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'email' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'password' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'phone' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'userStatus' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int32',
-                                        'description' => 'User Status',
-                                    ),
-                            ),
-                        'xml' =>
-                            array (
-                                'name' => 'User',
-                            ),
-                    ),
-                'Category' =>
-                    array (
-                        'type' => 'object',
-                        'properties' =>
-                            array (
-                                'id' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int64',
-                                    ),
-                                'name' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                            ),
-                        'xml' =>
-                            array (
-                                'name' => 'Category',
-                            ),
-                    ),
-                'Tag' =>
-                    array (
-                        'type' => 'object',
-                        'properties' =>
-                            array (
-                                'id' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int64',
-                                    ),
-                                'name' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                            ),
-                        'xml' =>
-                            array (
-                                'name' => 'Tag',
-                            ),
-                    ),
-                'Pet' =>
-                    array (
-                        'type' => 'object',
-                        'required' =>
-                            array (
-                                0 => 'name',
-                                1 => 'photoUrls',
-                            ),
-                        'properties' =>
-                            array (
-                                'id' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int64',
-                                    ),
-                                'category' =>
-                                    array (
-                                        '$ref' => '#/definitions/Category',
-                                    ),
-                                'name' =>
-                                    array (
-                                        'type' => 'string',
-                                        'example' => 'doggie',
-                                    ),
-                                'photoUrls' =>
-                                    array (
-                                        'type' => 'array',
-                                        'xml' =>
-                                            array (
-                                                'name' => 'photoUrl',
-                                                'wrapped' => true,
-                                            ),
-                                        'items' =>
-                                            array (
-                                                'type' => 'string',
-                                            ),
-                                    ),
-                                'tags' =>
-                                    array (
-                                        'type' => 'array',
-                                        'xml' =>
-                                            array (
-                                                'name' => 'tag',
-                                                'wrapped' => true,
-                                            ),
-                                        'items' =>
-                                            array (
-                                                '$ref' => '#/definitions/Tag',
-                                            ),
-                                    ),
-                                'status' =>
-                                    array (
-                                        'type' => 'string',
-                                        'description' => 'pet status in the store',
-                                        'enum' =>
-                                            array (
-                                                0 => 'available',
-                                                1 => 'pending',
-                                                2 => 'sold',
-                                            ),
-                                    ),
-                            ),
-                        'xml' =>
-                            array (
-                                'name' => 'Pet',
-                            ),
-                    ),
-                'ApiResponse' =>
-                    array (
-                        'type' => 'object',
-                        'properties' =>
-                            array (
-                                'code' =>
-                                    array (
-                                        'type' => 'integer',
-                                        'format' => 'int32',
-                                    ),
-                                'type' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                                'message' =>
-                                    array (
-                                        'type' => 'string',
-                                    ),
-                            ),
-                    ),
-            ),
-        'externalDocs' =>
-            array (
-                'description' => 'Find out more about Swagger',
-                'url' => 'http://swagger.io',
-            ),
-    );
-    
+                'contact'        => [
+                    "name"  => "name",
+                    "url"   => "url",
+                    "email" => "email",
+                ],
+                'license'        => [
+                    'name' => 'AN LICENCE',
+                    'url'  => 'AN URL',
+                ],
+                'version'        => '1.0.0',
+            ],
+            'servers'      => [
+                [
+                    "url"         => "http://{instanceName}.segurasystems.com",
+                    "description" => "description",
+                    "variables"   => [
+                        "instanceName" => [
+                            "description" => "the instance id / domain"
+                        ],
+                        //                        "versionString" => [
+                        //                            "enum"        => ["v1"],
+                        //                            "default"     => "v1",
+                        //                            "description" => "Version of the api you are accessing",
+                        //                        ],
+                    ],
+                ],
+            ],
+            'paths'        => [],
+            'components'   => [],
+            'security'     => [],
+            'tags'         => [],
+            'externalDocs' => [],
+        ];
+
+    const FILTER_PARAMETER
+        = [
+        ];
+
     public function generateFromRoutes(array $routes)
     {
-        $this->putFile(true,"swagger.json",json_encode($routes,JSON_PRETTY_PRINT));
+
+        $groupedRoutes = $this->groupRoutesByPath($routes);
+
+        $swaggerPaths = [];
+        foreach ($groupedRoutes as $path => $methods) {
+            $swaggerPaths[$path] = $this->generateSwaggerMethods($methods);
+        }
+        ksort($swaggerPaths);
+
+        $swagger = $this->baseSwagger;
+
+        $swagger["paths"] = $swaggerPaths;
+
+        $this->putJson(true, "swagger.json", $swagger);
+        $this->putYaml(true, "swagger.yml", $swagger);
+    }
+
+    private function groupRoutesByPath($routes)
+    {
+        $grouped = [];
+        foreach ($routes as $route) {
+            $path = $route["pattern"];
+            if (!isset($grouped[$path])) {
+                $grouped[$path] = [];
+            }
+            $grouped[$path][$route["method"]] = $route;
+        }
+        return $grouped;
+    }
+
+    private function generateSwaggerMethods($methods)
+    {
+        $swaggerMethods = [];
+        foreach ($methods as $method => $route) {
+            $swaggerMethods[strtolower($method)] = $this->generateSwaggerMethod($route);
+        }
+        ksort($swaggerMethods);
+        return $swaggerMethods;
+    }
+
+    public function generateSwaggerMethod($route)
+    {
+        $swagger = [];
+        $swagger["summary"] = $route["name"] ?? "Missing Name [{$route["pattern"]}]";
+        $swagger["tags"] = [$route["class"] ?? "Missing Class [{$route["pattern"]}]"];
+        if (!empty($route["callbackProperties"])) {
+            $swagger["parameters"] = $this->generateSwaggerParameters($route);
+        }
+        ksort($swagger);
+        return $swagger;
+    }
+
+    private function generateSwaggerParameters($route)
+    {
+        $parameters = $this->presetParameterSet($route["callbackProperties"]);
+        if (empty($parameters)) {
+            foreach ($route["callbackProperties"] as $name => $property) {
+                $parameters[] = [
+                    "name"        => $name,
+                    "in"          => $this->swaggerPropertyIn($route),
+                    "description" => $property["description"] ?? "MISSING DESCRIPTION !!!!",
+                    "required"    => $property["isMandatory"],
+                    "schema"      => $this->swaggerPropertySchema($property),
+                ];
+            }
+        }
+        return $parameters;
+    }
+
+    private function presetParameterSet($properties)
+    {
+        if(count($properties) === 1){
+            $type = $properties[0]["type"] ?? null;
+            
+        }
+    }
+
+//"name" => "Filter",
+//"in"   => "header",
+//"description" => "Filter for the list",
+////        "required" => false,
+////        "deprecated" => false,
+////        "allowEmptyValue" => false,
+//"style" => "json",
+//"schema" =>['$ref' => "#/components/schemas/Filter"]
+    private function swaggerPropertyIn($route)
+    {
+        $in = "query";
+        switch ($route["method"]) {
+            case "POST":
+                $in = "body";
+                break;
+            default:
+                $in = "path";
+                break;
+        }
+        return $in;
+    }
+
+    private function swaggerPropertySchema($property)
+    {
+        $type = strtolower($property["type"] ?? "");
+        $type = null;
+        $format = null;
+        switch ($type) {
+            case "integer":
+            case "int":
+                $type = "integer";
+                $format = "int32";
+                break;
+            case "string":
+                $type = "string";
+                break;
+            case "base64":
+                $type = "string";
+                $type = "byte";
+                break;
+            case "float":
+                $type = "number";
+                $format = "float";
+                break;
+            case "boolean":
+            case "bool":
+                $type = "number";
+                $format = "float";
+                break;
+            case "date":
+                $type = "string";
+                $format = "date";
+                break;
+            case "datetime":
+            case "date-time":
+                $type = "string";
+                $format = "date-time";
+                break;
+            case "password":
+                $type = "string";
+                $format = "password";
+                break;
+            default:
+                break;
+        }
+        $schema = null;
+        if (!empty($type)) {
+            $schema = ["type" => $type];
+            if (!empty($format)) {
+                $schema["format"] = $format;
+            }
+        }
+        return $schema;
     }
 }

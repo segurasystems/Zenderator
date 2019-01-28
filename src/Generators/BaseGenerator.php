@@ -6,6 +6,7 @@ use Gone\Twig\InflectionExtension;
 use Gone\Twig\TransformExtension;
 use Zenderator\Interfaces\IZenderatorGenerator;
 use Zenderator\Zenderator;
+use Symfony\Component\Yaml\Yaml;
 
 abstract class BaseGenerator implements IZenderatorGenerator
 {
@@ -18,10 +19,10 @@ abstract class BaseGenerator implements IZenderatorGenerator
 
     public function __construct(Zenderator $zenderator, string $outputPath)
     {
-        $this->outputPath = rtrim($outputPath,"/") . "/";
+        $this->outputPath = rtrim($outputPath, "/") . "/";
         $this->zenderator = $zenderator;
         $this->loader = new \Twig_Loader_Filesystem($this->baseTemplatePath);
-        $this->twig   = new \Twig_Environment($this->loader, ['debug' => true]);
+        $this->twig = new \Twig_Environment($this->loader, ['debug' => true]);
         $this->twig->addExtension(new \Twig_Extension_Debug());
         $this->twig->addExtension(new TransformExtension());
         $this->twig->addExtension(new InflectionExtension());
@@ -37,20 +38,37 @@ abstract class BaseGenerator implements IZenderatorGenerator
     protected function renderToFile(bool $overwrite, string $path, string $template, array $data)
     {
         $output = $this->twig->render($template, $data);
-        $this->putFile($overwrite,$path,$output);
+        $this->putFile($overwrite, $path, $output);
         return $this;
     }
 
-    protected function putFile(bool $overwrite,string $path, string $content){
+    protected function putJson(bool $overwrite, string $path, array $content)
+    {
+        $this->putFile($overwrite, $path, json_encode($content, JSON_PRETTY_PRINT));
+    }
+
+    protected function putYaml(bool $overwrite, string $path, array $content)
+    {
+        $this->putFile(
+            $overwrite,
+            $path,
+            Yaml::dump($content,10,2)
+        );
+    }
+
+
+    protected function putFile(bool $overwrite, string $path, string $content)
+    {
         $this->mkdir($path);
-        $path = $this->outputPath . ltrim($path,"/");
+        $path = $this->outputPath . ltrim($path, "/");
         if (!file_exists($path) || $overwrite) {
             file_put_contents($path, $content);
         }
     }
 
-    protected function mkdir($path){
-        $path = $this->outputPath . ltrim($path,"/");
+    protected function mkdir($path)
+    {
+        $path = $this->outputPath . ltrim($path, "/");
         if (!file_exists(dirname($path))) {
             mkdir(dirname($path), 0777, true);
         }

@@ -48,6 +48,16 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
+            ->setCallbackProperties([
+                "Filter" => [
+                    "name" => "Filter",
+                    "default" => null,
+                    "description" => "Filter object with rules to filter the list results by",
+                    "in" => "header",
+                    "isMandatory" => false,
+                    "type" => \Gone\SDK\Common\Filters\Filter::class,
+                ],
+            ])
     )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
@@ -88,6 +98,16 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be returned",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
     )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
@@ -107,6 +127,16 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be deleted",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
     );
 
 
