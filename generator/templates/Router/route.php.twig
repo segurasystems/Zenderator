@@ -30,23 +30,23 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
+//            ->setProperties([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
+//                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
 {% endfor %}
-            ])
-            ->setPropertyOptions([
+//            ])
+//            ->setPropertyOptions([
 {% for column in columns %}
 {% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-                '{{ column.getPropertyFunction }}' => [
+//                '{{ column.getPropertyFunction }}' => [
 {% for permittedValue in column.getPermittedValues %}
-                    "{{ permittedValue }}",
+//                    "{{ permittedValue }}",
 {% endfor %}
-                ],
+//                ],
 {% endif %}
 {% endfor %}
-            ])
-            ->setPropertyOptions([
+//            ])
+            ->setPropertyData([
 {% for column in columns %}
                 '{{ column.getPropertyFunction }}' => [
                     'type' => '{{ column.getDbType }}',
@@ -86,9 +86,18 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('PUT')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
+            ->setPropertyData([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
+                '{{ column.getPropertyFunction }}' => [
+                    'type' => '{{ column.getDbType }}',
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        "{{ permittedValue }}",
+{% endfor %}
+                    ],
+{% endif %}
+                ],
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
@@ -106,9 +115,18 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
+            ->setPropertyData([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
+                '{{ column.getPropertyFunction }}' => [
+                    'type' => '{{ column.getDbType }}',
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        "{{ permittedValue }}",
+{% endfor %}
+                    ],
+{% endif %}
+                ],
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
@@ -136,9 +154,18 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('DELETE')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
+            ->setPropertyData([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
+                '{{ column.getPropertyFunction }}' => [
+                    'type' => '{{ column.getDbType }}',
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        "{{ permittedValue }}",
+{% endfor %}
+                    ],
+{% endif %}
+                ],
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
