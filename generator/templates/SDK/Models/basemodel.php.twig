@@ -22,7 +22,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     // Constant arrays defined by ENUMs
 {% for propertyName, data in propertyData %}
 {% if data.options is not empty %}
-    const OPTIONS2_{{ propertyName|upper }} = ["{{ data.options | join('", "') | raw }}"];
+    const OPTIONS_{{ propertyName|upper }} = ["{{ data.options | join('", "') | raw }}"];
 {% endif %}
 {% endfor %}
 
