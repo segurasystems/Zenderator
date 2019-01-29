@@ -2,9 +2,6 @@
 
 namespace Zenderator\Generators;
 
-use Zenderator\Interfaces\IZenderatorGenerator;
-use Zenderator\Zenderator;
-
 class SwaggerGenerator extends BaseGenerator
 {
     private $baseSwagger
@@ -51,6 +48,9 @@ class SwaggerGenerator extends BaseGenerator
     const FILTER_PARAMETER
         = [
         ];
+
+    private $schemas = [];
+    private $parameters = [];
 
     public function generateFromRoutes(array $routes)
     {
@@ -108,27 +108,21 @@ class SwaggerGenerator extends BaseGenerator
 
     private function generateSwaggerParameters($route)
     {
-        $parameters = $this->presetParameterSet($route["callbackProperties"]);
-        if (empty($parameters)) {
-            foreach ($route["callbackProperties"] as $name => $property) {
-                $parameters[] = [
-                    "name"        => $name,
-                    "in"          => $this->swaggerPropertyIn($route),
-                    "description" => $property["description"] ?? "MISSING DESCRIPTION !!!!",
-                    "required"    => $property["isMandatory"],
-                    "schema"      => $this->swaggerPropertySchema($property),
-                ];
-            }
+        $parameters = [];
+        foreach ($route["callbackProperties"] as $name => $property) {
+            $parameters[] = $this->generateSwaggerParameter($property,$route);
         }
         return $parameters;
     }
 
-    private function presetParameterSet($properties)
-    {
-        if(count($properties) === 1){
-            $type = $properties[0]["type"] ?? null;
-            
-        }
+    private function generateSwaggerParameter($property,$route){
+        return  [
+            "name"        => $property["name"],
+            "in"          => $property["in"] ?? $this->swaggerPropertyIn($route),
+            "description" => $property["description"] ?? "MISSING DESCRIPTION !!!!",
+            "required"    => $property["isMandatory"],
+            "schema"      => $this->swaggerPropertySchema($property),
+        ];
     }
 
 //"name" => "Filter",
@@ -155,10 +149,12 @@ class SwaggerGenerator extends BaseGenerator
 
     private function swaggerPropertySchema($property)
     {
-        $type = strtolower($property["type"] ?? "");
+        if(!empty($property["type"]) && is_array($property["type"])){
+            return $property["type"];
+        }
         $type = null;
         $format = null;
-        switch ($type) {
+        switch (strtolower($property["type"] ?? "")) {
             case "integer":
             case "int":
                 $type = "integer";
@@ -169,7 +165,7 @@ class SwaggerGenerator extends BaseGenerator
                 break;
             case "base64":
                 $type = "string";
-                $type = "byte";
+                $format = "byte";
                 break;
             case "float":
                 $type = "number";
