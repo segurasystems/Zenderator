@@ -57,6 +57,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% endfor %}
                     ],
 {% endif %}
+{% if column.getMaxLength is not empty %}
+                    "maxLength" => {{ column.getMaxLength }} ,
+{% endif %}
                 ],
 {% endfor %}
             ])
