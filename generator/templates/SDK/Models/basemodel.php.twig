@@ -10,15 +10,24 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {
     use PresentableTrait;
 
-{% for property in properties %}
-    const FIELD_{{ property|upper }} = '{{ property|transform_studly_to_camel }}';
+{% for propertyName, data in propertyData %}
+    const FIELD_{{ propertyName|upper }} = '{{ propertyName|transform_studly_to_camel }}';
+{% endfor %}
+
+    //Property DB Types
+{% for propertyName, data in propertyData %}
+    const DBTYPE_{{ propertyName|upper }} = '{{ data.type }}';
 {% endfor %}
 
     // Constant arrays defined by ENUMs
 {% for propertyName, property in propertiesOptions %}
     const OPTIONS_{{ propertyName|upper }} = ["{{ property | join('", "') | raw }}"];
 {% endfor %}
-
+{% for propertyName, data in propertyData %}
+    {% if data.options is not empty %}
+    const OPTIONS2_{{ propertyName|upper }} = ["{{ data.options | join('", "') | raw }}"];
+    {% endif %}
+{% endfor %}
 
 {% for propertyName, property in propertiesOptions %}
 {% for permittedValue in property %}
@@ -27,8 +36,9 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% endfor %}
 
     // Properties
-{% for property in properties %}
-    protected ${{ property }};
+{% for propertyName, data in propertyData %}
+    /** @var {{ data.phpType }} ${{ propertyName }} */
+    protected ${{ propertyName }};
 {% endfor %}
 
     public function __toArray() : array
@@ -54,17 +64,17 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     }
 
     // Getters and Setters
-{% for property in properties %}
-    public function get{{ property }}()
+{% for propertyName, data in propertyData %}
+    public function get{{ propertyName }}() : {{ data.phpType }}
     {
-        return $this->{{ property }};
+        return $this->{{ propertyName }};
     }
 
-    public function set{{ property }}(${{ property }}) : {{ pack_name }}Model
+    public function set{{ propertyName }}(${{ propertyName }}) : {{ pack_name }}Model
     {
-        if($this->{{ property }} != ${{ property }}){
-            $this->addDirtyKey('{{ property }}');
-            $this->{{ property }} = ${{ property }};
+        if($this->{{ propertyName }} != ${{ propertyName }}){
+            $this->addDirtyKey('{{ propertyName }}');
+            $this->{{ propertyName }} = ${{ propertyName }};
         }
         return $this;
     }

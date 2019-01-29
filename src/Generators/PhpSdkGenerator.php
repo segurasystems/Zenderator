@@ -3,6 +3,7 @@
 namespace Zenderator\Generators;
 
 use Zend\Stdlib\ConsoleHelper;
+use Zenderator\Components\Column;
 use Zenderator\Interfaces\IZenderatorGenerator;
 use Zenderator\Zenderator;
 
@@ -45,6 +46,7 @@ class PhpSdkGenerator extends BaseGenerator
             ];
             $properties = [];
             $propertiesOptions = [];
+            $propertyData = [];
             foreach ($routes as $route) {
                 if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
@@ -56,11 +58,22 @@ class PhpSdkGenerator extends BaseGenerator
                         $propertiesOptions[$propertyName] = $propertyOption;
                     }
                 }
+                if(isset($route["propertyData"])){
+                    foreach ($route['propertyData'] as $propertyName => $data) {
+                        if(!empty($data["type"])){
+                            $data["phpType"] = Column::convertColumnType($data["type"]);
+                        }
+                        $propertyData[$propertyName] = $data;
+                    }
+                }
             }
+
+            //var_dump($propertyData);die();
 
             $properties = array_unique($properties);
             $routeRenderData['properties'] = $properties;
             $routeRenderData['propertiesOptions'] = $propertiesOptions;
+            $routeRenderData['propertyData'] = $propertyData;
             $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
             #\Kint::dump($routeRenderData);
 

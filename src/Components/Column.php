@@ -252,18 +252,28 @@ class Column extends Entity
     public function setDbType($dbType)
     {
         $this->dbType = $dbType;
-        switch ($this->getDbType()) {
+        $type = self::ConvertColumnType($this->getDbType());
+        if(empty($type)){
+            throw new DBTypeNotTranslatedException("Type not translated: {$this->getDbType()}");
+        }
+        $this->setPhpType($type);
+        return $this;
+    }
+
+    public static function convertColumnType($dbType){
+        $type = null;
+        switch ($dbType) {
             case 'float':
             case 'decimal':
             case 'double':
-                $this->setPhpType('float');
+                $type = 'float';
                 break;
             case 'bit':
             case 'int':
             case 'bigint':
             case 'tinyint':
             case 'smallint':
-                $this->setPhpType('int');
+                $type = 'int';
                 break;
             case 'varchar':
             case 'smallblob':
@@ -273,19 +283,18 @@ class Column extends Entity
             case 'text':
             case 'longtext':
             case 'json':
-                $this->setPhpType('string');
+                $type = 'string';
                 break;
             case 'enum':
-                $this->setPhpType('string');
+                $type = 'string';
                 break;
             case 'datetime':
-                $this->setPhpType('string');
+                $type = 'string';
                 break;
             default:
-                throw new DBTypeNotTranslatedException("Type not translated: {$this->getDbType()}");
+                break;
         }
-
-        return $this;
+        return $type;
     }
 
     /**

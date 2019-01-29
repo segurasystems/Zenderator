@@ -46,6 +46,20 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% endif %}
 {% endfor %}
             ])
+            ->setPropertyOptions([
+{% for column in columns %}
+                '{{ column.getPropertyFunction }}' => [
+                    'type' => '{{ column.getDbType }}',
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        "{{ permittedValue }}",
+{% endfor %}
+                    ],
+{% endif %}
+                ],
+{% endfor %}
+            ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
             ->setCallbackProperties([
