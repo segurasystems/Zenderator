@@ -572,7 +572,7 @@ class Zenderator
             //->purgeSDK($sdkOutputPath)
             //->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, $remoteApiUri, false)
-            ->cleanCodePHPCSFixer([$sdkOutputPath])
+            //->cleanCodePHPCSFixer([$sdkOutputPath])
             //->runSDKTests($sdkOutputPath)
             //->sendSDKToGit($sdkOutputPath)
         ;

@@ -37,6 +37,6 @@ $zenderator = new \Zenderator\Zenderator(
 );
 
 $zenderator
-//    ->runSdkifier($sdkOutputPath, $remoteApiUri)
+    ->runSdkifier($sdkOutputPath, $remoteApiUri)
     ->runSwaggerifier($sdkOutputPath . "/swagger",$remoteApiUri)
 ;
