@@ -60,6 +60,12 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% if column.getMaxLength is not empty %}
                     "maxLength" => {{ column.getMaxLength }} ,
 {% endif %}
+{% if column.hasRelatedObjects %}
+{% for related in column.getRelatedObjects %}
+// Local : {{ related.getLocalModelName|json_encode()|raw }}
+// Remot : {{ related.getRemoteModelName|json_encode()|raw }}
+{% endfor %}
+{% endif %}
                 ],
 {% endfor %}
             ])
