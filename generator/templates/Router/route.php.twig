@@ -32,7 +32,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setPlural('{{ object_name_plural }}')
             ->setProperties([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
 {% endfor %}
             ])
             ->setPropertyOptions([
@@ -94,7 +94,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setPlural('{{ object_name_plural }}')
             ->setProperties([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
@@ -124,7 +124,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setPlural('{{ object_name_plural }}')
             ->setProperties([
 {% for column in columns %}
-                '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}' => '{{ column.getDbType }}',
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
