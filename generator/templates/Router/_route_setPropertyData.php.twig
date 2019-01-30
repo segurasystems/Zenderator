@@ -1,0 +1,35 @@
+            ->setPropertyData([
+{% for column in columns %}
+                '{{ column.getPropertyFunction }}' => [
+                    'type' => '{{ column.getDbType }}',
+                    'unique' => {{ column.isUnique|json_encode()|raw }},
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        "{{ permittedValue }}",
+{% endfor %}
+                    ],
+{% endif %}
+{% if column.hasRelatedObjects %}
+                    'related' => [
+{% for related in column.getRelatedObjects %}
+                        [
+                            'model' => '{{ related.getRemoteModelName }}',
+                            'column' => '{{ related.getRemoteBoundColumn }}',
+                        ],
+{% endfor %}
+                    ],
+{% endif %}
+{% if column.hasRemoteObjects %}
+                    'remote' => [
+{% for remote in column.getRemoteObjects %}
+                        [
+                            'model' => '{{ remote.getRemoteModelName }}',
+                            'column' => '{{ remote.getRemoteBoundColumn }}',
+                        ],
+{% endfor %}
+                    ],
+{% endif %}
+                ],
+{% endfor %}
+            ])

@@ -21,6 +21,7 @@ class Column extends Entity
     protected $defaultValue;
     protected $isAutoIncrement = false;
     protected $isUnique = false;
+    protected $isNullable = true;
     /** @var RelatedModel[] */
     protected $relatedObjects = [];
     /** @var RelatedModel[] */
@@ -107,6 +108,25 @@ class Column extends Entity
     public function setIsUnique(bool $isUnique): Column
     {
         $this->isUnique = $isUnique;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNullable(): bool
+    {
+        return $this->isNullable;
+    }
+
+    /**
+     * @param bool $isUnique
+     *
+     * @return Column
+     */
+    public function setIsNullable(bool $isNullable): Column
+    {
+        $this->isNullable = $isNullable;
         return $this;
     }
 
