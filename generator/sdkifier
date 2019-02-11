@@ -6,14 +6,14 @@ if(file_exists(__DIR__ . "/../vendor/autoload.php")){
 } else {
     $rootOfApp = __DIR__ . "/../../../../";
 }
-
+defined("APP_ROOT") OR define("APP_ROOT",$rootOfApp);
 
 #require_once($rootOfApp . "/bootstrap.php");
 ini_set("memory_limit", "256M");
 
 $params = [
     "root"      => $rootOfApp,
-    "output"    => APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/",
+    "output"    => APP_ROOT . "/SDK",
     "name"      => null,
     "uri"       => null,
     "namespace" => "Gone",
@@ -44,8 +44,12 @@ define("APP_NAMESPACE", $params["namespace"]);
 if(defined("APP_CORE_NAME")) {
     $scope = APP_CORE_NAME;
 }else{
+    if(!file_exists("{$params["root"]}/vendor/autoload.php")){
+        echo "Cannot find composer autoload at \"{$params["root"]}/vendor/autoload.php\"\n";
+        echo "Root path is misconfigured or unexpected\n";
+        die();
+    }
     require_once("{$params["root"]}/vendor/autoload.php");
-    define("APP_ROOT", $params["root"]);
     $scope = Gone\AppCore\App::class;
 
     define("APP_NAME", $params["name"]);
