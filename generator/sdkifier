@@ -31,12 +31,10 @@ foreach ($argv as $arg){
 }
 
 if(!$usingEquals) {
-    $params = [
-        "output"    => isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/",
-        "name"      => isset($argv[2]) ? $argv[2] : null,
-        "uri"       => isset($argv[3]) ? $argv[3] : null,
-        "namespace" => isset($argv[4]) ? $argv[4] : "Gone",
-    ];
+    $params["output"]       = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+    $params["name"]         = isset($argv[2]) ? $argv[2] : null;
+    $params["uri"]          = isset($argv[3]) ? $argv[3] : null;
+    $params["namespace"]    = isset($argv[4]) ? $argv[4] : "Gone";
 }
 
 define("APP_NAMESPACE", $params["namespace"]);
