@@ -26,28 +26,23 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSDKFunction('list')
             ->setSDKTemplate('list')
             ->setRouterPattern('/v1/{{ controller_route }}')
-            ->setHttpEndpoint( '/v1/{{ controller_route }}')
+            ->setHttpEndpoint('/v1/{{ controller_route }}')
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
-{% for column in columns %}
-                '{{ column.getPropertyFunction }}',
-{% endfor %}
-            ])
-            ->setPropertyOptions([
-{% for column in columns %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-                '{{ column.getPropertyFunction }}' => [
-{% for permittedValue in column.getPermittedValues %}
-                    "{{ permittedValue }}",
-{% endfor %}
-                ],
-{% endif %}
-{% endfor %}
-            ])
+{%  include "Router/_route_setPropertyData.php.twig" %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
+            ->setCallbackProperties([
+                "Filter" => [
+                    "name" => "Filter",
+                    "default" => null,
+                    "description" => "Filter object with rules to filter the list results by",
+                    "in" => "header",
+                    "isMandatory" => false,
+                    "type" => \Gone\SDK\Common\Filters\Filter::class,
+                ],
+            ])
     )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
@@ -57,15 +52,11 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSDKFunction('create')
             ->setSDKTemplate('create')
             ->setRouterPattern('/v1/{{ controller_route }}')
-            ->setHttpEndpoint( '/v1/{{ controller_route }}')
+            ->setHttpEndpoint('/v1/{{ controller_route }}')
             ->setHttpMethod('PUT')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
-{% for column in columns %}
-                '{{ column.getPropertyFunction }}',
-{% endfor %}
-            ])
+{%  include "Router/_route_setPropertyData.php.twig" %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
     )
@@ -77,17 +68,23 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSDKFunction('get')
             ->setSDKTemplate('get')
             ->setRouterPattern('/v1/{{ controller_route }}/{id}')
-            ->setHttpEndpoint( '/v1/{{ controller_route }}/id')
+            ->setHttpEndpoint('/v1/{{ controller_route }}/id')
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
-{% for column in columns %}
-                '{{ column.getPropertyFunction }}',
-{% endfor %}
-            ])
+{%  include "Router/_route_setPropertyData.php.twig" %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be returned",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
     )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
@@ -97,16 +94,22 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSDKFunction('delete')
             ->setSDKTemplate('delete')
             ->setRouterPattern('/v1/{{ controller_route }}/{id}')
-            ->setHttpEndpoint( '/v1/{{ controller_route }}/id')
+            ->setHttpEndpoint('/v1/{{ controller_route }}/id')
             ->setHttpMethod('DELETE')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setProperties([
-{% for column in columns %}
-                '{{ column.getPropertyFunction }}',
-{% endfor %}
-            ])
+{%  include "Router/_route_setPropertyData.php.twig" %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be deleted",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
     );
 
 

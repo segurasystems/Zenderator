@@ -191,9 +191,20 @@ class Model extends Entity
             }
             if ($zendConstraint->getType() == "PRIMARY KEY") {
                 $this->primaryKeys = $zendConstraint->getColumns();
+                foreach ($this->columns as $column) {
+                    $columnCount = count($zendConstraint->getColumns());
+                    foreach ($zendConstraint->getColumns() as $affectedColumn) {
+                        if ($column->getPropertyName() == $affectedColumn) {
+                            if($columnCount === 1){
+                                $column->setIsUnique(true);
+                            }
+                            $column->setIsNullable(false);
+                        }
+                    }
+                }
             }
             if ($zendConstraint->getType() == "UNIQUE") {
-                if ($this->getClassName() == 'PermissionGroup') {
+                //if ($this->getClassName() == 'PermissionGroup') {
                     foreach ($this->columns as $column) {
                         foreach ($zendConstraint->getColumns() as $affectedColumn) {
                             if ($column->getPropertyName() == $affectedColumn) {
@@ -201,7 +212,7 @@ class Model extends Entity
                             }
                         }
                     }
-                }
+                //}
             }
         }
 

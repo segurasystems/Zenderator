@@ -23,6 +23,9 @@ use Zend\Stdlib\ConsoleHelper;
 use Zenderator\Components\Model;
 use Zenderator\Exception\Exception;
 use Zenderator\Exception\SchemaToAdaptorException;
+use Zenderator\Generators\PhpSdkGenerator;
+use Zenderator\Generators\SwaggerGenerator;
+use Zenderator\Interfaces\IZenderatorGenerator;
 
 class Zenderator
 {
@@ -138,7 +141,7 @@ class Zenderator
             }
         }
 
-        $this->config = self::getConfig($this->rootOfApp);
+        $this->config = self::loadConfig($this->rootOfApp);
 
         $this->pathsToPSR2 = array_merge($this->pathsToPSR2, $customPathsToPSR2);
 
@@ -230,7 +233,7 @@ class Zenderator
         return self::$useClassPrefixes;
     }
 
-    public static function getConfig($rootOfApp)
+    public static function loadConfig($rootOfApp)
     {
         if (file_exists($rootOfApp . "/zenderator.yml")) {
             $zenderatorConfigPath = $rootOfApp . "/zenderator.yml";
@@ -418,9 +421,24 @@ class Zenderator
         return $this;
     }
 
+    public function getConfig(){
+        return $this->config;
+    }
+
+    public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false){
+        $routes = $this->getRoutes($remoteApiUri);
+        $swaggerGenerator = new SwaggerGenerator($this,$outputPath);
+        $swaggerGenerator->generateFromRoutes($routes);
+        return $this;
+    }
+
     public function makeSDK($outputPath = APP_ROOT, $remoteApiUri = false, $cleanByDefault = true)
     {
-        $this->makeSDKFiles($outputPath, $remoteApiUri);
+        $routes = $this->getRoutes($remoteApiUri);
+
+        $phpGenerator = new PhpSdkGenerator($this,$outputPath);
+        $phpGenerator->generateFromRoutes($routes);
+
         $this->removePHPVCRCassettes($outputPath);
         if ($cleanByDefault) {
             $this->cleanCode();
@@ -550,7 +568,7 @@ class Zenderator
             }
         }
 
-        $this
+        return $this
             //->purgeSDK($sdkOutputPath)
             //->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, $remoteApiUri, false)
@@ -558,6 +576,17 @@ class Zenderator
             //->runSDKTests($sdkOutputPath)
             //->sendSDKToGit($sdkOutputPath)
         ;
+    }
+
+    public function runSwaggerifier($outputPath = false, $remoteApiUri = false){
+        if (!$outputPath) {
+            $outputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+            if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['path'])) {
+                $outputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
+            }
+        }
+
+        return $this->makeSwagger($outputPath, $remoteApiUri);
     }
 
     public function disableWaitForKeypress()
@@ -759,115 +788,10 @@ class Zenderator
         return $this;
     }
 
-    private function makeSDKFiles($outputPath = APP_ROOT, $remoteApiUri = false)
-    {
-        $packs            = [];
-        $routeCount       = 0;
-        $sharedRenderData = [
-            'app_namespace'    => APP_NAMESPACE,
-            'app_name'         => APP_NAME,
-            'app_container'    => APP_CORE_NAME,
-            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
-            'release_time'     => date("Y-m-d H:i:s"),
-        ];
-
-        $routes = $this->getRoutes($remoteApiUri);
-        echo "Found " . count($routes) . " routes.\n";
-        if (count($routes) > 0) {
-            foreach ($routes as $route) {
-                if (isset($route['name'])) {
-                    if (isset($route['class'])) {
-                        $packs[(string) $route['class']][(string) $route['function']] = $route;
-                        $routeCount++;
-                    }
-                }
-            }
-        } else {
-            die("Cannot find any routes while building SDK. Something has gone very wrong.\n\n");
-        }
-
-        echo "Generating SDK for {$routeCount} routes...\n";
-        // "SDK" suite
-        foreach ($packs as $packName => $routes) {
-            echo " > Pack: {$packName}...\n";
-            $scopeName = $packName;
-            $scopeName[0] = strtolower($scopeName[0]);
-            $routeRenderData = [
-                'pack_name'  => $packName,
-                'scope_name' => $scopeName,
-                'routes'     => $routes,
-            ];
-            $properties = [];
-            $propertiesOptions = [];
-            foreach ($routes as $route) {
-                if (isset($route['properties'])) {
-                    foreach ($route['properties'] as $property) {
-                        $properties[] = $property;
-                    }
-                }
-                if (isset($route['propertiesOptions'])) {
-                    foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
-                        $propertiesOptions[$propertyName] = $propertyOption;
-                    }
-                }
-            }
-
-            $properties                    = array_unique($properties);
-            $routeRenderData['properties'] = $properties;
-            $routeRenderData['propertiesOptions'] = $propertiesOptions;
-            $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
-            #\Kint::dump($routeRenderData);
-
-            // Access Layer
-            $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "SDK/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
-            $this->renderToFile(false, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "SDK/AccessLayer/accesslayer.php.twig", $routeRenderData);
-
-            // Models
-            $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "SDK/Models/basemodel.php.twig", $routeRenderData);
-            $this->renderToFile(false, $outputPath . "/src/Models/{$packName}Model.php", "SDK/Models/model.php.twig", $routeRenderData);
-
-            // Tests
-            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
-
-            if (!file_exists($outputPath . "/tests/fixtures")) {
-                mkdir($outputPath . "/tests/fixtures", 0777, true);
-            }
-        }
-
-        $renderData = array_merge(
-            $sharedRenderData,
-            [
-                'packs'  => $packs,
-                'config' => $this->config
-            ]
-        );
-
-        echo "Generating Client Container:";
-        $this->renderToFile(true, $outputPath . "/src/Client.php", "SDK/client.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating Composer.json:";
-        $this->renderToFile(true, $outputPath . "/composer.json", "SDK/composer.json.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating Test Bootstrap:";
-        $this->renderToFile(true, $outputPath . "/bootstrap.php", "SDK/bootstrap.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating phpunit.xml, documentation, etc:";
-        $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "SDK/phpunit.xml.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Readme.md", "SDK/readme.md.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/.gitignore", "SDK/gitignore.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Dockerfile.tests", "SDK/Dockerfile.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/test-compose.yml", "SDK/docker-compose.yml.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        return $this;
-    }
-
     private function getRoutes($remoteApiUri = false)
     {
         if ($remoteApiUri) {
+            echo " > Getting routes from \"{$remoteApiUri}\"";
             $client = new Client([
                 'base_uri' => $remoteApiUri,
                 'timeout'  => 30.0,
@@ -875,14 +799,23 @@ class Zenderator
                     'Accept' => 'application/json'
                 ]
             ]);
-            $result = $client->get("/v1")->getBody()->getContents();
+            try {
+                $result = $client->get("/v1")->getBody()->getContents();
+            } catch (\Exception $e){
+                var_dump(get_class($e));
+                die();
+            }
             $body = json_decode($result, true);
             return $body['Routes'];
         }
         $response = $this->makeRequest("GET", "/v1");
         $body = (string)$response->getBody();
         $body = json_decode($body, true);
-        return $body['Routes'];
+        echo "Found " . count($routes) . " routes.\n";
+        if (empty($body['Routes'])) {
+            die("Cannot find any routes while building SDK. Something has gone very wrong.\n\n");
+        }
+        return $body['Routes'];;
     }
 
     /**
