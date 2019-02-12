@@ -745,7 +745,7 @@ class Zenderator
         if (in_array("DependencyInjector", $this->config['templates'])) {
             $this->renderToFile(
                 true,
-                APP_ROOT . "/src/appcontainer.php",
+                APP_ROOT . "/src/AppContainer.php",
                 "DependencyInjector/appcontainer.php.twig",
                 [
                     "config" => $this->getConfig(),
