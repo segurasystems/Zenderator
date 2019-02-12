@@ -1,33 +1,40 @@
 #!/usr/bin/env php
 <?php
 
-$rootOfApp = __DIR__ . "/../../../../";
+if(file_exists(__DIR__ . "/../vendor/autoload.php")){
+    $rootOfApp = __DIR__ . "/../";
+} else {
+    $rootOfApp = __DIR__ . "/../../../../";
+}
+defined("APP_ROOT") OR define("APP_ROOT",$rootOfApp);
 
 #require_once($rootOfApp . "/bootstrap.php");
 ini_set("memory_limit", "256M");
+
 $params = [
-    "output" => "/app/SDK",//APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/",
-    "name" => null,
-    "uri" => null,
+    "root"      => $rootOfApp,
+    "output"    => APP_ROOT . "/SDK",
+    "name"      => null,
+    "uri"       => null,
     "namespace" => "Gone",
 ];
 
-if(!empty($argv)) {
-    $usingEquals = false;
-    foreach($argv as $arg){
-        $parts = explode("=",$arg);
-        if(count($parts) > 1){
-            $arg = strtolower(trim(ltrim(array_shift($parts),"-")));
-            $params[$arg] = implode("=",$parts);
-            $usingEquals = true;
-        }
+$usingEquals = false;
+foreach ($argv as $arg){
+    $parts = explode("=",$arg);
+    if(count($parts) > 1) {
+        $usingEquals = true;
+        $param = strtolower(ltrim(array_shift($parts), "-"));
+        $arg = implode("=", $parts);
+        $params[$param] = $arg;
     }
-    if(!$usingEquals) {
-        $params["output"] = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
-        $params["name"] = isset($argv[2]) ? $argv[2] : null;
-        $params["uri"] = isset($argv[3]) ? $argv[3] : null;
-        $params["namespace"] = isset($argv[4]) ? $argv[4] : "Gone";
-    }
+}
+
+if(!$usingEquals) {
+    $params["output"]       = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+    $params["name"]         = isset($argv[2]) ? $argv[2] : null;
+    $params["uri"]          = isset($argv[3]) ? $argv[3] : null;
+    $params["namespace"]    = isset($argv[4]) ? $argv[4] : "Gone";
 }
 
 define("APP_NAMESPACE", $params["namespace"]);
@@ -35,15 +42,16 @@ define("APP_NAMESPACE", $params["namespace"]);
 if(defined("APP_CORE_NAME")) {
     $scope = APP_CORE_NAME;
 }else{
-    if(empty($params["root"])) {
-        $params["root"] = __DIR__ . "/../";
+    if(!file_exists("{$params["root"]}/vendor/autoload.php")){
+        echo "Cannot find composer autoload at \"{$params["root"]}/vendor/autoload.php\"\n";
+        echo "Root path is misconfigured or unexpected\n";
+        die();
     }
     require_once("{$params["root"]}/vendor/autoload.php");
-    define("APP_ROOT", $params["root"]);
     $scope = Gone\AppCore\App::class;
 
     define("APP_NAME", $params["name"]);
-    define("APP_CORE_NAME", $params["namespace"] . '\\' . $params["name"] );
+    define("APP_CORE_NAME", $params["namespace"] ."\\" . $params["name"]);
 }
 
 try {
