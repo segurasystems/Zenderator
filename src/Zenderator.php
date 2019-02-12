@@ -791,6 +791,7 @@ class Zenderator
     private function getRoutes($remoteApiUri = false)
     {
         if ($remoteApiUri) {
+            echo " > Getting routes from \"{$remoteApiUri}\"";
             $client = new Client([
                 'base_uri' => $remoteApiUri,
                 'timeout'  => 30.0,
@@ -798,7 +799,12 @@ class Zenderator
                     'Accept' => 'application/json'
                 ]
             ]);
-            $result = $client->get("/v1")->getBody()->getContents();
+            try {
+                $result = $client->get("/v1")->getBody()->getContents();
+            } catch (\Exception $e){
+                var_dump(get_class($e));
+                die();
+            }
             $body = json_decode($result, true);
             return $body['Routes'];
         }

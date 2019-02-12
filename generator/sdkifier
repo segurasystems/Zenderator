@@ -5,24 +5,45 @@ $rootOfApp = __DIR__ . "/../../../../";
 
 #require_once($rootOfApp . "/bootstrap.php");
 ini_set("memory_limit", "256M");
+$params = [
+    "output" => "/app/SDK",//APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/",
+    "name" => null,
+    "uri" => null,
+    "namespace" => "Gone",
+];
 
-$sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
-$appName       = isset($argv[2]) ? $argv[2] : null;
-$remoteApiUri  = isset($argv[3]) ? $argv[3] : null;
-$namespace     = isset($argv[4]) ? $argv[4] : "Gone";
+if(!empty($argv)) {
+    $usingEquals = false;
+    foreach($argv as $arg){
+        $parts = explode("=",$arg);
+        if(count($parts) > 1){
+            $arg = strtolower(trim(ltrim(array_shift($parts),"-")));
+            $params[$arg] = implode("=",$parts);
+            $usingEquals = true;
+        }
+    }
+    if(!$usingEquals) {
+        $params["output"] = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+        $params["name"] = isset($argv[2]) ? $argv[2] : null;
+        $params["uri"] = isset($argv[3]) ? $argv[3] : null;
+        $params["namespace"] = isset($argv[4]) ? $argv[4] : "Gone";
+    }
+}
 
-define("APP_NAMESPACE", $namespace);
+define("APP_NAMESPACE", $params["namespace"]);
 
 if(defined("APP_CORE_NAME")) {
     $scope = APP_CORE_NAME;
 }else{
-    $rootOfApp = __DIR__ . "/../";
-    require_once("{$rootOfApp}/vendor/autoload.php");
-    define("APP_ROOT", __DIR__ . "/../");
+    if(empty($params["root"])) {
+        $params["root"] = __DIR__ . "/../";
+    }
+    require_once("{$params["root"]}/vendor/autoload.php");
+    define("APP_ROOT", $params["root"]);
     $scope = Gone\AppCore\App::class;
 
-    define("APP_NAME", $appName);
-    define("APP_CORE_NAME", "{$namespace}\\{$appName}");
+    define("APP_NAME", $params["name"]);
+    define("APP_CORE_NAME", $params["namespace"] . '\\' . $params["name"] );
 }
 
 try {
@@ -32,11 +53,11 @@ try {
 }
 
 $zenderator = new \Zenderator\Zenderator(
-    $rootOfApp,
+    $params["root"],
     $databaseConfigs
 );
 
 $zenderator
-    ->runSdkifier($sdkOutputPath, $remoteApiUri)
-    ->runSwaggerifier($sdkOutputPath . "/swagger",$remoteApiUri)
+    ->runSdkifier($params["output"], $params["uri"])
+    ->runSwaggerifier($params["output"] . "/swagger",$params["uri"])
 ;

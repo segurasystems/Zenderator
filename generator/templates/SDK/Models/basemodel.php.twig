@@ -5,7 +5,19 @@ use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\SDK\Common\Traits\PresentableTrait;
 use {{ app_namespace }}\SDK\{{ app_name }}\AccessLayer\{{ pack_name }}AccessLayer;
 use {{ app_namespace }}\SDK\{{ app_name }}\Models\{{ pack_name }}Model;
+{% for propertyName, data in propertyData %}
+{% if data.related is not empty %}
+{% for related in data.related %}
+use {{ app_namespace }}\SDK\{{ app_name }}\Models\{{ related.model }};
+{% endfor %}
+{% endif %}
+{% endfor %}
 
+/**
+ * Class Base{{ pack_name }}Model
+ * @package {{ app_namespace }}\SDK\{{ app_name }}\Models\Base
+ * @property \{{ app_namespace }}\SDK\{{ app_name }}\Client $sdkClient
+ */
 abstract class Base{{ pack_name }}Model extends AbstractModel
 {
     use PresentableTrait;
@@ -77,6 +89,15 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
         }
         return $this;
     }
+{% if data.related is not empty %}
+{% for related in data.related %}
+    public function get{{ data.cleanName }}Model() : {{ related.model }}
+    {
+        $this->sdkClient->{{ data.cleanName[:1]|lower ~ data.cleanName[1:] }}
+            ->get($this->get{{ propertyName }}());
+    }
+{% endfor %}
+{% endif %}
 
 {% endfor %}
 }

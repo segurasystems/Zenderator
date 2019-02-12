@@ -383,4 +383,8 @@ class Column extends Entity
     {
         return $this->remoteObjects;
     }
+
+    public static function cleanName($name) {
+        return ucfirst(preg_replace('/Id$/', '', $name));
+    }
 }

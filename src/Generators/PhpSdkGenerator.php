@@ -63,6 +63,12 @@ class PhpSdkGenerator extends BaseGenerator
                         if(!empty($data["type"])){
                             $data["phpType"] = Column::convertColumnType($data["type"]);
                         }
+                        if(!empty($data["related"])){
+                            foreach ($data["related"] as $index => $related) {
+                                $data["related"][$index]["modelName"] = preg_replace('/Model$/', '', $related["model"]);
+                            }
+                        }
+                        $data["cleanName"] = Column::cleanName($propertyName);
                         $propertyData[$propertyName] = $data;
                     }
                 }
