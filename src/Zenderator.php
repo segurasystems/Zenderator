@@ -740,7 +740,19 @@ class Zenderator
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
         }
-        
+
+        // "DependencyInjector" suite
+        if (in_array("DependencyInjector", $this->config['templates'])) {
+            $this->renderToFile(
+                true,
+                APP_ROOT . "/src/appcontainer.php",
+                "DependencyInjector/appcontainer.php.twig",
+                [
+                    "config" => $this->getConfig(),
+                    "models" => $models,
+                ]
+            );
+        }
         return $this;
     }
 
