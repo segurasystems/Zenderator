@@ -566,6 +566,9 @@ class Zenderator
             if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['path'])) {
                 $sdkOutputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
             }
+            if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['absolute_path'])) {
+                $sdkOutputPath = $this->config['sdk']['output']['absolute_path'];
+            }
         }
 
         return $this
@@ -709,7 +712,7 @@ class Zenderator
             echo " > {$model->getClassName()}\n";
 
             #\Kint::dump($model->getRenderDataset());
-            if (in_array("Models", $this->config['templates'])) {
+            if (in_array("Models", $this->config['templates']) && !$this->skipModel($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "Models/basemodel.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "Models/model.php.twig", $model->getRenderDataset());
                 $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "Models/tests.models.php.twig", $model->getRenderDataset());
@@ -718,14 +721,14 @@ class Zenderator
             }
 
             // "Service" suite
-            if (in_array("Services", $this->config['templates'])) {
+            if (in_array("Services", $this->config['templates']) && !$this->skipService($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "Services/baseservice.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "Services/service.php.twig", $model->getRenderDataset());
                 $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "Services/tests.service.php.twig", $model->getRenderDataset());
             }
 
             // "Controller" suite
-            if (in_array("Controllers", $this->config['templates'])) {
+            if (in_array("Controllers", $this->config['templates']) && !$this->skipController($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "Controllers/basecontroller.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "Controllers/controller.php.twig", $model->getRenderDataset());
             }
@@ -736,7 +739,7 @@ class Zenderator
             }
 
             // "Routes" suite
-            if (in_array("Routes", $this->config['templates'])) {
+            if (in_array("Routes", $this->config['templates']) && !$this->skipRoute($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
         }
@@ -754,6 +757,54 @@ class Zenderator
             );
         }
         return $this;
+    }
+
+    private function skipRoute($name){
+        return in_array($name,$this->getRoutesToSkip());
+    }
+
+    private function getRoutesConfig(){
+        return $this->config["routes"] ?? [];
+    }
+
+    private function getRoutesToSkip(){
+        return $this->getRoutesConfig()["skip"] ?? [];
+    }
+
+    private function skipController($name){
+        return in_array($name,$this->getControllersToSkip());
+    }
+
+    private function getControllersConfig(){
+        return $this->config["controllers"] ?? [];
+    }
+
+    private function getControllersToSkip(){
+        return $this->getControllersConfig()["skip"] ?? [];
+    }
+
+    private function skipModel($name){
+        return in_array($name,$this->getModelsToSkip());
+    }
+
+    private function getModelsConfig(){
+        return $this->config["models"] ?? [];
+    }
+
+    private function getModelsToSkip(){
+        return $this->getModelsConfig()["skip"] ?? [];
+    }
+
+    private function skipService($name){
+        return in_array($name,$this->getServicesToSkip());
+    }
+
+    private function getServicesConfig(){
+        return $this->config["services"] ?? [];
+    }
+
+    private function getServicesToSkip(){
+        return $this->getServicesConfig()["skip"] ?? [];
     }
 
     private function renderToFile(bool $overwrite, string $path, string $template, array $data)
