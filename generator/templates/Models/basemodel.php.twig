@@ -18,6 +18,8 @@ abstract class Base{{ class_name }}Model
     implements ModelInterface
 {
 
+    const TABLE_NAME = '{{ table }}';
+
     // Declare what fields are available on this object
 {% for column in columns %}
     const FIELD_{{ column.getField|upper }} = '{{ column.getField }}';
