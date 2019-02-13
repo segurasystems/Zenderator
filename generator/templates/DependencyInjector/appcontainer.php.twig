@@ -2,58 +2,64 @@
 {% if 'Services' in config.templates %}
 {% for model in models %}
 $this->container[\{{ model.namespace }}\Services\{{ model.getClassName }}Service::class] = function (Slim\Container $c) {
-return new \{{ model.namespace }}\Services\{{ model.getClassName }}Service(
+    return new \{{ model.namespace }}\Services\{{ model.getClassName }}Service(
 {% if model.getRelatedObjects is not null %}
-    // Related Objects.
-    {% for object in model.getRelatedObjects|sort|unique %}
+        // Related Objects.
+{% for object in model.getRelatedObjects|sort|unique %}
         $c->get(\{{ model.namespace }}\TableGateways\{{ object.getRemoteClass }}TableGateway::class),
-    {% endfor %}
+{% endfor %}
 {% endif %}
 
 {% if model.getRelatedObjects is not null %}
-    // Remote Constraints.
-    {% for remote_constraint in model.getRemoteObjects %}
+        // Remote Constraints.
+{% for remote_constraint in model.getRemoteObjects %}
         // $c->get(\{{ model.namespace }}\TableGateways\{{ remote_constraint.getLocalClass }}TableGateway::class),
-    {% endfor %}
+{% endfor %}
 {% endif %}
-// Self TableGateway.
-$c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class)
-);
+        // Self TableGateway.
+        $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class)
+    );
 };
 {% endfor %}
 {% endif %}
 
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+//////////////////////// Controllers ///////////////////////////
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
 {% if 'Controllers' in config.templates %}
-    {% for model in models %}
-        {% if model.getClassName not in skipControllers %}
-        $this->container[\{{ model.namespace }}\Controllers\{{ model.getClassName }}Controller::class] = function (Slim\Container $c) {
-        return new \{{ model.namespace }}\Controllers\{{ model.getClassName }}Controller(
+{% for model in models %}
+{% if model.getClassName not in skipControllers %}
+$this->container[\{{ model.namespace }}\Controllers\{{ model.getClassName }}Controller::class] = function (Slim\Container $c) {
+    return new \{{ model.namespace }}\Controllers\{{ model.getClassName }}Controller(
         $c->get(\{{ model.namespace }}\Services\{{ model.getClassName }}Service::class)
-        );
-        };
-        {% endif %}
-    {% endfor %}
+    );
+};
+{% endif %}
+{% endfor %}
 {% endif %}
 
 {% for model in models %}
-    $this->container[\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class] = function (Slim\Container $c) {
+$this->container[\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class] = function (Slim\Container $c) {
     return new \{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway(
-    {% for className in model.getRelatedObjectsClassNames|sort|unique %}
+{% for className in model.getRelatedObjectsClassNames|sort|unique %}
         $c->get(\{{ model.namespace }}\TableGateways\{{ className }}TableGateway::class),
-    {% endfor %}
-    $c->get('Faker'),
-    $c->get(\Gone\AppCore\Db::class)
+{% endfor %}
+        $c->get('Faker'),
+        $c->get(\Gone\AppCore\Db::class)
     );
-    };
+};
 {% endfor %}
 
 {% for model in models %}
-    $this->container['{{ model.getClassName }}MockModel'] = function (Slim\Container $c) {
+$this->container['{{ model.getClassName }}MockModel'] = function (Slim\Container $c) {
     /** @var {{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway ${{ model.getClassName }}TableGateway */
     ${{ model.getClassName }}TableGateway = $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class);
     $new{{ model.getClassName }}Object = ${{ model.getClassName }}TableGateway->getNewMockModelInstance();
     return $new{{ model.getClassName }}Object;
-    };
+};
 {% endfor %}
 
 
