@@ -254,7 +254,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function save()
+    public function save(): self
     {
         /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
         $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
@@ -270,13 +270,13 @@ abstract class Base{{ class_name }}Model
     * @throws \Psr\Container\ContainerExceptionInterface
     * @throws \Psr\Container\NotFoundExceptionInterface
     */
-    public function destroy() : int
+    public function destroy() : self
     {
         $this->setDeleted("yes");
 {% if soft_delete_date %}
         $this->setDateDeleted(date("Y-m-d H:i:s"));
 {% endif %}
-        $this->save();
+        return $this->save();
     }
 
     /**
@@ -287,13 +287,13 @@ abstract class Base{{ class_name }}Model
     * @throws \Psr\Container\ContainerExceptionInterface
     * @throws \Psr\Container\NotFoundExceptionInterface
     */
-    public function reinstate() : int
+    public function reinstate() : self
     {
         $this->setDeleted("no");
     {% if soft_delete_date %}
         $this->setDateDeleted(null);
     {% endif %}
-        $this->save();
+        return $this->save();
     }
 {% else %}
     /**
