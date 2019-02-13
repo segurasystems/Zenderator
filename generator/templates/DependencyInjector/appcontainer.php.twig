@@ -36,8 +36,8 @@ $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGatewa
 {% for model in models %}
     $this->container[\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class] = function (Slim\Container $c) {
     return new \{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway(
-    {% for object in model.getRelatedObjectsClassNames|sort|unique %}
-        $c->get(\{{ model.namespace }}\TableGateways\{{ object.getRemoteClass }}TableGateway::class),
+    {% for className in model.getRelatedObjectsClassNames|sort|unique %}
+        $c->get(\{{ model.namespace }}\TableGateways\{{ className }}TableGateway::class),
     {% endfor %}
     $c->get('Faker'),
     $c->get(\Gone\AppCore\Db::class)
