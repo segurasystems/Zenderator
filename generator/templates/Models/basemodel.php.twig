@@ -272,11 +272,14 @@ abstract class Base{{ class_name }}Model
     */
     public function destroy(): self
     {
-        $this->setDeleted("yes");
+        if($this->getDeleted() !== self::DELETED_YES){
+            $this->setDeleted(self::DELETED_YES);
 {% if soft_delete_date %}
-        $this->setDateDeleted(date("Y-m-d H:i:s"));
+            $this->setDateDeleted(date("Y-m-d H:i:s"));
 {% endif %}
-        return $this->save();
+            return $this->save();
+        }
+        return $this;
     }
 
     /**
@@ -289,11 +292,14 @@ abstract class Base{{ class_name }}Model
     */
     public function reinstate() : self
     {
-        $this->setDeleted("no");
-    {% if soft_delete_date %}
-        $this->setDateDeleted(null);
-    {% endif %}
-        return $this->save();
+        if($this->getDeleted() !== self::DELETED_NO){
+            $this->setDeleted(self::DELETED_NO);
+{% if soft_delete_date %}
+            $this->setDateDeleted(null);
+{% endif %}
+            return $this->save();
+        }
+        return $this;
     }
 {% else %}
     /**
