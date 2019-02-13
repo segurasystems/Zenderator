@@ -59,6 +59,12 @@ abstract class Base{{ class_name }}Model
 {% endif %}
 {% endfor %}
 
+{% if required_columns is empty %}
+    protected $requiredFields = [];
+{% else %}
+    protected $requiredFields = ['{{ required_columns|join('\', \'')|raw }}'];
+{% endif %}
+
     /**
      * @param array $data An array of a {{ class_name }}Model's properties.
      * @return {{ class_name }}Model
@@ -66,6 +72,10 @@ abstract class Base{{ class_name }}Model
     static public function factory(array $data = [])
     {
         return parent::factory($data);
+    }
+
+    public function getRequiredFields(){
+        return $this->requiredFields;
     }
 
     /**
@@ -99,6 +109,7 @@ abstract class Base{{ class_name }}Model
 {% if column.hasRelatedObjects %}
                     'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
 {% endif %}
+                    'nullable' => {{ column.isNullable|json_encode|raw }},
                 ],
 {% endfor %}
         ];

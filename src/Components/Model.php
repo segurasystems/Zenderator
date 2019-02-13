@@ -398,6 +398,7 @@ class Model extends Entity
                 ->setPermittedValues($column->getErrata('permitted_values'))
                 ->setMaxDecimalPlaces($column->getNumericScale())
                 ->setIsUnsigned($column->getNumericUnsigned())
+                ->setIsNullable($column->isNullable())
                 ->setDefaultValue($column->getColumnDefault());
 
             /**
@@ -458,6 +459,7 @@ class Model extends Entity
             'related_objects'        => $this->getRelatedObjects(),
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
             'remote_objects'         => $this->getRemoteObjects(),
+            'required_columns'       => $this->getRequiredColumns(),
 
             'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
@@ -465,6 +467,19 @@ class Model extends Entity
             // @todo: work out why there are two.
             'autoincrement_parameters' => $this->getAutoIncrements()
         ];
+    }
+
+    /**
+     * @return Column[]
+     */
+    public function getRequiredColumns(){
+        $columns = [];
+        foreach ($this->getColumns() as $column){
+            if(!$column->isNullable()){
+                $columns[] = $column->getField();
+            }
+        }
+        return $columns;
     }
 
     /**
