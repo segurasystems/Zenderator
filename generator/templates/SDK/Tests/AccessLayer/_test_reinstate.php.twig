@@ -1,0 +1,82 @@
+    /**
+     * @vcr unittest_{{ pack_name|lower }}_list.cassette
+     **/
+    public function test{{ route.function|capitalize }}()
+    {
+        $response = $this->client->{{ scope_name }}->{{ route.function }}();
+        if($response == false){
+            $this->markTestSkipped("There was no data returned calling {{ route.function }}() on {{ pack_name|lower }}.");
+        }
+        $element = $response[rand(0,count($response) - 1)];
+        $this->assertEquals('{{ app_namespace }}\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
+        return $response;
+    }
+
+    /**
+     * @vcr unittest_{{ pack_name|lower }}_list.cassette
+     **/
+    public function test{{ route.function|capitalize }}LimitOne()
+    {
+        $response = $this->client->{{ scope_name }}->{{ route.function }}(
+                        Filter::Factory()
+                            ->setLimit(1)
+                            ->setOffset(0)
+                    );
+        if($response == false){
+            $this->markTestSkipped("There was no data returned calling {{ route.function }}() on {{ pack_name|lower }}.");
+        }
+        $element = $response[rand(0,count($response) - 1)];
+        $this->assertEquals('{{ app_namespace }}\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
+        $this->assertEquals(1, count($response));
+        return $response[0];
+    }
+
+    /**
+     * @depends test{{ route.function|capitalize }}LimitOne
+     * @vcr unittest_{{ pack_name|lower }}_list.cassette
+     **/
+    public function test{{ route.function|capitalize }}Wheres(\{{ app_namespace }}\SDK\{{ app_name }}\Models\{{ route.singular }}Model $toFind)
+    {
+        $filter = Filter::Factory();
+{% for key, value in route.example %}
+        if(is_string($toFind->get{{ key }}()) || is_numeric($toFind->get{{ key }}())){
+            $filter->addWhere('{{ key }}', $toFind->get{{ key }}(), '=');
+        }
+{% endfor %}
+        $response = $this->client->{{ scope_name }}->{{ route.function }}($filter);
+        //\Kint::dump($response);
+        /** @var $element \{{ app_namespace }}\SDK\{{ app_name }}\Models\{{ route.singular }}Model */
+        $element = $response[rand(0,count($response) - 1)];
+        $this->assertEquals('{{ app_namespace }}\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
+        $this->assertEquals(1, count($response));
+{% for key, value in route.example %}
+{% if value %}
+        $this->assertEquals($toFind->get{{ key }}(), $element->get{{ key }}());
+{% endif %}
+{% endfor %}
+        return $response;
+    }
+
+    /**
+    * @vcr unittest_{{ pack_name|lower }}_list.cassette
+    **/
+    public function test{{ route.function|capitalize }}OrderBy()
+    {
+        $responseAsc = $this->client->{{ scope_name }}->{{ route.function }}(
+            Filter::Factory()->setOrder('Id', 'ASC')
+        );
+        $responseDsc = $this->client->{{ scope_name }}->{{ route.function }}(
+            Filter::Factory()->setOrder('Id', 'DESC')
+        );
+        $responseAscIds = [];
+        foreach($responseAsc as $item){
+            $responseAscIds[] = $item->getId();
+        }
+        $responseDscIds = [];
+        foreach($responseDsc as $item){
+            $responseDscIds[] = $item->getId();
+        }
+        //\Kint::dump($responseAscIds, $responseDscIds);
+
+        $this->assertEquals(array_reverse($responseAscIds), $responseDscIds);
+    }
