@@ -471,6 +471,8 @@ class Model extends Entity
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
             'remote_objects'         => $this->getRemoteObjects(),
             'required_columns'       => $this->getRequiredColumns(),
+            'soft_delete'            => $this->getHasSoftDelete(),
+            'soft_delete_date'       => $this->getHasSoftDeleteDate(),
 
             'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
@@ -478,6 +480,28 @@ class Model extends Entity
             // @todo: work out why there are two.
             'autoincrement_parameters' => $this->getAutoIncrements()
         ];
+    }
+
+    public function getHasSoftDelete(){
+        foreach ($this->columns as $column){
+            if(strtolower($column->getField()) === "deleted"){
+                if($column->getDbType() === "enum"){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function getHasSoftDeleteDate(){
+        foreach ($this->columns as $column){
+            if(strtolower($column->getField()) === "datedeleted"){
+                if($column->getDbType() === "datetime"){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
