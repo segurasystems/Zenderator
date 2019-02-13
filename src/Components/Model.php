@@ -87,6 +87,17 @@ class Model extends Entity
     }
 
     /**
+     * @return string[]
+     */
+    public function getRelatedObjectsClassNames(){
+        $names = [];
+        foreach ($this->getRelatedObjects() as $relatedObject){
+            $names[] = $relatedObject->getRemoteClass();
+        }
+        return $names;
+    }
+
+    /**
      * @param array $relatedObjects
      *
      * @return Model
