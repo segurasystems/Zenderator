@@ -25,11 +25,13 @@ $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGatewa
 
 {% if 'Controllers' in config.templates %}
     {% for model in models %}
+        {% if model.getClassName not in skipControllers %}
         $this->container[\{{ model.namespace }}\Controllers\{{ model.getClassName }}Controller::class] = function (Slim\Container $c) {
         return new \{{ model.namespace }}\Controllers\{{ model.getClassName }}Controller(
         $c->get(\{{ model.namespace }}\Services\{{ model.getClassName }}Service::class)
         );
         };
+        {% endif %}
     {% endfor %}
 {% endif %}
 
