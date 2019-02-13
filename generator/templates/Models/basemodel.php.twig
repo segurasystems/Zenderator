@@ -270,7 +270,7 @@ abstract class Base{{ class_name }}Model
     * @throws \Psr\Container\ContainerExceptionInterface
     * @throws \Psr\Container\NotFoundExceptionInterface
     */
-    public function destroy() : self
+    public function destroy(): self
     {
         $this->setDeleted("yes");
 {% if soft_delete_date %}
