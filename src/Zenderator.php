@@ -752,6 +752,7 @@ class Zenderator
                 "DependencyInjector/appcontainer.php.twig",
                 [
                     "config" => $this->getConfig(),
+                    "skipControllers" => $this->getControllersToSkip(),
                     "models" => $models,
                 ]
             );
