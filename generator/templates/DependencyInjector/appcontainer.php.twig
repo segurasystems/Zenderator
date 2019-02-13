@@ -40,7 +40,7 @@ $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGatewa
         $c->get(\{{ model.namespace }}\TableGateways\{{ object.getRemoteClass }}TableGateway::class),
     {% endfor %}
     $c->get('Faker'),
-    $c->get('DatabaseInstance')
+    $c->get(\Gone\AppCore\Db::class)
     );
     };
 {% endfor %}
