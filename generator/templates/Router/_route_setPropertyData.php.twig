@@ -2,6 +2,7 @@
 {% for column in columns %}
                 '{{ column.getPropertyFunction }}' => [
                     'type' => '{{ column.getDbType }}',
+                    'isNullable' => {{ column.isNullable|json_encode|raw }},
                     'unique' => {{ column.isUnique|json_encode()|raw }},
 {% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
                     'options' => [

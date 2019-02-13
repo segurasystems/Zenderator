@@ -303,6 +303,7 @@ class Column extends Entity
             case 'text':
             case 'longtext':
             case 'json':
+            case 'password':
                 $type = 'string';
                 break;
             case 'enum':
