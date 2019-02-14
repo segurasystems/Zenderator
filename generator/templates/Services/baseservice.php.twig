@@ -89,6 +89,22 @@ abstract class Base{{ class_name }}Service
     }
 
     /**
+     * @param Filter $filter
+     *
+     * @return Models\{{ class_name }}Model|null
+     */
+    public function getFilter(Filter $filter)
+    {
+        return parent::get(
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
+        );
+    }
+
+    /**
      * @param int|null $offset
      * @param array|\Closure[]|null $wheres
      * @param string|Expression|null $order
@@ -111,6 +127,23 @@ abstract class Base{{ class_name }}Service
             $order,
             $orderDirection,
             $joins
+        );
+    }
+
+    /**
+     * @param Filter $filter
+     *
+     * @return Models\{{ class_name }}Model[]
+     */
+    public function getAllFilter(Filter $filter)
+    {
+        return parent::getAll(
+            $filter->getLimit(),
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
         );
     }
 
