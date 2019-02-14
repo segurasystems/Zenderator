@@ -94,15 +94,17 @@ abstract class Base{{ class_name }}Service
      * @param array|\Closure[]|null $wheres
      * @param string|Expression|null $order
      * @param string|null $orderDirection
+     * @param array|\Closure[]|null $joins
      *
      * @return Models\{{ class_name }}Model[]
      */
     public function getAll(
         int $limit = null,
         int $offset = null,
-        array $wheres = null,
+        array $wheres = [],
         $order = null,
-        string $orderDirection = null
+        string $orderDirection = null,
+        array $joins = []
     )
     {
         return parent::getAll(
@@ -110,7 +112,8 @@ abstract class Base{{ class_name }}Service
             $offset,
             $wheres,
             $order,
-            $orderDirection
+            $orderDirection,
+            $joins
         );
     }
 
