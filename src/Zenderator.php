@@ -870,16 +870,17 @@ class Zenderator
                 die();
             }
             $body = json_decode($result, true);
+            echo "Found " . count($body['Routes']) . " routes.\n";
             return $body['Routes'];
         }
         $response = $this->makeRequest("GET", "/v1");
         $body = (string)$response->getBody();
         $body = json_decode($body, true);
-        echo "Found " . count($routes) . " routes.\n";
+        echo "Found " . count($body['Routes']) . " routes.\n";
         if (empty($body['Routes'])) {
             die("Cannot find any routes while building SDK. Something has gone very wrong.\n\n");
         }
-        return $body['Routes'];;
+        return $body['Routes'];
     }
 
     /**
