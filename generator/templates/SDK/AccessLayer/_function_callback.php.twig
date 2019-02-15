@@ -16,27 +16,20 @@
 {% endif %}
     )
     {
+        $endpoint = "{{ route.pattern }}";
 {% if route.callbackProperties %}
         $propertyArray = [
 {% for callbackProperty in route.callbackProperties %}
             '{{ callbackProperty.name }}' => ${{ callbackProperty.name }},
 {% endfor %}
         ];
-{% endif %}
-        /** @var $response \GuzzleHttp\Psr7\Response */
 
-{% if route.callbackProperties %}
         $endpoint = $this->replaceUrlElements(
-            "{{ route.pattern }}",
-            [
-{% for callbackProperty in route.callbackProperties %}
-                '{{ callbackProperty.name }}' => ${{ callbackProperty.name }},
-{% endfor %}
-            ]
+            $endpoint,
+            $propertyArray
         );
-{% else %}
-        $endpoint = "{{ route.pattern }}";
 {% endif %}
+
         $method = "{{ route.method }}";
 
         try {
@@ -46,8 +39,15 @@
                 [
                     'headers' => [
                         'Accept' => 'application/json',
-                    ],
 {% if route.callbackProperties %}
+{% for callbackProp in route.callbackProperties %}
+{% if callbackProp.in == "header" %}
+                        '{{ callbackProp.name }}' => ${{ callbackProp.name }},
+{% endif %}
+{% endfor %}
+{% endif %}
+                    ],
+{% if route.callbackProperties and route.method != "GET" %}
                     'body' => json_encode($propertyArray),
 {% endif %}
                 ]
