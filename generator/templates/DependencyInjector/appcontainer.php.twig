@@ -54,12 +54,12 @@ $this->container[\{{ model.namespace }}\TableGateways\{{ model.getClassName }}Ta
 {% endfor %}
 
 {% for model in models %}
-$this->container['{{ model.getClassName }}MockModel'] = function (Slim\Container $c) {
-    /** @var {{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway ${{ model.getClassName }}TableGateway */
-    ${{ model.getClassName }}TableGateway = $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class);
-    $new{{ model.getClassName }}Object = ${{ model.getClassName }}TableGateway->getNewMockModelInstance();
-    return $new{{ model.getClassName }}Object;
-};
+//$this->container['{{ model.getClassName }}MockModel'] = function (Slim\Container $c) {
+//    /** @var {{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway ${{ model.getClassName }}TableGateway */
+//    ${{ model.getClassName }}TableGateway = $c->get(\{{ model.namespace }}\TableGateways\{{ model.getClassName }}TableGateway::class);
+//    $new{{ model.getClassName }}Object = ${{ model.getClassName }}TableGateway->getNewMockModelInstance();
+//    return $new{{ model.getClassName }}Object;
+//};
 {% endfor %}
 
 
