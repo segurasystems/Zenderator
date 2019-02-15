@@ -46,12 +46,20 @@ class PhpSdkGenerator extends BaseGenerator
             ];
             $properties = [];
             $propertiesOptions = [];
+            $singular = null;
+            $plural = null;
             $propertyData = [];
             foreach ($routes as $route) {
                 if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
                         $properties[] = $property;
                     }
+                }
+                if(isset($route["plural"])){
+                    $plural = $route["plural"];
+                }
+                if(isset($route["singular"])){
+                    $singular = $route["singular"];
                 }
                 if (isset($route['propertiesOptions'])) {
                     foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
@@ -80,6 +88,8 @@ class PhpSdkGenerator extends BaseGenerator
             $routeRenderData['properties'] = $properties;
             $routeRenderData['propertiesOptions'] = $propertiesOptions;
             $routeRenderData['propertyData'] = $propertyData;
+            $routeRenderData['plural'] = $plural;
+            $routeRenderData['singular'] = $singular;
             $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
             #\Kint::dump($routeRenderData);
 
