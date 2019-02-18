@@ -261,47 +261,6 @@ abstract class Base{{ class_name }}Model
         return $tableGateway->save($this);
     }
 
-{% if soft_delete %}
-    /**
-    * Soft delete the current record.
-    *
-    * @return int Number of affected rows.
-    *
-    * @throws \Psr\Container\ContainerExceptionInterface
-    * @throws \Psr\Container\NotFoundExceptionInterface
-    */
-    public function destroy(): self
-    {
-        if($this->getDeleted() !== self::DELETED_YES){
-            $this->setDeleted(self::DELETED_YES);
-{% if soft_delete_date %}
-            $this->setDateDeleted(date("Y-m-d H:i:s"));
-{% endif %}
-            return $this->save();
-        }
-        return $this;
-    }
-
-    /**
-    * Reinstate the current record.
-    *
-    * @return int Number of affected rows.
-    *
-    * @throws \Psr\Container\ContainerExceptionInterface
-    * @throws \Psr\Container\NotFoundExceptionInterface
-    */
-    public function reinstate() : self
-    {
-        if($this->getDeleted() !== self::DELETED_NO){
-            $this->setDeleted(self::DELETED_NO);
-{% if soft_delete_date %}
-            $this->setDateDeleted(null);
-{% endif %}
-            return $this->save();
-        }
-        return $this;
-    }
-{% else %}
     /**
     * Destroy the current record.
     *
@@ -316,7 +275,6 @@ abstract class Base{{ class_name }}Model
         $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
         return $tableGateway->delete($this->getPrimaryKeys());
     }
-{% endif %}
 
     /**
      * Destroy the current record, and any dependencies upon it, recursively.
