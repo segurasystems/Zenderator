@@ -712,7 +712,7 @@ class Zenderator
             echo " > {$model->getClassName()}\n";
 
             #\Kint::dump($model->getRenderDataset());
-            if (in_array("Models", $this->config['templates']) && !$this->skipModel($model->getClassName())) {
+            if (!$this->skipTemplate("Models") && !$this->skipModel($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "Models/basemodel.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "Models/model.php.twig", $model->getRenderDataset());
                 $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "Models/tests.models.php.twig", $model->getRenderDataset());
@@ -721,31 +721,31 @@ class Zenderator
             }
 
             // "Service" suite
-            if (in_array("Services", $this->config['templates']) && !$this->skipService($model->getClassName())) {
+            if (!$this->skipTemplate("Services") && !$this->skipService($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "Services/baseservice.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "Services/service.php.twig", $model->getRenderDataset());
                 $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "Services/tests.service.php.twig", $model->getRenderDataset());
             }
 
             // "Controller" suite
-            if (in_array("Controllers", $this->config['templates']) && !$this->skipController($model->getClassName())) {
+            if (!$this->skipTemplate("Controllers") && !$this->skipController($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "Controllers/basecontroller.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "Controllers/controller.php.twig", $model->getRenderDataset());
             }
 
             // "Endpoint" test suite
-            if (in_array("Endpoints", $this->config['templates'])) {
+            if (!$this->skipTemplate("Endpoints")) {
                 $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $model->getRenderDataset());
             }
 
             // "Routes" suite
-            if (in_array("Routes", $this->config['templates']) && !$this->skipRoute($model->getClassName())) {
+            if (!$this->skipTemplate("Routes") && !$this->skipRoute($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
         }
 
         // "DependencyInjector" suite
-        if (in_array("DependencyInjector", $this->config['templates'])) {
+        if (!$this->skipTemplate("DependencyInjector")) {
             $this->renderToFile(
                 true,
                 APP_ROOT . "/src/AppContainer.php",
@@ -758,6 +758,14 @@ class Zenderator
             );
         }
         return $this;
+    }
+
+    private function skipTemplate(string $template): bool{
+        return !in_array($template,$this->getTemplateConfig());
+    }
+
+    private function getTemplateConfig(){
+        return $this->config["templates"] ?? [];
     }
 
     private function skipRoute($name){
