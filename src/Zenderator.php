@@ -742,10 +742,13 @@ class Zenderator
             if (!$this->skipTemplate("Routes") && !$this->skipRoute($model->getClassName())) {
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
+
+            $allModelData[$model->getClassName()]["has_soft_delete"] = $model->hasField($this->softDeletedField());
+
         }
 
-        if(!$this->skipTemplate("SoftDeleteRoutes")){
-            $this->renderToFile(true,APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php","Router/route.php.twig", $allModelData);
+        if(!$this->skipTemplate("Routes") && $this->routesSoftDeleted()){
+            $this->renderToFile(true,APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php","Router/softDeleteRoutes.php.twig", ["models" => array_values($allModelData)]);
         }
 
         // "DependencyInjector" suite
@@ -762,6 +765,14 @@ class Zenderator
             );
         }
         return $this;
+    }
+
+    private function routesSoftDeleted(){
+        return $this->getRoutesConfig()["soft_deleted"] ?? false;
+    }
+
+    private function softDeletedField(){
+        return $this->getModelsConfig()["soft_deleted_field"] ?? null;
     }
 
     private function skipTemplate(string $template): bool{

@@ -1,24 +1,9 @@
 <?php
-$exampleExistingObjectFindFunction = function()
-{
-    $DIContainer = \{{ app_container }}::Instance()->getContainer();
-    $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
-
-    /** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
-    $exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
-
-    /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
-    $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance();
-    if(method_exists($exampleExistingObject, 'setId')){
-        $exampleExistingObject->setId(rand(1000000,9999999));
-    }
-
-    return $exampleExistingObject;
-};
 
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
 {% for model in models %}
+{% if model.has_soft_delete %}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ model.class_name }} Reinstate')
@@ -42,4 +27,4 @@ $router = \Gone\AppCore\Router\Router::Instance()
                     "type" => "integer",
                 ],
             ])
-    ){% endfor %};
+    ){% endif %}{% endfor %};
