@@ -466,7 +466,7 @@ class Model extends Entity
             'object_name_singular'   => $this->getClassName(),
             'controller_route'       => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
             'namespace_model'        => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
-            'columns'                => $this->columns,
+            'columns'                => $this->getColumns(),
             'related_objects'        => $this->getRelatedObjects(),
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
             'remote_objects'         => $this->getRemoteObjects(),
@@ -478,6 +478,16 @@ class Model extends Entity
             // @todo: work out why there are two.
             'autoincrement_parameters' => $this->getAutoIncrements()
         ];
+    }
+
+    public function hasField($field){
+        $field = strtolower($field);
+        foreach ($this->getColumns() as $column){
+            if(strtolower($column->getField()) === $field){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
