@@ -15,7 +15,9 @@ $exampleExistingObjectFindFunction = function()
 
     return $exampleExistingObject;
 };
-
+$propertyData = [
+{%  include "Router/_route_setPropertyData.php.twig" %}
+];
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
     ->addRoute(
@@ -30,8 +32,8 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-{%  include "Router/_route_setPropertyData.php.twig" %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setPropertyData($propertyData)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
             ->setCallbackProperties([
                 "Filter" => [
@@ -56,7 +58,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('PUT')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-{%  include "Router/_route_setPropertyData.php.twig" %}
+            ->setPropertyData($propertyData)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
     )
@@ -72,7 +74,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-{%  include "Router/_route_setPropertyData.php.twig" %}
+            ->setPropertyData($propertyData)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
             ->setCallbackProperties([
@@ -98,7 +100,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('DELETE')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-{%  include "Router/_route_setPropertyData.php.twig" %}
+            ->setPropertyData($propertyData)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setCallbackProperties([
                 "id" => [

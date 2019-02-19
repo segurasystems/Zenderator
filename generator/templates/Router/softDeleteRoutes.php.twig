@@ -1,0 +1,45 @@
+<?php
+$exampleExistingObjectFindFunction = function()
+{
+    $DIContainer = \{{ app_container }}::Instance()->getContainer();
+    $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+
+    /** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
+    $exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+
+    /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
+    $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance();
+    if(method_exists($exampleExistingObject, 'setId')){
+        $exampleExistingObject->setId(rand(1000000,9999999));
+    }
+
+    return $exampleExistingObject;
+};
+
+// Router proper begins
+$router = \Gone\AppCore\Router\Router::Instance()
+{% for model in models %}
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ model.class_name }} Reinstate')
+            ->setCallback(\{{ model.namespace }}\Controllers\{{ model.class_name }}Controller::class . ':reinstateRequest')
+            ->setSDKClass('{{ model.class_name }}')
+            ->setSDKFunction('reinstate')
+            ->setSDKTemplate('reinstate')
+            ->setRouterPattern('/v1/{{ model.controller_route }}/reinstate/{id}')
+            ->setHttpEndpoint('/v1/{{ model.controller_route }}/reinstate/id')
+            ->setHttpMethod('GET')
+            ->setSingular('{{ model.object_name_singular }}')
+            ->setPlural('{{ model.object_name_plural }}')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be reinstated",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
+    ){% endfor %};
