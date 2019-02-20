@@ -1,12 +1,12 @@
     /**
      * Return a single Models\{{ routes['create'].singular }}Model by ID
      *
-     * @return Models\{{ routes['create'].singular }}Model
+     * @return Models\{{ routes['create'].singular }}Model|array
      *
      * @throws Exceptions\ObjectNotFoundException
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}($id) : Models\{{ routes['create'].singular }}Model
+    public function {{ route.function }}($id, $hydrate=true)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = $this->replaceUrlElements(
@@ -30,7 +30,11 @@
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
             }
             $body = json_decode($body, true);
-            return $this->hydrate($body['{{ route.singular }}']);
+            if($hydrate){
+                return $this->hydrate($body['{{ route.singular }}']);
+            } else {
+                return $body['{{ route.singular }}'];
+            }
         }catch(\GuzzleHttp\Exception\ClientException $clientException){
             $body = $clientException->getResponse()->getBody()->getContents();
             if(json_decode($body) === null){
@@ -43,37 +47,5 @@
                 throw new Exceptions\ObjectNotFoundException("A bad thing happened: " . $body);
             }
         }
-    }
-
-    /**
-     * Get a single result with an optional filter.
-     *
-     * @param Filter|null $filter
-     *
-     * @return Models\{{ route.singular }}Model|null
-     */
-    public function getFiltered(Filter $filter = null) : ?Models\{{ route.singular }}Model
-    {
-        $singular = $this->list($filter->setLimit(1));
-
-        return (is_array($singular) && count($singular) == 1)
-            ? reset($singular)
-            : null;
-    }
-
-    /**
-     * Get many results with an optional filter
-     *
-     * @param Filter|null $filter
-     *
-     * @return Models\{{ route.singular }}Model|null
-     */
-    public function getManyFiltered(Filter $filter = null) : ?array
-    {
-        $list = $this->list($filter);
-
-        return (is_array($list) && count($list) > 0)
-            ? $list
-            : null;
     }
 

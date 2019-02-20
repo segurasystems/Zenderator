@@ -4,10 +4,10 @@
 
     /**
      * @param $filter Filter instance
-     * @return null|Models\{{ route.singular }}Model[]
+     * @return null|array|Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}(Filter $filter = null) : ?array
+    public function {{ route.function }}(Filter $filter = null,$hydrate = true)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
@@ -40,8 +40,43 @@
                     "Available Keys were: ['" . implode("', '", array_keys($body)) . "'].\n"
                 );
             }
-            return $this->hydrate($body['{{ route.plural }}']);
+            if($hydrate){
+                return $this->hydrate($body['{{ route.plural }}']);
+            } else {
+                return $body['{{ route.plural }}'];
+            }
         }
         return null;
     }
 
+    /**
+     * Get a single result with an optional filter.
+     *
+     * @param Filter|null $filter
+     *
+     * @return Models\{{ route.singular }}Model|array|null
+     */
+    public function getFiltered(Filter $filter = null)
+    {
+        $singular = $this->list($filter->setLimit(1));
+
+        return (is_array($singular) && count($singular) == 1)
+            ? reset($singular)
+            : null;
+    }
+
+    /**
+     * Get many results with an optional filter
+     *
+     * @param Filter|null $filter
+     *
+     * @return Models\{{ route.singular }}Model[]|array|null
+     */
+    public function getManyFiltered(Filter $filter = null) : ?array
+    {
+        $list = $this->list($filter);
+
+        return (is_array($list) && count($list) > 0)
+            ? $list
+            : null;
+    }
