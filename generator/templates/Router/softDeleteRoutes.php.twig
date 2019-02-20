@@ -17,6 +17,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSingular('{{ model.object_name_singular }}')
             ->setPlural('{{ model.object_name_plural }}')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setSDKModelSafe(true)
             ->setCallbackProperties([
                 "id" => [
                     "name" => "id",
