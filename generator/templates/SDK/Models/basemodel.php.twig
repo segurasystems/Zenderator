@@ -110,9 +110,9 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
 {% for route in routes %}
 {% if route.modelSafeMethod %}
-    public function {{ route.function }}()
+    public function {{ route.function }}(){% if route.hydratable %} : {{ pack_name }}Model{%  endif %}
     {
-        $this->getAccessLayer()->{{ route.function }}(
+        return $this->getAccessLayer()->{{ route.function }}(
 {% if route.callbackProperties %}
 {% for callbackProperty in route.callbackProperties %}
             $this->get{{ callbackProperty.name }}(){% if not loop.last %},{% endif %}
