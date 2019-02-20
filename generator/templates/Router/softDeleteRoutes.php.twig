@@ -3,7 +3,7 @@
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
 {% for model in models %}
-{% if model.has_soft_delete %}
+{% if model.has_soft_delete and model.class_name not in skip_routes %}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ model.class_name }} Reinstate')
