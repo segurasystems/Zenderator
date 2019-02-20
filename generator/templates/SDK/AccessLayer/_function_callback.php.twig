@@ -53,24 +53,26 @@
                 ]
             );
             $body = $response->getBody()->getContents();
-            if(json_decode($body) === null){
+            $json = json_decode($body, true);
+            if($json === null){
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
             }
-            $body = json_decode($body, true);
-            return $body;
+{% if route.hydratable %}
+            return $this->hydrate($json['{{ route.singular }}']);
+{% else %}
+            return $json;
+{% endif %}
         } catch (GuzzleException\ClientException $clientException) {
             $body = $clientException->getResponse()->getBody()->getContents();
             if (json_decode($body) === null) {
-                throw new Exceptions\SDKException(
-                    "Response from API ({$endpoint}) was not expected JSON:\n" .
-                    "Method: {$method}\n" .
-                    "GuzzleConfig: " . var_export($this->sdkClient->getGuzzle()->getConfig(), true) . "\n".
-                    "URL: {$endpoint}\n" .
+                throw Exceptions\SDKException::Factory("Response from API was not expected JSON")
+                    ->setMethod($method)
+                    ->setGuzzleConfig($this->sdkClient->getGuzzle()->getConfig())
+                    ->setEndpoint($endpoint)
 {% if route.callbackProperties %}
-                    "Request: " .  json_encode($propertyArray, JSON_PRETTY_PRINT) . "\n\n" .
+                    ->setRequest($propertyArray)
 {% endif %}
-                    var_export($body, true)
-                );
+                    ->setResponse($body);
             }
             $body = json_decode($body, true);
             return $body;

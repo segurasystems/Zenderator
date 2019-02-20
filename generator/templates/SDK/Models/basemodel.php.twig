@@ -108,6 +108,18 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
 {% endfor %}
 
+{% for route in routes %}
+    public function {{ route.function }}(
+{% if route.callbackProperties %}
+{% for callbackProperty in route.callbackProperties %}
+        ${{ callbackProperty.name }}{% if not callbackProperty.isMandatory %} = "{{ callbackProperty.default }}"{% endif %}{% if not loop.last %},{% endif %}
+{% endfor %}
+
+{% endif %}
+    )
+    {}
+{% endfor %}
+
 public static function getPropertyMeta(){
 return [
 {% for propertyName, data in propertyData %}
