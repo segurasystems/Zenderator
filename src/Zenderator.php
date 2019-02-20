@@ -748,7 +748,10 @@ class Zenderator
         }
 
         if(!$this->skipTemplate("Routes") && $this->routesSoftDeleted()){
-            $this->renderToFile(true,APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php","Router/softDeleteRoutes.php.twig", ["models" => array_values($allModelData)]);
+            $this->renderToFile(true,
+                APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php",
+                "Router/softDeleteRoutes.php.twig",
+                ["models" => array_values($allModelData),"skip_routes"=>$this->getRoutesToSkip()]);
         }
 
         // "DependencyInjector" suite
