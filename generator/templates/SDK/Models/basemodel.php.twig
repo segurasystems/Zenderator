@@ -130,7 +130,9 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
             '{{ propertyName }}' => [
                 'type' => '{{ data.type }}',
                 'nullable' => {{ data.nullable|json_encode|raw }},
+{% if data.length %}
                 'length' => {{ data.length }},
+{% endif %}
                 'unique' => {{ data.unique|json_encode()|raw }},
 {% if data.options is not empty %}
                 'options' => ["{{ data.options | join('", "') | raw }}"],
