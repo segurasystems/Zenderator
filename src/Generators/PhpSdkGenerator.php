@@ -39,17 +39,12 @@ class PhpSdkGenerator extends BaseGenerator
             echo " > Pack: {$packName}...\n";
             $scopeName = $packName;
             $scopeName[0] = strtolower($scopeName[0]);
-            $routeRenderData = [
-                'pack_name'  => $packName,
-                'scope_name' => $scopeName,
-                'routes'     => $routes,
-            ];
             $properties = [];
             $propertiesOptions = [];
             $singular = null;
             $plural = null;
             $propertyData = [];
-            foreach ($routes as $route) {
+            foreach ($routes as $k=>$route) {
                 if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
                         $properties[] = $property;
@@ -57,11 +52,11 @@ class PhpSdkGenerator extends BaseGenerator
                 }
                 if(isset($route["plural"])){
                     $plural = $route["plural"];
-                    $route["pluralLC"] = lcfirst($route["plural"]);
+                    $routes[$k]["pluralLC"] = lcfirst($route["plural"]);
                 }
                 if(isset($route["singular"])){
                     $singular = $route["singular"];
-                    $route["singularLC"] = lcfirst($route["singular"]);
+                    $routes[$k]["singularLC"] = lcfirst($route["singular"]);
                 }
                 if (isset($route['propertiesOptions'])) {
                     foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
@@ -86,6 +81,11 @@ class PhpSdkGenerator extends BaseGenerator
 
             //var_dump($propertyData);die();
 
+            $routeRenderData = [
+                'pack_name'  => $packName,
+                'scope_name' => $scopeName,
+                'routes'     => $routes,
+            ];
             $properties = array_unique($properties);
             $routeRenderData['properties'] = $properties;
             $routeRenderData['propertiesOptions'] = $propertiesOptions;
