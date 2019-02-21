@@ -118,7 +118,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% for related in related_objects %}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
-            ->setName('{{ class_name }} Delete')
+            ->setName('{{ class_name }} Get {{ related.getRemoteModelName }} Model')
             ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':{{ related.getBoundModelReferenceNameLC }}Request')
             ->setSDKClass('{{ class_name }}')
             ->setSDKFunction('get{{ related.getBoundModelReferenceName }}')
@@ -129,7 +129,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setPlural(\{{ namespace }}\Models\{{ related.getRemoteModelName }}::NAME_PLURAL)
             ->setPropertyData(\{{ namespace }}\Models\{{ related.getRemoteModelName }}::getPropertyMeta())
             ->setSDKModelSafe(true)
-{% if {{ related.getRemoteModelName }} not in skip_routes %}
+{% if related.getRemoteModelName not in skip_routes %}
             ->setSDKHydrate(true)
 {% endif %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
