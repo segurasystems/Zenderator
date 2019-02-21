@@ -97,6 +97,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
         }
         return $this;
     }
+{#
 {% if data.related is not empty %}
 {% for related in data.related %}
     public function get{{ data.cleanName }}Model() : {{ related.model }}
@@ -106,7 +107,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     }
 {% endfor %}
 {% endif %}
-
+#}
 {% endfor %}
 
 {% for route in routes %}
