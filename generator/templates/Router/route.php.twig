@@ -100,9 +100,10 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setRouterPattern('/v1/{{ controller_route }}/{id}')
             ->setHttpEndpoint('/v1/{{ controller_route }}/id')
             ->setHttpMethod('DELETE')
-            ->setSingular('{{ object_name_singular }}')
-            ->setPlural('{{ object_name_plural }}')
+            ->setSingular(\{{ namespace }}\Models\{{ class_name }}Model::NAME_SINGULAR)
+            ->setPlural(\{{ namespace }}\Models\{{ class_name }}Model::NAME_PLURAL)
             ->setPropertyData(\{{ namespace }}\Models\{{ class_name }}Model::getPropertyMeta())
+            ->setSDKModelSafe(true)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setCallbackProperties([
                 "id" => [
