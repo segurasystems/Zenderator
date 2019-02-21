@@ -83,14 +83,41 @@ abstract class Base{{ class_name }}Model
     /**
      * @return array
      */
-    public function getPropertyMeta()
+    public static function getPropertyMeta()
     {
+/**
 {% for column in columns %}
 {% if column.hasRelatedObjects %}
         ${{ column.getField|replace({"Id":"s"}) }}Service = App::Container()->get(Services\{{ column.getModel.getClassName }}Service::class);
 {% endif %}
 {% endfor %}
 
+        $properties = [
+{% for column in columns %}
+            self::FIELD_{{ column.getField|upper }} => [
+                    'type' => self::TYPE_{{ column.getField|upper }},
+{% if column.getMaxLength > 0 %}
+                    'length' => {{ column.getMaxLength }},
+{% endif %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        self::{{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+{% endfor %}
+                    ],
+{% if column.getDefaultvalue %}
+                    'default' => '{{ column.getDefaultValue() }}',
+{% endif %}
+{% endif %}
+{% if column.hasRelatedObjects %}
+                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
+{% endif %}
+                    'unique'     => {{ column.isUnique|json_encode|raw }},
+                    'isNullable' => {{ column.isNullable|json_encode|raw }},
+                ],
+{% endfor %}
+        ];
+**/
         $properties = [
 {% for column in columns %}
             self::FIELD_{{ column.getField|upper }} => [
