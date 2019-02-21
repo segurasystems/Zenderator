@@ -59,6 +59,9 @@ class PhpSdkGenerator extends BaseGenerator
                     $routes[$k]["pluralLC"] = lcfirst($route["plural"]);
                 }
                 if(isset($route["singular"])){
+                    if(empty($route["responseKey"])){
+                        $routes[$k]["responseKey"] = $route["singular"];
+                    }
                     $singular = $route["singular"];
                     $routes[$k]["singularLC"] = lcfirst($route["singular"]);
                 }
