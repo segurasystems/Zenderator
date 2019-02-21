@@ -136,8 +136,26 @@ abstract class Base{{ class_name }}Model
 {% endif %}
 {% endif %}
 {% if column.hasRelatedObjects %}
-                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
+                    'related' => [
+{% for related in column.getRelatedObjects %}
+                        [
+                            'model' => '{{ related.getRemoteModelName }}',
+                            'column' => '{{ related.getRemoteBoundColumn }}',
+                        ],
+{% endfor %}
+                    ],
 {% endif %}
+{% if column.hasRemoteObjects %}
+                    'remote' => [
+{% for remote in column.getRemoteObjects %}
+                        [
+                            'model' => '{{ remote.getRemoteModelName }}',
+                            'column' => '{{ remote.getRemoteBoundColumn }}',
+                        ],
+{% endfor %}
+                    ],
+{% endif %}
+                    'unique'     => {{ column.isUnique|json_encode|raw }},
                     'nullable' => {{ column.isNullable|json_encode|raw }},
                 ],
 {% endfor %}
