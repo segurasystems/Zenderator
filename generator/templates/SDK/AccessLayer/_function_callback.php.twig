@@ -59,7 +59,7 @@
             }
 {% if route.singular %}
 {% if route.hydratable %}
-            return $this->sdkClient->{{ route.singular }}->hydrate($json['{{ route.singular }}']);
+            return $this->sdkClient->{{ route.singularLC }}->hydrate($json['{{ route.singular }}']);
 {% else %}
             return $json['{{ route.singular }}'];
 {% endif %}
