@@ -83,7 +83,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
     // Getters and Setters
 {% for propertyName, data in propertyData %}
-    public function get{{ propertyName }}() : {% if data.isNullable %}?{% endif %}{{ data.phpType }}
+    public function get{{ propertyName }}() : {% if data.nullable %}?{% endif %}{{ data.phpType }}
     {
         return $this->{{ propertyName }};
     }
@@ -128,7 +128,8 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% for propertyName, data in propertyData %}
             '{{ propertyName }}' => [
                 'type' => '{{ data.type }}',
-                'isNullable' => {{ data.isNullable|json_encode|raw }},
+                'nullable' => {{ data.nullable|json_encode|raw }},
+                'length' => {{ data.length }},
                 'unique' => {{ data.unique|json_encode()|raw }},
 {% if data.options is not empty %}
                 'options' => ["{{ data.options | join('", "') | raw }}"],
