@@ -12,8 +12,9 @@
 {% for callbackProperty in route.callbackProperties %}
         ${{ callbackProperty.name }}{% if not callbackProperty.isMandatory %} = "{{ callbackProperty.default }}"{% endif %}{% if not loop.last %},{% endif %}
 {% endfor %}
-
+,
 {% endif %}
+    $hydrate = true
     )
     {
         $endpoint = "{{ route.pattern }}";
@@ -59,7 +60,11 @@
             }
 {% if route.singular %}
 {% if route.hydratable %}
-            return $this->sdkClient->{{ route.singularLC }}->hydrate($json['{{ route.singular }}']);
+            if($hydrate) {
+                return $this->sdkClient->{{ route.singularLC }}->hydrate($json['{{ route.singular }}']);
+            } else {
+                return $json['{{ route.singular }}'];
+            }
 {% else %}
             return $json['{{ route.singular }}'];
 {% endif %}
