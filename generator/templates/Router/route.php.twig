@@ -112,6 +112,33 @@ $router = \Gone\AppCore\Router\Router::Instance()
                     "type" => "integer",
                 ],
             ])
-    );
+    )
+{% for related in related_objects %}
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class_name }} Delete')
+            ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':{{ related.getBoundModelReferenceNameLC }}Request')
+            ->setSDKClass('{{ class_name }}')
+            ->setSDKFunction('get{{ related.getBoundModelReferenceName }}')
+            ->setRouterPattern('/v1/{{ controller_route }}/{id}/{{ related.getBoundModelReferenceNameSC }}')
+            ->setHttpEndpoint('/v1/{{ controller_route }}/id/{{ related.getBoundModelReferenceNameSC }}')
+            ->setHttpMethod('GET')
+            ->setSingular('{{ object_name_singular }}')
+            ->setPlural('{{ object_name_plural }}')
+            ->setPropertyData($propertyData)
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be deleted",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
+    )
+{% endfor %}
+;
 
 
