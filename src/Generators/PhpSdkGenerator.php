@@ -57,9 +57,11 @@ class PhpSdkGenerator extends BaseGenerator
                 }
                 if(isset($route["plural"])){
                     $plural = $route["plural"];
+                    $route["pluralLC"] = lcfirst($route["plural"]);
                 }
                 if(isset($route["singular"])){
                     $singular = $route["singular"];
+                    $route["singularLC"] = lcfirst($route["singular"]);
                 }
                 if (isset($route['propertiesOptions'])) {
                     foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
