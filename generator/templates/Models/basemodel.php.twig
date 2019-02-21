@@ -85,7 +85,7 @@ abstract class Base{{ class_name }}Model
      */
     public static function getPropertyMeta()
     {
-/**
+{#
 {% for column in columns %}
 {% if column.hasRelatedObjects %}
         ${{ column.getField|replace({"Id":"s"}) }}Service = App::Container()->get(Services\{{ column.getModel.getClassName }}Service::class);
@@ -117,7 +117,7 @@ abstract class Base{{ class_name }}Model
                 ],
 {% endfor %}
         ];
-**/
+#}
         $properties = [
 {% for column in columns %}
             self::FIELD_{{ column.getField|upper }} => [
