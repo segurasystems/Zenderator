@@ -6,7 +6,7 @@
 {% endif %}
      * @param $hydrate bool
      *
-     * @return array
+     * @return array{% if route.singular and route.hydratable %}|Models\{{ route.singular }}Model{% endif %}
      * @throws Exceptions\SDKException
      **/
     public function {{ route.function }}(
