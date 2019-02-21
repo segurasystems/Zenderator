@@ -15,9 +15,11 @@ $exampleExistingObjectFindFunction = function()
 
     return $exampleExistingObject;
 };
+{#
 $propertyData = [
 {%  include "Router/_route_setPropertyData.php.twig" %}
 ];
+#}
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
     ->addRoute(
@@ -125,7 +127,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('GET')
             ->setSingular('{{ object_name_singular }}')
             ->setPlural('{{ object_name_plural }}')
-            ->setPropertyData($propertyData)
+            ->setPropertyData({{ class_name }}Model::getPropertyMeta())
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setCallbackProperties([
                 "id" => [
