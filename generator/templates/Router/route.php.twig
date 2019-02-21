@@ -129,8 +129,8 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setPlural(\{{ namespace }}\Models\{{ related.getRemoteModelName }}::NAME_PLURAL)
             ->setPropertyData(\{{ namespace }}\Models\{{ related.getRemoteModelName }}::getPropertyMeta())
             ->setSDKModelSafe(true)
-// {{ skip_routes | join(', ') | raw }}
-{% if related.getRemoteModelName not in skip_routes %}
+// {{ related.getRemoteClass }} {{ skip_routes | join(', ') | raw }}
+{% if related.getRemoteClass not in skip_routes %}
             ->setSDKHydrate(true)
 {% endif %}
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
