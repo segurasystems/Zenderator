@@ -476,7 +476,8 @@ class Model extends Entity
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
             // @todo: work out why there are two.
-            'autoincrement_parameters' => $this->getAutoIncrements()
+            'autoincrement_parameters' => $this->getAutoIncrements(),
+            'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
         ];
     }
 
