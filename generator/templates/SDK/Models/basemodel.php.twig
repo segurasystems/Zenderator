@@ -28,6 +28,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% if plural is not empty %}
     const NAME_PLURAL = "{{ plural }}";
 {% endif %}
+    const TABLE_NAME = "{{ tableName }}";
 
 {% for propertyName, data in propertyData %}
     const FIELD_{{ propertyName|upper }} = '{{ propertyName|transform_studly_to_camel }}';
