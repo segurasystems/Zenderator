@@ -78,7 +78,7 @@ class PhpSdkGenerator extends BaseGenerator
                             }
                         }
                         $data["cleanName"] = Column::cleanName($propertyName);
-                        $propertyData[$propertyName] = $data;
+                        $propertyData[ucfirst($propertyName)] = $data;
                     }
                 }
             }
