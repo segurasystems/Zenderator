@@ -57,8 +57,12 @@
             if($json === null){
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
             }
+{% if route.singular %}
 {% if route.hydratable %}
-            return $this->hydrate($json['{{ route.singular }}']);
+            return $this->sdkClient->{{ route.singular }}->hydrate($json['{{ route.singular }}']);
+{% else %}
+            return $json['{{ route.singular }}'];
+{% endif %}
 {% else %}
             return $json;
 {% endif %}

@@ -794,7 +794,7 @@ class Zenderator
         return $this->config["routes"] ?? [];
     }
 
-    private function getRoutesToSkip(){
+    public function getRoutesToSkip(){
         return $this->getRoutesConfig()["skip"] ?? [];
     }
 

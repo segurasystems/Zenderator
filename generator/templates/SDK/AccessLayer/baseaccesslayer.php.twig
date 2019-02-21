@@ -7,6 +7,9 @@ use {{ app_namespace }}\SDK\{{ app_name }}\Models;
 use Gone\SDK\Common\Filters\Filter;
 use GuzzleHttp\Exception as GuzzleException;
 
+/**
+ * @property \{{ app_namespace }}\SDK\{{ app_name }}\Client $sdkClient
+ */
 abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
 {
 
