@@ -26,6 +26,8 @@ class Entity
     protected $transCamel2Snake;
     /** @var CaseTransformer */
     protected $transField2Property;
+    /** @var CaseTransformer */
+    protected $transStudly2Snake;
     /** @var Zenderator */
     private $zenderator;
 
@@ -39,6 +41,7 @@ class Entity
         $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
         $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
         $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transStudly2Snake   = new CaseTransformer(new Format\StudlyCaps(), new Format\SnakeCase());
 
         $this->transField2Property = $this->transCamel2Camel;
     }
