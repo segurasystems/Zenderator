@@ -133,10 +133,11 @@ abstract class Base{{ class_name }}Service
 
     /**
      * @param Filter $filter
+     * @param bool $doCount
      *
      * @return Models\{{ class_name }}Model[]
      */
-    public function getAllFilter(Filter $filter)
+    public function getAllFilter(Filter $filter, bool $doCount = true)
     {
         return parent::getAll(
             $filter->getLimit(),
@@ -144,7 +145,8 @@ abstract class Base{{ class_name }}Service
             $filter->getWheres(),
             $filter->getOrder(),
             $filter->getOrderDirection(),
-            $filter->getJoins()
+            $filter->getJoins(),
+            $doCount
         );
     }
 
@@ -155,6 +157,7 @@ abstract class Base{{ class_name }}Service
      * @param string|Expression|null $order
      * @param string|null $orderDirection
      * @param array|\Closure[]|null $joins
+     * @param bool $doCount
      *
      * @return Models\{{ class_name }}Model[]
      */
@@ -164,7 +167,8 @@ abstract class Base{{ class_name }}Service
         array $wheres = [],
         $order = null,
         string $orderDirection = null,
-        array $joins = []
+        array $joins = [],
+        bool $doCount = true
     )
     {
         return parent::getAll(
@@ -173,7 +177,8 @@ abstract class Base{{ class_name }}Service
             $wheres,
             $order,
             $orderDirection,
-            $joins
+            $joins,
+            $doCount
         );
     }
 
