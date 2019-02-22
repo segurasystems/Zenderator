@@ -70,7 +70,7 @@ class PhpSdkGenerator extends BaseGenerator
                         $propertiesOptions[$propertyName] = $propertyOption;
                     }
                 }
-                if(isset($route["propertyData"])){
+                if(isset($route["propertyData"]) && in_array($route["template"],["get","create"])){
                     foreach ($route['propertyData'] as $propertyName => $data) {
                         if(!empty($data["type"])){
                             $data["phpType"] = Column::convertColumnType($data["type"]);
