@@ -20,7 +20,7 @@ use {{ app_namespace }}\SDK\{{ app_name }}\Models\{{ related.model }};
  */
 abstract class Base{{ pack_name }}Model extends AbstractModel
 {
-    use PresentableTrait;
+    //use PresentableTrait;
 
 {% if singular is not empty %}
     const NAME_SINGULAR = "{{ singular }}";
