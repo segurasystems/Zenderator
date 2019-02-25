@@ -51,8 +51,9 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
         ${{ related.getBoundModelReferenceNameLC }} = $this->{{ related.getRemoteServiceLC }}->getFilter(
             Filter::Factory()
                 ->addJoin(
+                    Models\{{ class_name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }},
                     Models\{{ class_name }}Model::TABLE_NAME,
-                    Models\{{ class_name }}Model::TABLE_NAME . "." . Models\{{ class_name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }} . " = " . Models\{{ related.getRemoteModel }}::TABLE_NAME . "." . Models\{{ related.getRemoteModel }}::FIELD_{{ related.getRemoteBoundColumn|upper }}
+                    Models\{{ related.getRemoteModel }}::FIELD_{{ related.getRemoteBoundColumn|upper }}
                 )
                 ->addWhere(
                     Models\{{ class_name }}Model::FIELD_ID,
