@@ -63,8 +63,8 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     public function __toArray() : array
     {
         return [
-{% for property in properties %}
-            "{{ property }}" => $this->get{{ property }}(),
+{% for propertyName, data in propertyData %}
+            "{{ propertyName }}" => $this->get{{ propertyName }}(),
 {% endfor %}
         ];
     }
