@@ -84,7 +84,8 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
     // Getters and Setters
 {% for propertyName, data in propertyData %}
-    public function get{{ propertyName }}() : {% if data.nullable %}?{% endif %}{{ data.phpType }}
+{#    public function get{{ propertyName }}() : {% if data.nullable %}?{% endif %}{{ data.phpType }} #}
+    public function get{{ propertyName }}() : ?{{ data.phpType }}
     {
         return $this->{{ propertyName }};
     }
