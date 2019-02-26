@@ -113,7 +113,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
 {% for route in routes %}
 {% if route.modelSafeMethod %}
-    public function {{ route.function }}($hydrate = true){% if route.hydratable %}
+    public function {{ route.function }}($hydrate = true)
     {
         return $this->getAccessLayer()->{{ route.function }}(
 {% if route.callbackProperties %}
