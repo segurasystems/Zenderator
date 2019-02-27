@@ -57,14 +57,14 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     // Properties
 {% for propertyName, data in propertyData %}
     /** @var {{ data.phpType }} ${{ propertyName }} */
-    protected ${{ propertyName }};
+    protected ${{ data.nameLC }};
 {% endfor %}
 
     public function __toArray() : array
     {
         return [
 {% for propertyName, data in propertyData %}
-            "{{ propertyName }}" => $this->get{{ propertyName }}(),
+            "{{ data.nameLC }}" => $this->get{{ propertyName }}(),
 {% endfor %}
         ];
     }
@@ -87,14 +87,14 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {#    public function get{{ propertyName }}() : {% if data.nullable %}?{% endif %}{{ data.phpType }} #}
     public function get{{ propertyName }}() : ?{{ data.phpType }}
     {
-        return $this->{{ propertyName }};
+        return $this->{{ data.nameLC }};
     }
 
-    public function set{{ propertyName }}(${{ propertyName }}) : {{ pack_name }}Model
+    public function set{{ propertyName }}(${{ data.nameLC }}) : {{ pack_name }}Model
     {
-        if($this->{{ propertyName }} != ${{ propertyName }}){
+        if($this->{{ data.nameLC }} != ${{ data.nameLC }}){
             $this->addDirtyKey('{{ propertyName }}');
-            $this->{{ propertyName }} = ${{ propertyName }};
+            $this->{{ data.nameLC }} = ${{ data.nameLC }};
         }
         return $this;
     }
