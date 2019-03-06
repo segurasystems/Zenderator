@@ -8,7 +8,7 @@
      * @return null|array|Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}(Filter $filter = null,$hydrate = true)
+    public function {{ route.function }}(Filter $filter = null,bool $hydrate = true)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
@@ -58,7 +58,7 @@
      *
      * @return Models\{{ route.singular }}Model|array|null
      */
-    public function getFiltered(Filter $filter = null,$hydrate = true)
+    public function getFiltered(Filter $filter = null,bool $hydrate = true)
     {
         $singular = $this->list($filter->setLimit(1),$hydrate);
 
@@ -75,7 +75,7 @@
      *
      * @return Models\{{ route.singular }}Model[]|array|null
      */
-    public function getManyFiltered(Filter $filter = null,$hydrate = true) : ?array
+    public function getManyFiltered(Filter $filter = null,bool $hydrate = true) : ?array
     {
         $list = $this->list($filter,$hydrate);
 
