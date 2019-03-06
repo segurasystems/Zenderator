@@ -24,6 +24,6 @@
             }
             return $array;
         }else{
-            return new Models\{{ routes['create'].singular }}Model($this->sdkClient, $raw{{ routes['create'].singular }});
+            return new Models\{{ routes['create'].singular }}Model($raw{{ routes['create'].singular }});
         }
     }
