@@ -77,7 +77,7 @@
             if (json_decode($body) === null) {
                 throw Exceptions\SDKException::Factory("Response from API was not expected JSON")
                     ->setMethod($method)
-                    ->setGuzzleConfig($this->sdkClient->getGuzzle()->getConfig())
+                    ->setGuzzleConfig($this->guzzleClient->getConfig())
                     ->setEndpoint($endpoint)
 {% if route.callbackProperties %}
                     ->setRequest($propertyArray)

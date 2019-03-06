@@ -64,7 +64,7 @@
                 throw new Exceptions\SDKException(
                     "Response from API ({$endpoint}) was not expected JSON:\n" .
                     "Method: {$method}\n" .
-                    "GuzzleConfig: " . var_export($this->sdkClient->getGuzzle()->getConfig(), true) . "\n".
+                    "GuzzleConfig: " . var_export($this->guzzleClient->getConfig(), true) . "\n".
                     "URL: {$endpoint}\n" .
 {% if route.callbackProperties %}
                     "Request: " .  json_encode($propertyArray, JSON_PRETTY_PRINT) . "\n\n" .
