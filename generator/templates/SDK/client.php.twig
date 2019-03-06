@@ -12,8 +12,8 @@ class Client extends AbstractClient
 
 {% endfor %}
 #}
-    public function __construct($baseUrl = "{{ default_base_url }}"){
-        parent::__construct($baseUrl);
+    public function __construct($baseUrl = "{{ default_base_url }}", $extraHeaders = []){
+        parent::__construct($baseUrl,$extraHeaders);
 {#
 {% for pack in packs|keys %}
         $this->{{ pack|transform_studly_to_camel }} = new AccessLayer\{{ pack }}AccessLayer($this);
