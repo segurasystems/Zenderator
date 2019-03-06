@@ -4,6 +4,7 @@
 
     /**
      * @param $filter Filter instance
+     * @param bool $hydrate
      * @return null|array|Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
@@ -53,6 +54,7 @@
      * Get a single result with an optional filter.
      *
      * @param Filter|null $filter
+     * @param bool $hydrate
      *
      * @return Models\{{ route.singular }}Model|array|null
      */
@@ -69,6 +71,7 @@
      * Get many results with an optional filter
      *
      * @param Filter|null $filter
+     * @param bool $hydrate
      *
      * @return Models\{{ route.singular }}Model[]|array|null
      */
