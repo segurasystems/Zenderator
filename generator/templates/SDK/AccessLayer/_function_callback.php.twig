@@ -62,7 +62,7 @@
 {% if route.responseKey %}
 {% if route.hydratable %}
             if($hydrate) {
-                return $this->sdkClient->{{ route.singularLC }}->hydrate($json['{{ route.responseKey }}']);
+                return new Models\{{ route.singular }}Model($json['{{ route.responseKey }}']);
             } else {
                 return $json['{{ route.responseKey }}'];
             }
