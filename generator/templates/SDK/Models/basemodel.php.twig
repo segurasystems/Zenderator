@@ -64,12 +64,12 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     {
         return [
 {% for propertyName, data in propertyData %}
-            "{{ data.nameLC }}" => $this->get{{ propertyName }}(),
+            self::FIELD_{{ propertyName|upper }} => $this->get{{ propertyName }}(),
 {% endfor %}
         ];
     }
 
-    protected function getAccessLayer() : {{ pack_name }}AccessLayer
+{#    protected function getAccessLayer() : {{ pack_name }}AccessLayer
     {
         return new {{ pack_name }}AccessLayer($this->sdkClient);
     }
@@ -81,7 +81,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     {
         return $this->getAccessLayer()->createFromObject($this);
     }
-
+#}
     // Getters and Setters
 {% for propertyName, data in propertyData %}
 {#    public function get{{ propertyName }}() : {% if data.nullable %}?{% endif %}{{ data.phpType }} #}
@@ -90,10 +90,10 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
         return $this->{{ data.nameLC }};
     }
 
-    public function set{{ propertyName }}(${{ data.nameLC }}) : {{ pack_name }}Model
+    public function set{{ propertyName }}(${{ data.nameLC }}) : self
     {
         if($this->{{ data.nameLC }} != ${{ data.nameLC }}){
-            $this->addDirtyKey('{{ propertyName }}');
+            $this->addDirtyKey(self::FIELD_{{ propertyName|upper }});
             $this->{{ data.nameLC }} = ${{ data.nameLC }};
         }
         return $this;
@@ -111,7 +111,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 #}
 
 {% endfor %}
-
+{#
 {% for route in routes %}
 {% if route.modelSafeMethod %}
     public function {{ route.function }}($hydrate = true)
@@ -127,11 +127,11 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     }
 {% endif %}
 {% endfor %}
-
+#}
     public static function getPropertyMeta(){
         return [
 {% for propertyName, data in propertyData %}
-            '{{ propertyName }}' => [
+            self::FIELD_{{ propertyName|upper }} => [
                 'type' => '{{ data.type }}',
                 'nullable' => {{ data.nullable|json_encode|raw }},
 {% if data.length %}
@@ -146,7 +146,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% for related in data.related %}
                     [
                         'model' => '{{ related.model }}',
-                        'column' => '{{ related.column }}',
+                        'column' => Base{{ related.model }}::FIELD_{{ related.column|upper }},
                     ],
 {% endfor %}
                 ],
