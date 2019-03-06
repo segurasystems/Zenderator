@@ -44,6 +44,8 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     const {{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
 {% endfor %}
 {% endif %}
+{% endfor %}
+
 
     // Constant arrays defined by ENUMs
 {% for propertyName, data in propertyData %}
@@ -56,7 +58,6 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% endif %}
 {% endfor %}
 
-{% endfor %}
 
     // Properties
 {% for propertyName, data in propertyData %}
