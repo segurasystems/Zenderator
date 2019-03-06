@@ -56,6 +56,8 @@
      * @param Filter|null $filter
      * @param bool $hydrate
      *
+     * @throws Exceptions\SDKException
+     *
      * @return Models\{{ route.singular }}Model|array|null
      */
     public function getFiltered(Filter $filter = null,bool $hydrate = true)
@@ -72,6 +74,8 @@
      *
      * @param Filter|null $filter
      * @param bool $hydrate
+     *
+     * @throws Exceptions\SDKException
      *
      * @return Models\{{ route.singular }}Model[]|array|null
      */
