@@ -144,7 +144,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% endif %}
                 'unique' => {{ data.unique|json_encode()|raw }},
 {% if data.options is not empty %}
-                'options' => ["{{ data.options | join('", "') | raw }}"],
+                'options' => self::OPTIONS_{{ propertyName|upper }},
 {% endif %}
 {% if data.related is not empty %}
                 'related' => [
