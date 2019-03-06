@@ -156,6 +156,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% endfor %}
                 ],
 {% endif %}
+{#
 {% if data.remote is not empty %}
                 'remote' => [
 {% for remote in data.remote %}
@@ -168,6 +169,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% endif %}
             ],
 {% endfor %}
+#}
         ];
     }
 
