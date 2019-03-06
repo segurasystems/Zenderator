@@ -30,7 +30,7 @@
     /**
      * @return Models\{{ route.singular }}Model;
      */
-    public function {{ route.function }}FromObject(Models\{{ route.singular }}Model ${{ route.singular }})
+    public function {{ route.function }}FromObject(\Gone\SDK\Common\Abstracts\AbstractModel ${{ route.singular }})
     {
         return $this->{{ route.function }}(
             ${{ route.singular }}->__toUpsertArray()
