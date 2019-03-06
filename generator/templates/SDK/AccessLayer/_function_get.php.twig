@@ -1,12 +1,15 @@
     /**
      * Return a single Models\{{ routes['create'].singular }}Model by ID
      *
+     * @param int $id
+     * @param bool $hydrate
+     *
      * @return Models\{{ routes['create'].singular }}Model|array
      *
      * @throws Exceptions\ObjectNotFoundException
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}($id, $hydrate=true)
+    public function {{ route.function }}($id, bool $hydrate=true)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = $this->replaceUrlElements(
