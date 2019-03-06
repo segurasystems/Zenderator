@@ -23,13 +23,13 @@ class Client extends AbstractClient
 
     public static function DependencyInjector($container,$config) {
 
-        $container[{{ app_namespace }}\SDK\{{ app_name }}\Client::class] = function($container) {
+        $container[\{{ app_namespace }}\SDK\{{ app_name }}\Client::class] = function($container) {
             $client = new self($config["baseUrl"],$config["headers"]);
             return $client;
         };
 
 {% for pack in packs|keys %}
-        $container[{{ app_namespace }}\SDK\{{ app_name }}\AccessLayer\{{ pack }}AccessLayer::class] = function($container) {
+        $container[\{{ app_namespace }}\SDK\{{ app_name }}\AccessLayer\{{ pack }}AccessLayer::class] = function($container) {
             return new AccessLayer\{{ pack }}AccessLayer($container->get(self::class));
         };
 {% endfor %}
