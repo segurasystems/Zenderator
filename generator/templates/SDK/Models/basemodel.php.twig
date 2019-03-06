@@ -137,7 +137,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
         return [
 {% for propertyName, data in propertyData %}
             self::FIELD_{{ propertyName|upper }} => [
-                'type' => '{{ data.type }}',
+                'type' => self::DBTYPE_{{ propertyName|upper }},
                 'nullable' => {{ data.nullable|json_encode|raw }},
 {% if data.length %}
                 'length' => {{ data.length }},
