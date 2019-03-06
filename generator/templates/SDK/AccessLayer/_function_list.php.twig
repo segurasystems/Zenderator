@@ -56,9 +56,9 @@
      *
      * @return Models\{{ route.singular }}Model|array|null
      */
-    public function getFiltered(Filter $filter = null)
+    public function getFiltered(Filter $filter = null,$hydrate = true)
     {
-        $singular = $this->list($filter->setLimit(1));
+        $singular = $this->list($filter->setLimit(1),$hydrate);
 
         return (is_array($singular) && count($singular) == 1)
             ? reset($singular)
@@ -72,9 +72,9 @@
      *
      * @return Models\{{ route.singular }}Model[]|array|null
      */
-    public function getManyFiltered(Filter $filter = null) : ?array
+    public function getManyFiltered(Filter $filter = null,$hydrate = true) : ?array
     {
-        $list = $this->list($filter);
+        $list = $this->list($filter,$hydrate);
 
         return (is_array($list) && count($list) > 0)
             ? $list
