@@ -22,7 +22,7 @@ class Client extends AbstractClient
 #}
     }
 
-    public static function DependencyInjector($container,$config) {
+    public static function DependencyInjector($container,$config = []) {
 
         $container[\{{ app_namespace }}\SDK\{{ app_name }}\Client::class] = function($container) use ($config) {
             $client = new self($config["baseUrl"] ?? self::DEFAULT_BASE_URL,$config["extraHeaders"] ?? []);
