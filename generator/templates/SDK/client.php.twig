@@ -5,6 +5,7 @@ use Gone\SDK\Common\Abstracts\AbstractClient;
 
 class Client extends AbstractClient
 {
+    const DEFAULT_BASE_URL = "{{ default_base_url }}";
 {#
 {% for pack in packs|keys %}
     /** @var AccessLayer\{{ pack }}AccessLayer */
@@ -12,7 +13,7 @@ class Client extends AbstractClient
 
 {% endfor %}
 #}
-    public function __construct($baseUrl = "{{ default_base_url }}", $extraHeaders = []){
+    public function __construct($baseUrl = self::DEFAULT_BASE_URL, $extraHeaders = []){
         parent::__construct($baseUrl,$extraHeaders);
 {#
 {% for pack in packs|keys %}
@@ -24,7 +25,7 @@ class Client extends AbstractClient
     public static function DependencyInjector($container,$config) {
 
         $container[\{{ app_namespace }}\SDK\{{ app_name }}\Client::class] = function($container) use ($config) {
-            $client = new self($config["baseUrl"],$config["headers"]);
+            $client = new self($config["baseUrl"] ?? self::DEFAULT_BASE_URL,$config["extraHeaders"] ?? []);
             return $client;
         };
 
