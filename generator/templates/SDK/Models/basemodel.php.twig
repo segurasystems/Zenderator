@@ -38,19 +38,24 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     const DBTYPE_{{ propertyName|upper }} = '{{ data.type }}';
 {% endfor %}
 
-    // Constant arrays defined by ENUMs
-{% for propertyName, data in propertyData %}
-{% if data.options is not empty %}
-    const OPTIONS_{{ propertyName|upper }} = ["{{ data.options | join('", "') | raw }}"];
-{% endif %}
-{% endfor %}
-
 {% for propertyName, data in propertyData %}
 {% if data.options is not empty %}
 {% for permittedValue in data.options %}
     const {{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
 {% endfor %}
 {% endif %}
+
+    // Constant arrays defined by ENUMs
+{% for propertyName, data in propertyData %}
+{% if data.options is not empty %}
+    const OPTIONS_{{ propertyName|upper }} = [
+{% for permittedValue in data.options %}
+        self::{{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+{% endfor %}
+    ];
+{% endif %}
+{% endfor %}
+
 {% endfor %}
 
     // Properties
