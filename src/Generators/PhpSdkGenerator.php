@@ -36,7 +36,7 @@ class PhpSdkGenerator extends BaseGenerator
         echo "Generating SDK for {$routeCount} routes...\n";
         // "SDK" suite
         foreach ($packs as $packName => $routes) {
-            echo " > Pack: {$packName}...\n";
+            echo str_pad(" > Pack [{$packName}]:",40);
             $scopeName = $packName;
             $scopeName[0] = strtolower($scopeName[0]);
             $properties = [];
@@ -116,6 +116,8 @@ class PhpSdkGenerator extends BaseGenerator
             $this->renderToFile(true, "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
 
             $this->mkdir("/tests/fixtures/touch");
+
+            echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
         }
 
         $renderData = array_merge(
@@ -128,6 +130,10 @@ class PhpSdkGenerator extends BaseGenerator
 
         echo "Generating Client Container:";
         $this->renderToFile(true, "/src/Client.php", "SDK/client.php.twig", $renderData);
+        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
+
+        echo "Generating Dependency Injector:";
+        $this->renderToFile(true, "/src/Client.php", "SDK/dependencyinjector.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo "Generating Composer.json:";
