@@ -133,7 +133,7 @@ class PhpSdkGenerator extends BaseGenerator
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo "Generating Dependency Injector:";
-        $this->renderToFile(true, "/src/Client.php", "SDK/dependencyinjector.php.twig", $renderData);
+        $this->renderToFile(true, "/src/DependencyInjector.php", "SDK/dependencyinjector.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo "Generating Composer.json:";
