@@ -6,7 +6,7 @@ class DependencyInjector
     public static function Setup($container,$config = []) {
 
         $container[Client::class] = function($container) use ($config) {
-            $client = new Client($config["baseUrl"] ?? self::DEFAULT_BASE_URL,$config["extraHeaders"] ?? []);
+            $client = new Client($config["baseUrl"] ?? Client::DEFAULT_BASE_URL,$config["extraHeaders"] ?? []);
             return $client;
         };
 
