@@ -285,7 +285,7 @@ abstract class Base{{ class_name }}Service
     }
 
     public function updatePK($oldPK, $newPK){
-        $oldModel = $this->getById($oldPK);
+        ${{ variable_name }} = $this->getById($oldPK);
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
         return ${{ variable_name }}Table->updatePK(${{ variable_name }},$newPK);
     }
