@@ -36,7 +36,7 @@ class PhpSdkGenerator extends BaseGenerator
         echo "Generating SDK for {$routeCount} routes...\n";
         // "SDK" suite
         foreach ($packs as $packName => $routes) {
-            echo str_pad(" > Pack [{$packName}]:",40);
+            echo str_pad(" > Pack [{$packName}]:",50);
             $scopeName = $packName;
             $scopeName[0] = strtolower($scopeName[0]);
             $properties = [];
@@ -128,23 +128,23 @@ class PhpSdkGenerator extends BaseGenerator
             ]
         );
 
-        echo "Generating Client Container:";
+        echo str_pad("Generating Client Container:",50);
         $this->renderToFile(true, "/src/Client.php", "SDK/client.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
-        echo "Generating Dependency Injector:";
+        echo str_pad("Generating Dependency Injector:",50);
         $this->renderToFile(true, "/src/DependencyInjector.php", "SDK/dependencyinjector.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
-        echo "Generating Composer.json:";
+        echo str_pad("Generating Composer.json:",50);
         $this->renderToFile(true, "/composer.json", "SDK/composer.json.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
-        echo "Generating Test Bootstrap:";
+        echo str_pad("Generating Test Bootstrap:",50);
         $this->renderToFile(true, "/bootstrap.php", "SDK/bootstrap.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
-        echo "Generating phpunit.xml, documentation, etc:";
+        echo str_pad("Generating phpunit.xml, documentation, etc:",50);
         $this->renderToFile(true, "/phpunit.xml.dist", "SDK/phpunit.xml.twig", $renderData);
         $this->renderToFile(true, "/Readme.md", "SDK/readme.md.twig", $renderData);
         $this->renderToFile(true, "/.gitignore", "SDK/gitignore.twig", $renderData);
