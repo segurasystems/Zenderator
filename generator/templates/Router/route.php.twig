@@ -119,6 +119,40 @@ $router = \Gone\AppCore\Router\Router::Instance()
                 ],
             ])
     )
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class_name }} Update ID')
+            ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':updateIDRequest')
+            ->setSDKClass('{{ class_name }}')
+            ->setSDKFunction('updateID')
+            //->setSDKTemplate('delete')
+            ->setRouterPattern('/v1/{{ controller_route }}/{oldID}/updateID/{newID}')
+            ->setHttpEndpoint('/v1/{{ controller_route }}/oldID/updateID/newID')
+            ->setHttpMethod('POST')
+            ->setSingular(\{{ namespace }}\Models\{{ class_name }}Model::NAME_SINGULAR)
+            ->setPlural(\{{ namespace }}\Models\{{ class_name }}Model::NAME_PLURAL)
+            ->setPropertyData(\{{ namespace }}\Models\{{ class_name }}Model::getPropertyMeta())
+            ->setSDKTableName(\{{ namespace }}\Models\{{ class_name }}Model::TABLE_NAME)
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setCallbackProperties([
+                "oldID" => [
+                    "name" => "oldID",
+                    "default" => null,
+                    "description" => "ID of the object to be updated",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+                "newID" => [
+                    "name" => "newID",
+                    "default" => null,
+                    "description" => "new ID for the object to use",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
+    )
 {% for related in related_objects %}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
