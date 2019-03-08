@@ -97,7 +97,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
     public function set{{ propertyName }}(${{ data.nameLC }}) : {{ pack_name }}Model
     {
-        if($this->{{ data.nameLC }} != ${{ data.nameLC }}){
+        if($this->{{ data.nameLC }} !== ${{ data.nameLC }}){
             $this->addDirtyKey(self::FIELD_{{ propertyName|upper }});
             $this->{{ data.nameLC }} = ${{ data.nameLC }};
         }
