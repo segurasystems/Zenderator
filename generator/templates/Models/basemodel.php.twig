@@ -31,13 +31,6 @@ abstract class Base{{ class_name }}Model
     const TYPE_{{ column.getField|upper }} = '{{ column.getDbType }}';
 {% endfor %}
 
-    // Constant arrays defined by ENUMs
-{% for column in columns %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-    const OPTIONS_{{ column.getField|upper }} = ["{{ column.getPermittedValues | join('", "') | raw }}"];
-{% endif %}
-{% endfor %}
-
     // Constants defined by ENUMs
 {% for column in columns %}
 {% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
@@ -46,6 +39,18 @@ abstract class Base{{ class_name }}Model
 {% endfor %}
 {% endif %}
 {% endfor %}
+
+    // Constant arrays defined by ENUMs
+{% for column in columns %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+    const OPTIONS_{{ column.getField|upper }} = [
+{% for permittedValue in column.getPermittedValues %}
+        self::{{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+{% endfor %}
+    ];
+{% endif %}
+{% endfor %}
+
 
 {% if primary_keys %}
     protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
@@ -365,7 +370,7 @@ abstract class Base{{ class_name }}Model
     {
         return [
 {% for column in columns %}
-            '{{ column.getField }}',
+            self::FIELD_{{ column.getField|upper }},
 {% endfor %}
         ];
     }
