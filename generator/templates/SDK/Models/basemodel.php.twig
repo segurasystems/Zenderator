@@ -30,7 +30,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     const TABLE_NAME = "{{ tableName }}";
 
 {% for propertyName, data in propertyData %}
-    const FIELD_{{ propertyName|upper }} = '{{ propertyName|transform_studly_to_camel }}';
+    const FIELD_{{ propertyName|upper }} = '{{ propertyName }}';
 {% endfor %}
 
     //Property DB Types
