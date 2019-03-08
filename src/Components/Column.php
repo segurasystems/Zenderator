@@ -151,6 +151,7 @@ class Column extends Entity
 
     public function getPropertyName()
     {
+        return $this->getField();
         return $this->transField2Property->transform($this->getField());
     }
 

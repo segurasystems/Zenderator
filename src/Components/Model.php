@@ -231,7 +231,7 @@ class Model extends Entity
         if (count($this->relatedObjects) > 0) {
             foreach ($this->relatedObjects as $relatedObject) {
                 /** @var $relatedObject RelatedModel */
-                $localBoundVariable = $this->transStudly2Camel->transform($relatedObject->getLocalBoundColumn());
+                $localBoundVariable = $relatedObject->getLocalBoundColumn();
                 #echo "In {$this->getClassName()} column {$localBoundVariable} has a related object called {$relatedObject->getLocalClass()}::{$relatedObject->getRemoteClass()}\n";
                 $this->columns[$localBoundVariable]
                     ->addRelatedObject($relatedObject);

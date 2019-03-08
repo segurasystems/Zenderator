@@ -19,6 +19,7 @@ use Slim\Http\Uri;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
+use Zend\Db\Metadata\Object\ViewObject;
 use Zend\Stdlib\ConsoleHelper;
 use Zenderator\Components\Model;
 use Zenderator\Exception\Exception;
@@ -294,9 +295,9 @@ class Zenderator
 
     public function makeZenderator($cleanByDefault = false)
     {
-        $models = $this->makeModelSchemas();
+        list($models,$views) = $this->makeModelSchemas();
         $this->removeCoreGeneratedFiles();
-        $this->makeCoreFiles($models);
+        $this->makeCoreFiles($models,$views);
         if ($cleanByDefault) {
             $this->cleanCode();
         }
@@ -611,6 +612,8 @@ class Zenderator
     {
         /** @var Model[] $models */
         $models = [];
+        $allModels = [];
+        $views = [];
         if (is_array($this->adapters)) {
             foreach ($this->adapters as $dbName => $adapter) {
                 echo "Adaptor: {$dbName}\n";
@@ -622,9 +625,7 @@ class Zenderator
                 echo "Collecting " . count($tables) . " entities data.\n";
 
                 foreach ($tables as $table) {
-                    if (in_array($table->getName(), $this->ignoredTables)) {
-                        continue;
-                    }
+
                     $oModel = Components\Model::Factory($this)
                         ->setNamespace($this->namespace)
                         ->setAdaptor($adapter)
@@ -632,20 +633,51 @@ class Zenderator
                         ->setTable($table->getName())
                         ->computeColumns($table->getColumns())
                         ->computeConstraints($table->getConstraints());
-                    $models[$oModel->getClassName()] = $oModel;
+                    if (!in_array($table->getName(), $this->ignoredTables)) {
+                        $models[$oModel->getClassName()] = $oModel;
+                    }
+                    $allModels[$oModel->getClassName()] = $oModel;
+                }
+
+                /** @var ViewObject[] $views */
+                $dbViews = $this->metadatas[$dbName]->getViews();
+                foreach ($dbViews as $view){
+                    if(!$this->useViewAsModel($view->getName())){
+                        continue;
+                    }
+                    $oView = Components\ViewModel::Factory($this)
+                        ->setNamespace($this->namespace)
+                        ->setAdaptor($adapter)
+                        ->setDatabase($dbName)
+                        ->setView($view->getName())
+                        ->setConfig($this->getViewModelConfig($view->getName()));
+
+                    /**
+                     * @var  string $modelName
+                     * @var  Components\Model $oModel
+                     */
+                    foreach ($allModels as $modelName => $oModel){
+                        if(!in_array($modelName,$this->viewModelSubModels($view->getName()))){
+                            continue;
+                        }
+                        $oView->addBaseModel($oModel);
+                    }
+
+                    
+                    $views[$oView->getClassName()] = $oView;
                 }
             }
         }
 
         // Scan for remote relations
         //\Kint::dump(array_keys($models));
-        foreach ($models as $oModel) {
+        foreach ($allModels as $oModel) {
             $oModel->scanForRemoteRelations($models);
         }
 
         // Check for Conflicts.
         $conflictCheck = [];
-        foreach ($models as $oModel) {
+        foreach ($allModels as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
                     #echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
@@ -669,7 +701,28 @@ class Zenderator
         #}
 
         // Finally return some models.
-        return $models;
+        return [$models,$views];
+    }
+
+    public function viewModelSubModels($name){
+        $submodels = $this->viewModelSubModelData($name);
+        return empty($submodels) ? [] : array_keys($submodels);
+    }
+
+    public function viewModelSubModelData($name){
+        return $this->getViewModelConfig($name)["sub_models"] ?? [];
+    }
+
+    public function useViewAsModel($name){
+        return !empty($this->getViewModelConfig($name));
+    }
+
+    public function getViewModelConfig($name){
+        return $this->getViewModelConfigs()[$name] ?? [];
+    }
+
+    public function getViewModelConfigs(){
+        return $this->getConfig()["views_as_models"] ?? [];
     }
 
     private function removeCoreGeneratedFiles()
@@ -702,48 +755,28 @@ class Zenderator
      *
      * @return Zenderator
      */
-    private function makeCoreFiles(array $models)
+    private function makeCoreFiles(array $models, array $views)
     {
         echo "Generating Core files for " . count($models) . " models... \n";
         $allModelData = [];
+        /** @var Components\Model $model */
         foreach ($models as $model) {
-            $allModelData[$model->getClassName()] = $model->getRenderDataset();
+            $renderData = $model->getRenderDataset();
+            $allModelData[$model->getClassName()] = $renderData;
             // "Model" suite
-            echo " > {$model->getClassName()}\n";
-
-            #\Kint::dump($model->getRenderDataset());
-            if (!$this->skipTemplate("Models") && !$this->skipModel($model->getClassName())) {
-                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "Models/basemodel.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "Models/model.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "Models/tests.models.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "Models/basetable.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "Models/table.php.twig", $model->getRenderDataset());
-            }
-
-            // "Service" suite
-            if (!$this->skipTemplate("Services") && !$this->skipService($model->getClassName())) {
-                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "Services/baseservice.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "Services/service.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "Services/tests.service.php.twig", $model->getRenderDataset());
-            }
-
-            // "Controller" suite
-            if (!$this->skipTemplate("Controllers") && !$this->skipController($model->getClassName())) {
-                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "Controllers/basecontroller.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "Controllers/controller.php.twig", $model->getRenderDataset());
-            }
-
-            // "Endpoint" test suite
-            if (!$this->skipTemplate("Endpoints")) {
-                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $model->getRenderDataset());
-            }
-
-            // "Routes" suite
-            if (!$this->skipTemplate("Routes") && !$this->skipRoute($model->getClassName())) {
-                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
-            }
+            $this->makeCoreFilesForModel($model->getClassName(),$renderData);
 
             $allModelData[$model->getClassName()]["has_soft_delete"] = $model->hasField($this->softDeletedField());
+
+        }
+
+        foreach ($views as $view) {
+            $renderData = $view->getRenderDataset();
+            $allModelData[$view->getClassName()] = $renderData;
+            // "Model" suite
+            $this->makeCoreFilesForModel($view->getClassName(),$renderData);
+
+            $allModelData[$view->getClassName()]["has_soft_delete"] = $view->hasField($this->softDeletedField());
 
         }
 
@@ -768,6 +801,42 @@ class Zenderator
             );
         }
         return $this;
+    }
+
+    public function makeCoreFilesForModel($className, $renderData){
+        echo " > {$className}\n";
+
+        #\Kint::dump($model->getRenderDataset());
+        if (!$this->skipTemplate("Models") && !$this->skipModel($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "Models/basemodel.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/Models/{$className}Model.php", "Models/model.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "Models/tests.models.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "Models/basetable.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "Models/table.php.twig", $renderData);
+        }
+
+        // "Service" suite
+        if (!$this->skipTemplate("Services") && !$this->skipService($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "Services/baseservice.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/Services/{$className}Service.php", "Services/service.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$className}Test.php", "Services/tests.service.php.twig", $renderData);
+        }
+
+        // "Controller" suite
+        if (!$this->skipTemplate("Controllers") && !$this->skipController($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$className}Controller.php", "Controllers/basecontroller.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$className}Controller.php", "Controllers/controller.php.twig", $renderData);
+        }
+
+        // "Endpoint" test suite
+        if (!$this->skipTemplate("Endpoints")) {
+            $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$className}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $renderData);
+        }
+
+        // "Routes" suite
+        if (!$this->skipTemplate("Routes") && !$this->skipRoute($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$className}Route.php", "Router/route.php.twig", $renderData);
+        }
     }
 
     private function routesSoftDeleted(){
