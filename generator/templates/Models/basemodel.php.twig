@@ -237,7 +237,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Object(
+    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}ObjectRemote(
 {% if remote_object.local_model_key != 'id' %}
         $orderBy = null,
         $orderDirection='ASC'
