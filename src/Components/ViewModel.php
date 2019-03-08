@@ -1,0 +1,266 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: wolfgang
+ * Date: 08/03/19
+ * Time: 17:40
+ */
+
+namespace Zenderator\Components;
+
+use Gone\Inflection\Inflect;
+use Zend\Db\Adapter\Adapter as DbAdaptor;
+use Zenderator\Zenderator;
+
+/**
+ * Class ViewModel
+ *
+ * @package Zenderator\Components
+ */
+class ViewModel extends Entity
+{
+    /** @var Model[] */
+    private $baseModels = [];
+    /** @var DbAdaptor */
+    protected $dbAdaptor;
+    private $config = [];
+    private $view;
+    private $className;
+    private $namespace;
+    private $database;
+
+    /**
+     * @return self
+     */
+    public static function Factory(Zenderator $zenderator)
+    {
+        return parent::Factory($zenderator);
+    }
+
+    public function addBaseModel(Model $model){
+        $this->baseModels[$model->getClassName()] = $model;
+        return $this;
+    }
+
+    public function setConfig($config){
+        $this->config = $config;
+        $this->setClassName($config["name"] ?? null);
+        return $this;
+    }
+
+    public function getRenderDataset(){
+        $baseRenderData = [];
+        foreach ($this->baseModels as $name=>$baseModel){
+            //$baseRenderData[$name] = array_keys($baseModel->getRenderDataset());
+        }
+        return [
+            'namespace'              => $this->getNamespace(),
+            'database'               => $this->getDatabase(),
+            'table'                  => $this->getView(),
+            'app_name'               => APP_NAME,
+            'app_container'          => APP_CORE_NAME,
+            'class_name'             => $this->getClassName(),
+            'variable_name'          => $this->transStudly2Camel->transform($this->getClassName()),
+            'name'                   => $this->getClassName(),
+            'object_name_plural'     => Inflect::pluralize($this->getClassName()),
+            'object_name_singular'   => $this->getClassName(),
+            'controller_route'       => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
+            'namespace_model'        => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
+            'columns'                => $this->getColumns(),
+            'related_objects'        => $this->getRelatedObjects(),
+            'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
+            'remote_objects'         => $this->getRemoteObjects(),
+            'required_columns'       => $this->getRequiredColumns(),
+//
+            'primary_keys'       => $this->getPrimaryKeys(),
+            'primary_parameters' => $this->getPrimaryParameters(),
+            'autoincrement_keys' => $this->getAutoIncrements(),
+//            // @todo: work out why there are two.
+            'autoincrement_parameters' => $this->getAutoIncrements(),
+            'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
+
+            "view_model_data"       => $this->getViewModelData(),
+
+            "baseRenderData" => $baseRenderData,
+        ];
+    }
+
+    public function getRelatedObjects(){
+        return [];
+    }
+    
+    public function getRelatedObjectsSharedAssets(){
+        return [];
+    }
+
+    public function getRemoteObjects(){
+        return [];
+    }
+
+    public function getViewModelData(){
+        return $this->config["sub_models"] ?? [];
+    }
+
+    public function getColumns(){
+        $columns = [];
+        foreach ($this->baseModels as $modelName => $baseModel){
+            foreach ($baseModel->getColumns() as $propName => $column){
+                if(in_array($propName,$this->getSubModelIgnoreColumns($modelName))){
+                    continue;
+                }
+                $columns[$propName] = $column;
+            }
+        }
+        return $columns;
+    }
+
+    public function hasField($field){
+        $field = strtolower($field);
+        foreach ($this->getColumns() as $column){
+            if(strtolower($column->getField()) === $field){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getRequiredColumns(){
+        $columns = [];
+        foreach ($this->baseModels as $base) {
+            foreach ($base->getColumns() as $column) {
+                if (!$column->isNullable()) {
+                    $columns[] = $column->getField();
+                }
+            }
+        }
+        return $columns;
+    }
+
+    public function getPrimaryKeys(){
+        return $this->config["pk"] ?? [];
+    }
+
+    public function getPrimaryParameters(){
+        $keys = [];
+        foreach ($this->baseModels as $base) {
+            foreach ($base->getPrimaryParameters() as $key) {
+                $keys[] = $key;
+            }
+        }
+        return $keys;
+    }
+
+    public function getAutoIncrements(){
+        $keys = [];
+        foreach ($this->baseModels as $base) {
+            foreach ($base->getAutoIncrements() as $key) {
+                $keys[] = $key;
+            }
+        }
+        return $keys;
+    }
+
+
+    private function getSubModelIgnoreColumns($name){
+        return $this->config["sub_models"][$name]["ignore"] ?? [];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClassName()
+    {
+        return $this->className;
+    }
+
+    /**
+     * @param mixed $className
+     *
+     * @return ViewModel
+     */
+    private function setClassName($className = null)
+    {
+        if(empty($className)){
+            throw new \Exception("View as model is missing name");
+        }
+        $this->className = $className;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getView()
+    {
+        return $this->view;
+    }
+
+    /**
+     * @param mixed $view
+     *
+     * @return ViewModel
+     */
+    public function setView($view)
+    {
+        $this->view = $view;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+    /**
+     * @param mixed $namespace
+     *
+     * @return ViewModel
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+
+    /**
+     * @param mixed $database
+     *
+     * @return ViewModel
+     */
+    public function setDatabase($database)
+    {
+        $this->database = $database;
+        return $this;
+    }
+
+    /**
+     * @return DbAdaptor
+     */
+    public function getAdaptor(): DbAdaptor
+    {
+        return $this->dbAdaptor;
+    }
+
+    /**
+     * @param DbAdaptor $dbAdaptor
+     *
+     * @return ViewModel
+     */
+    public function setAdaptor(DbAdaptor $dbAdaptor): ViewModel
+    {
+        $this->dbAdaptor = $dbAdaptor;
+        return $this;
+    }
+
+}
