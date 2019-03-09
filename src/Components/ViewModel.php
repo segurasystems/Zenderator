@@ -42,6 +42,15 @@ class ViewModel extends Entity
         return $this;
     }
 
+    /**
+     * @return Model[]
+     */
+    public function getBaseModels(): array
+    {
+        return $this->baseModels;
+    }
+
+
     public function setConfig($config){
         $this->config = $config;
         $this->setClassName($config["name"] ?? null);
@@ -49,11 +58,8 @@ class ViewModel extends Entity
     }
 
     public function getRenderDataset(){
-        $baseRenderData = [];
-        foreach ($this->baseModels as $name=>$baseModel){
-            //$baseRenderData[$name] = array_keys($baseModel->getRenderDataset());
-        }
         return [
+            'isView'                 => true,
             'namespace'              => $this->getNamespace(),
             'database'               => $this->getDatabase(),
             'table'                  => $this->getView(),
@@ -81,7 +87,7 @@ class ViewModel extends Entity
 
             "view_model_data"       => $this->getViewModelData(),
 
-            "baseRenderData" => $baseRenderData,
+            "baseModels"            => $this->getBaseModels(),
         ];
     }
 
@@ -98,7 +104,21 @@ class ViewModel extends Entity
     }
 
     public function getViewModelData(){
-        return $this->config["sub_models"] ?? [];
+        $data = $this->config["sub_models"];
+        foreach ($data as $table => $datum){
+            $data[$table]["name"] = $table;
+        }
+        $data = uasort($data,function($a,$b){
+            $aName = $a["name"];
+            $bName = $b["name"];
+            $a = array_values($a["dependant"] ?? []);
+            $b = array_values($b["dependant"] ?? []);
+            if(in_array($aName,$b))return -1;
+            if(in_array($bName,$a))return 1;
+            return 0;
+        });
+        var_dump($data);
+        die();
     }
 
     public function getColumns(){
@@ -137,7 +157,17 @@ class ViewModel extends Entity
     }
 
     public function getPrimaryKeys(){
-        return $this->config["pk"] ?? [];
+        $subModelConfig =$this->config["sub_models"];
+        $pks = [];
+        foreach ($subModelConfig as $table => $data){
+            if(!empty($data["pk"])){
+                if(!is_array($data["pk"])){
+                    $data["pk"] = [$data["pk"]];
+                }
+                $pks = array_merge($pks,$data["pk"]);
+            }
+        }
+        return $pks;
     }
 
     public function getPrimaryParameters(){
