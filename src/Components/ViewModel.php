@@ -124,6 +124,11 @@ class ViewModel extends Entity
             if(in_array($bName,$a))return 1;
             return 0;
         });
+        return $data;
+    }
+
+    public function getRelatedObjectsClassNames(){
+        return [];
     }
 
     public function getColumns(){
@@ -137,6 +142,18 @@ class ViewModel extends Entity
             }
         }
         return $columns;
+    }
+
+
+
+    public function getColumn($name): Column
+    {
+        foreach ($this->getBaseModels() as $baseModel) {
+            if (isset($baseModel->getColumns()[$name])) {
+                return $baseModel->getColumns()[$name];
+            }
+        }
+        die("Cannot find a Column called {$name} in baseModels");
     }
 
     public function hasField($field){

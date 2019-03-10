@@ -311,7 +311,7 @@ class Model extends Entity
     /**
      * @param Model[] $models
      */
-    public function scanForRemoteRelations(array &$models)
+    public function scanForRemoteRelations(array $models)
     {
         #echo "Scan: {$this->getClassName()}\n";
         foreach ($this->getColumns() as $column) {

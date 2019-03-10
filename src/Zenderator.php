@@ -672,7 +672,7 @@ class Zenderator
         // Scan for remote relations
         //\Kint::dump(array_keys($models));
         foreach ($allModels as $oModel) {
-            $oModel->scanForRemoteRelations($models);
+            $oModel->scanForRemoteRelations(array_merge($models,$views));
         }
 
         // Check for Conflicts.
@@ -780,12 +780,12 @@ class Zenderator
 
         }
 
-        if(!$this->skipTemplate("Routes") && $this->routesSoftDeleted()){
+        /*if(!$this->skipTemplate("Routes") && $this->routesSoftDeleted()){
             $this->renderToFile(true,
                 APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php",
                 "Router/softDeleteRoutes.php.twig",
                 ["models" => array_values($allModelData),"skip_routes"=>$this->getRoutesToSkip()]);
-        }
+        }*/
 
         // "DependencyInjector" suite
         if (!$this->skipTemplate("DependencyInjector")) {
@@ -796,7 +796,7 @@ class Zenderator
                 [
                     "config" => $this->getConfig(),
                     "skipControllers" => $this->getControllersToSkip(),
-                    "models" => $models,
+                    "models" => array_merge($models,$views),
                 ]
             );
         }

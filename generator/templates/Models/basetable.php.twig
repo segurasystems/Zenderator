@@ -169,6 +169,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
                     "{{ dependent }}" => "{{ source }}",
 {% endfor %}
                 ],
+                "pk" => "{{ data.pk }}",
             ],
 {% endfor %}
         ];
