@@ -106,9 +106,16 @@ class ViewModel extends Entity
     public function getViewModelData(){
         $data = $this->config["sub_models"];
         foreach ($data as $table => $datum){
-            $data[$table]["name"] = $table;
+            $data[$table]["name"] = $data[$table]["name"] ?? $table;
+            $data[$table]["columns"] = [];
+            $data[$table]["dependent"] = $data[$table]["dependent"] ?? [];
+            if(!empty($this->getBaseModels()[$table])){
+                foreach ($this->getBaseModels()[$table]->getColumns() as $column) {
+                    $data[$table]["columns"][] = $column->getField();
+                }
+            }
         }
-        $data = uasort($data,function($a,$b){
+        uasort($data,function($a,$b){
             $aName = $a["name"];
             $bName = $b["name"];
             $a = array_values($a["dependant"] ?? []);
@@ -117,8 +124,6 @@ class ViewModel extends Entity
             if(in_array($bName,$a))return 1;
             return 0;
         });
-        var_dump($data);
-        die();
     }
 
     public function getColumns(){
