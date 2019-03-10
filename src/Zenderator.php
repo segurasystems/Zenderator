@@ -19,10 +19,14 @@ use Slim\Http\Uri;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
+use Zend\Db\Metadata\Object\ViewObject;
 use Zend\Stdlib\ConsoleHelper;
 use Zenderator\Components\Model;
 use Zenderator\Exception\Exception;
 use Zenderator\Exception\SchemaToAdaptorException;
+use Zenderator\Generators\PhpSdkGenerator;
+use Zenderator\Generators\SwaggerGenerator;
+use Zenderator\Interfaces\IZenderatorGenerator;
 
 class Zenderator
 {
@@ -138,7 +142,7 @@ class Zenderator
             }
         }
 
-        $this->config = self::getConfig($this->rootOfApp);
+        $this->config = self::loadConfig($this->rootOfApp);
 
         $this->pathsToPSR2 = array_merge($this->pathsToPSR2, $customPathsToPSR2);
 
@@ -230,7 +234,7 @@ class Zenderator
         return self::$useClassPrefixes;
     }
 
-    public static function getConfig($rootOfApp)
+    public static function loadConfig($rootOfApp)
     {
         if (file_exists($rootOfApp . "/zenderator.yml")) {
             $zenderatorConfigPath = $rootOfApp . "/zenderator.yml";
@@ -291,9 +295,9 @@ class Zenderator
 
     public function makeZenderator($cleanByDefault = false)
     {
-        $models = $this->makeModelSchemas();
+        list($models,$views) = $this->makeModelSchemas();
         $this->removeCoreGeneratedFiles();
-        $this->makeCoreFiles($models);
+        $this->makeCoreFiles($models,$views);
         if ($cleanByDefault) {
             $this->cleanCode();
         }
@@ -418,9 +422,24 @@ class Zenderator
         return $this;
     }
 
+    public function getConfig(){
+        return $this->config;
+    }
+
+    public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false){
+        $routes = $this->getRoutes($remoteApiUri);
+        $swaggerGenerator = new SwaggerGenerator($this,$outputPath);
+        $swaggerGenerator->generateFromRoutes($routes);
+        return $this;
+    }
+
     public function makeSDK($outputPath = APP_ROOT, $remoteApiUri = false, $cleanByDefault = true)
     {
-        $this->makeSDKFiles($outputPath, $remoteApiUri);
+        $routes = $this->getRoutes($remoteApiUri);
+
+        $phpGenerator = new PhpSdkGenerator($this,$outputPath);
+        $phpGenerator->generateFromRoutes($routes);
+
         $this->removePHPVCRCassettes($outputPath);
         if ($cleanByDefault) {
             $this->cleanCode();
@@ -548,9 +567,12 @@ class Zenderator
             if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['path'])) {
                 $sdkOutputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
             }
+            if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['absolute_path'])) {
+                $sdkOutputPath = $this->config['sdk']['output']['absolute_path'];
+            }
         }
 
-        $this
+        return $this
             //->purgeSDK($sdkOutputPath)
             //->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, $remoteApiUri, false)
@@ -558,6 +580,17 @@ class Zenderator
             //->runSDKTests($sdkOutputPath)
             //->sendSDKToGit($sdkOutputPath)
         ;
+    }
+
+    public function runSwaggerifier($outputPath = false, $remoteApiUri = false){
+        if (!$outputPath) {
+            $outputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+            if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['path'])) {
+                $outputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
+            }
+        }
+
+        return $this->makeSwagger($outputPath, $remoteApiUri);
     }
 
     public function disableWaitForKeypress()
@@ -579,6 +612,8 @@ class Zenderator
     {
         /** @var Model[] $models */
         $models = [];
+        $allModels = [];
+        $views = [];
         if (is_array($this->adapters)) {
             foreach ($this->adapters as $dbName => $adapter) {
                 echo "Adaptor: {$dbName}\n";
@@ -590,9 +625,7 @@ class Zenderator
                 echo "Collecting " . count($tables) . " entities data.\n";
 
                 foreach ($tables as $table) {
-                    if (in_array($table->getName(), $this->ignoredTables)) {
-                        continue;
-                    }
+
                     $oModel = Components\Model::Factory($this)
                         ->setNamespace($this->namespace)
                         ->setAdaptor($adapter)
@@ -600,20 +633,57 @@ class Zenderator
                         ->setTable($table->getName())
                         ->computeColumns($table->getColumns())
                         ->computeConstraints($table->getConstraints());
-                    $models[$oModel->getClassName()] = $oModel;
+                    if (!in_array($table->getName(), $this->ignoredTables)) {
+                        $models[$oModel->getClassName()] = $oModel;
+                    }
+                    $allModels[$oModel->getClassName()] = $oModel;
+                }
+
+                /** @var ViewObject[] $views */
+                $dbViews = $this->metadatas[$dbName]->getViews();
+                foreach ($dbViews as $view){
+                    if(!$this->useViewAsModel($view->getName())){
+                        continue;
+                    }
+                    $oView = Components\ViewModel::Factory($this)
+                        ->setNamespace($this->namespace)
+                        ->setAdaptor($adapter)
+                        ->setDatabase($dbName)
+                        ->setView($view->getName())
+                        ->setConfig($this->getViewModelConfig($view->getName()));
+
+                    /**
+                     * @var  string $modelName
+                     * @var  Components\Model $oModel
+                     */
+                    foreach ($allModels as $modelName => $oModel){
+                        if(!in_array($modelName,$this->viewModelSubModels($view->getName()))){
+                            continue;
+                        }
+                        $oView->addBaseModel($oModel);
+                    }
+
+                    
+                    $views[$oView->getClassName()] = $oView;
                 }
             }
         }
 
         // Scan for remote relations
         //\Kint::dump(array_keys($models));
-        foreach ($models as $oModel) {
-            $oModel->scanForRemoteRelations($models);
+        foreach ($allModels as $oModel) {
+            $oModel->scanForRemoteRelations(array_merge($models,$views));
+        }
+
+        // Scan for remote relations
+        //\Kint::dump(array_keys($models));
+        foreach ($views as $oView) {
+            $oView->scanForRemoteRelations(array_merge($models,$views));
         }
 
         // Check for Conflicts.
         $conflictCheck = [];
-        foreach ($models as $oModel) {
+        foreach ($allModels as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
                     #echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
@@ -637,7 +707,28 @@ class Zenderator
         #}
 
         // Finally return some models.
-        return $models;
+        return [$models,$views];
+    }
+
+    public function viewModelSubModels($name){
+        $submodels = $this->viewModelSubModelData($name);
+        return empty($submodels) ? [] : array_keys($submodels);
+    }
+
+    public function viewModelSubModelData($name){
+        return $this->getViewModelConfig($name)["sub_models"] ?? [];
+    }
+
+    public function useViewAsModel($name){
+        return !empty($this->getViewModelConfig($name));
+    }
+
+    public function getViewModelConfig($name){
+        return $this->getViewModelConfigs()[$name] ?? [];
+    }
+
+    public function getViewModelConfigs(){
+        return $this->getConfig()["views_as_models"] ?? [];
     }
 
     private function removeCoreGeneratedFiles()
@@ -670,49 +761,152 @@ class Zenderator
      *
      * @return Zenderator
      */
-    private function makeCoreFiles(array $models)
+    private function makeCoreFiles(array $models, array $views)
     {
         echo "Generating Core files for " . count($models) . " models... \n";
         $allModelData = [];
+        /** @var Components\Model $model */
         foreach ($models as $model) {
-            $allModelData[$model->getClassName()] = $model->getRenderDataset();
+            $renderData = $model->getRenderDataset();
+            $allModelData[$model->getClassName()] = $renderData;
             // "Model" suite
-            echo " > {$model->getClassName()}\n";
+            $this->makeCoreFilesForModel($model->getClassName(),$renderData);
 
-            #\Kint::dump($model->getRenderDataset());
-            if (in_array("Models", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "Models/basemodel.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "Models/model.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "Models/tests.models.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "Models/basetable.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "Models/table.php.twig", $model->getRenderDataset());
-            }
+            $allModelData[$model->getClassName()]["has_soft_delete"] = $model->hasField($this->softDeletedField());
 
-            // "Service" suite
-            if (in_array("Services", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "Services/baseservice.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "Services/service.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "Services/tests.service.php.twig", $model->getRenderDataset());
-            }
-
-            // "Controller" suite
-            if (in_array("Controllers", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "Controllers/basecontroller.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "Controllers/controller.php.twig", $model->getRenderDataset());
-            }
-
-            // "Endpoint" test suite
-            if (in_array("Endpoints", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $model->getRenderDataset());
-            }
-
-            // "Routes" suite
-            if (in_array("Routes", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
-            }
         }
-        
+
+        foreach ($views as $view) {
+            $renderData = $view->getRenderDataset();
+            $allModelData[$view->getClassName()] = $renderData;
+            // "Model" suite
+            $this->makeCoreFilesForModel($view->getClassName(),$renderData);
+
+            $allModelData[$view->getClassName()]["has_soft_delete"] = $view->hasField($this->softDeletedField());
+
+        }
+
+        /*if(!$this->skipTemplate("Routes") && $this->routesSoftDeleted()){
+            $this->renderToFile(true,
+                APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php",
+                "Router/softDeleteRoutes.php.twig",
+                ["models" => array_values($allModelData),"skip_routes"=>$this->getRoutesToSkip()]);
+        }*/
+
+        // "DependencyInjector" suite
+        if (!$this->skipTemplate("DependencyInjector")) {
+            $this->renderToFile(
+                true,
+                APP_ROOT . "/src/AppContainer.php",
+                "DependencyInjector/appcontainer.php.twig",
+                [
+                    "config" => $this->getConfig(),
+                    "skipControllers" => $this->getControllersToSkip(),
+                    "models" => array_merge($models,$views),
+                ]
+            );
+        }
         return $this;
+    }
+
+    public function makeCoreFilesForModel($className, $renderData){
+        echo " > {$className}\n";
+
+        #\Kint::dump($model->getRenderDataset());
+        if (!$this->skipTemplate("Models") && !$this->skipModel($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "Models/basemodel.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/Models/{$className}Model.php", "Models/model.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "Models/tests.models.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "Models/basetable.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "Models/table.php.twig", $renderData);
+        }
+
+        // "Service" suite
+        if (!$this->skipTemplate("Services") && !$this->skipService($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "Services/baseservice.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/Services/{$className}Service.php", "Services/service.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$className}Test.php", "Services/tests.service.php.twig", $renderData);
+        }
+
+        // "Controller" suite
+        if (!$this->skipTemplate("Controllers") && !$this->skipController($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$className}Controller.php", "Controllers/basecontroller.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$className}Controller.php", "Controllers/controller.php.twig", $renderData);
+        }
+
+        // "Endpoint" test suite
+        if (!$this->skipTemplate("Endpoints")) {
+            $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$className}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $renderData);
+        }
+
+        // "Routes" suite
+        if (!$this->skipTemplate("Routes") && !$this->skipRoute($className)) {
+            $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$className}Route.php", "Router/route.php.twig", $renderData);
+        }
+    }
+
+    private function routesSoftDeleted(){
+        return $this->getRoutesConfig()["soft_deleted"] ?? false;
+    }
+
+    private function softDeletedField(){
+        return $this->getModelsConfig()["soft_deleted_field"] ?? null;
+    }
+
+    private function skipTemplate(string $template): bool{
+        return !in_array($template,$this->getTemplateConfig());
+    }
+
+    private function getTemplateConfig(){
+        return $this->config["templates"] ?? [];
+    }
+
+    private function skipRoute($name){
+        return in_array($name,$this->getRoutesToSkip());
+    }
+
+    private function getRoutesConfig(){
+        return $this->config["routes"] ?? [];
+    }
+
+    public function getRoutesToSkip(){
+        return $this->getRoutesConfig()["skip"] ?? [];
+    }
+
+    private function skipController($name){
+        return in_array($name,$this->getControllersToSkip());
+    }
+
+    private function getControllersConfig(){
+        return $this->config["controllers"] ?? [];
+    }
+
+    private function getControllersToSkip(){
+        return $this->getControllersConfig()["skip"] ?? [];
+    }
+
+    private function skipModel($name){
+        return in_array($name,$this->getModelsToSkip());
+    }
+
+    private function getModelsConfig(){
+        return $this->config["models"] ?? [];
+    }
+
+    private function getModelsToSkip(){
+        return $this->getModelsConfig()["skip"] ?? [];
+    }
+
+    private function skipService($name){
+        return in_array($name,$this->getServicesToSkip());
+    }
+
+    private function getServicesConfig(){
+        return $this->config["services"] ?? [];
+    }
+
+    private function getServicesToSkip(){
+        return $this->getServicesConfig()["skip"] ?? [];
     }
 
     private function renderToFile(bool $overwrite, string $path, string $template, array $data)
@@ -759,115 +953,10 @@ class Zenderator
         return $this;
     }
 
-    private function makeSDKFiles($outputPath = APP_ROOT, $remoteApiUri = false)
-    {
-        $packs            = [];
-        $routeCount       = 0;
-        $sharedRenderData = [
-            'app_namespace'    => APP_NAMESPACE,
-            'app_name'         => APP_NAME,
-            'app_container'    => APP_CORE_NAME,
-            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
-            'release_time'     => date("Y-m-d H:i:s"),
-        ];
-
-        $routes = $this->getRoutes($remoteApiUri);
-        echo "Found " . count($routes) . " routes.\n";
-        if (count($routes) > 0) {
-            foreach ($routes as $route) {
-                if (isset($route['name'])) {
-                    if (isset($route['class'])) {
-                        $packs[(string) $route['class']][(string) $route['function']] = $route;
-                        $routeCount++;
-                    }
-                }
-            }
-        } else {
-            die("Cannot find any routes while building SDK. Something has gone very wrong.\n\n");
-        }
-
-        echo "Generating SDK for {$routeCount} routes...\n";
-        // "SDK" suite
-        foreach ($packs as $packName => $routes) {
-            echo " > Pack: {$packName}...\n";
-            $scopeName = $packName;
-            $scopeName[0] = strtolower($scopeName[0]);
-            $routeRenderData = [
-                'pack_name'  => $packName,
-                'scope_name' => $scopeName,
-                'routes'     => $routes,
-            ];
-            $properties = [];
-            $propertiesOptions = [];
-            foreach ($routes as $route) {
-                if (isset($route['properties'])) {
-                    foreach ($route['properties'] as $property) {
-                        $properties[] = $property;
-                    }
-                }
-                if (isset($route['propertiesOptions'])) {
-                    foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
-                        $propertiesOptions[$propertyName] = $propertyOption;
-                    }
-                }
-            }
-
-            $properties                    = array_unique($properties);
-            $routeRenderData['properties'] = $properties;
-            $routeRenderData['propertiesOptions'] = $propertiesOptions;
-            $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
-            #\Kint::dump($routeRenderData);
-
-            // Access Layer
-            $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "SDK/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
-            $this->renderToFile(false, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "SDK/AccessLayer/accesslayer.php.twig", $routeRenderData);
-
-            // Models
-            $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "SDK/Models/basemodel.php.twig", $routeRenderData);
-            $this->renderToFile(false, $outputPath . "/src/Models/{$packName}Model.php", "SDK/Models/model.php.twig", $routeRenderData);
-
-            // Tests
-            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
-
-            if (!file_exists($outputPath . "/tests/fixtures")) {
-                mkdir($outputPath . "/tests/fixtures", 0777, true);
-            }
-        }
-
-        $renderData = array_merge(
-            $sharedRenderData,
-            [
-                'packs'  => $packs,
-                'config' => $this->config
-            ]
-        );
-
-        echo "Generating Client Container:";
-        $this->renderToFile(true, $outputPath . "/src/Client.php", "SDK/client.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating Composer.json:";
-        $this->renderToFile(true, $outputPath . "/composer.json", "SDK/composer.json.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating Test Bootstrap:";
-        $this->renderToFile(true, $outputPath . "/bootstrap.php", "SDK/bootstrap.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating phpunit.xml, documentation, etc:";
-        $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "SDK/phpunit.xml.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Readme.md", "SDK/readme.md.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/.gitignore", "SDK/gitignore.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Dockerfile.tests", "SDK/Dockerfile.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/test-compose.yml", "SDK/docker-compose.yml.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        return $this;
-    }
-
     private function getRoutes($remoteApiUri = false)
     {
         if ($remoteApiUri) {
+            echo " > Getting routes from \"{$remoteApiUri}\"";
             $client = new Client([
                 'base_uri' => $remoteApiUri,
                 'timeout'  => 30.0,
@@ -875,13 +964,23 @@ class Zenderator
                     'Accept' => 'application/json'
                 ]
             ]);
-            $result = $client->get("/v1")->getBody()->getContents();
+            try {
+                $result = $client->get("/v1")->getBody()->getContents();
+            } catch (\Exception $e){
+                var_dump(get_class($e));
+                die();
+            }
             $body = json_decode($result, true);
+            echo "Found " . count($body['Routes']) . " routes.\n";
             return $body['Routes'];
         }
         $response = $this->makeRequest("GET", "/v1");
         $body = (string)$response->getBody();
         $body = json_decode($body, true);
+        echo "Found " . count($body['Routes']) . " routes.\n";
+        if (empty($body['Routes'])) {
+            die("Cannot find any routes while building SDK. Something has gone very wrong.\n\n");
+        }
         return $body['Routes'];
     }
 

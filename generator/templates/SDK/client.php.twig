@@ -5,15 +5,9 @@ use Gone\SDK\Common\Abstracts\AbstractClient;
 
 class Client extends AbstractClient
 {
-{% for pack in packs|keys %}
-    /** @var AccessLayer\{{ pack }}AccessLayer */
-    public ${{ pack|transform_studly_to_camel }};
+    const DEFAULT_BASE_URL = "{{ default_base_url }}";
 
-{% endfor %}
-    public function __construct($baseUrl = "{{ default_base_url }}"){
-        parent::__construct($baseUrl);
-{% for pack in packs|keys %}
-        $this->{{ pack|transform_studly_to_camel }} = new AccessLayer\{{ pack }}AccessLayer($this);
-{% endfor %}
+    public function __construct($baseUrl = self::DEFAULT_BASE_URL, $extraHeaders = []){
+        parent::__construct($baseUrl,$extraHeaders);
     }
 }

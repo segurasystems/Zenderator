@@ -3,6 +3,7 @@ namespace {{ namespace }}\Services\Base;
 
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
+use Gone\SDK\Common\Filters\Filter;
 use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
@@ -89,20 +90,85 @@ abstract class Base{{ class_name }}Service
     }
 
     /**
+     * @param Filter $filter
+     *
+     * @return Models\{{ class_name }}Model|null
+     */
+    public function getFilter(Filter $filter)
+    {
+        return parent::get(
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins()
+        );
+    }
+
+    /**
+     * @param int|null $offset
+     * @param array|\Closure[]|null $wheres
+     * @param string|Expression|null $order
+     * @param string|null $orderDirection
+     * @param array|\Closure[]|null $joins
+     *
+     * @return Models\{{ class_name }}Model|null
+     */
+    public function get(
+        int $offset = null,
+        array $wheres = [],
+        $order = null,
+        string $orderDirection = null,
+        array $joins = []
+    )
+    {
+        return parent::get(
+            $offset,
+            $wheres,
+            $order,
+            $orderDirection,
+            $joins
+        );
+    }
+
+    /**
+     * @param Filter $filter
+     * @param bool $doCount
+     *
+     * @return Models\{{ class_name }}Model[]
+     */
+    public function getAllFilter(Filter $filter, bool $doCount = true)
+    {
+        return parent::getAll(
+            $filter->getLimit(),
+            $filter->getOffset(),
+            $filter->getWheres(),
+            $filter->getOrder(),
+            $filter->getOrderDirection(),
+            $filter->getJoins(),
+            $doCount
+        );
+    }
+
+    /**
      * @param int|null $limit
      * @param int|null $offset
      * @param array|\Closure[]|null $wheres
      * @param string|Expression|null $order
      * @param string|null $orderDirection
+     * @param array|\Closure[]|null $joins
+     * @param bool $doCount
      *
      * @return Models\{{ class_name }}Model[]
      */
     public function getAll(
         int $limit = null,
         int $offset = null,
-        array $wheres = null,
+        array $wheres = [],
         $order = null,
-        string $orderDirection = null
+        string $orderDirection = null,
+        array $joins = [],
+        bool $doCount = true
     )
     {
         return parent::getAll(
@@ -110,7 +176,9 @@ abstract class Base{{ class_name }}Service
             $offset,
             $wheres,
             $order,
-            $orderDirection
+            $orderDirection,
+            $joins,
+            $doCount
         );
     }
 
@@ -206,7 +274,7 @@ abstract class Base{{ class_name }}Service
 
     /**
      * @param $dataExchange
-     * @return array|\ArrayObject|null
+     * @return Models\{{ class_name }}Model|null|null
      */
     public function createFromArray($dataExchange)
     {
@@ -214,6 +282,12 @@ abstract class Base{{ class_name }}Service
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
         ${{ variable_name }} = $this->getNewModelInstance($dataExchange);
         return ${{ variable_name }}Table->save(${{ variable_name }});
+    }
+
+    public function updatePK($oldPK, $newPK){
+        ${{ variable_name }} = $this->getById($oldPK);
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->updatePK(${{ variable_name }},$newPK);
     }
 
     /**

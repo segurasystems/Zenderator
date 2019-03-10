@@ -87,6 +87,17 @@ class Model extends Entity
     }
 
     /**
+     * @return string[]
+     */
+    public function getRelatedObjectsClassNames(){
+        $names = [];
+        foreach ($this->getRelatedObjects() as $relatedObject){
+            $names[] = $relatedObject->getRemoteClass();
+        }
+        return $names;
+    }
+
+    /**
      * @param array $relatedObjects
      *
      * @return Model
@@ -191,9 +202,20 @@ class Model extends Entity
             }
             if ($zendConstraint->getType() == "PRIMARY KEY") {
                 $this->primaryKeys = $zendConstraint->getColumns();
+                foreach ($this->columns as $column) {
+                    $columnCount = count($zendConstraint->getColumns());
+                    foreach ($zendConstraint->getColumns() as $affectedColumn) {
+                        if ($column->getPropertyName() == $affectedColumn) {
+                            if($columnCount === 1){
+                                $column->setIsUnique(true);
+                            }
+                            $column->setIsNullable(false);
+                        }
+                    }
+                }
             }
             if ($zendConstraint->getType() == "UNIQUE") {
-                if ($this->getClassName() == 'PermissionGroup') {
+                //if ($this->getClassName() == 'PermissionGroup') {
                     foreach ($this->columns as $column) {
                         foreach ($zendConstraint->getColumns() as $affectedColumn) {
                             if ($column->getPropertyName() == $affectedColumn) {
@@ -201,7 +223,7 @@ class Model extends Entity
                             }
                         }
                     }
-                }
+                //}
             }
         }
 
@@ -209,7 +231,7 @@ class Model extends Entity
         if (count($this->relatedObjects) > 0) {
             foreach ($this->relatedObjects as $relatedObject) {
                 /** @var $relatedObject RelatedModel */
-                $localBoundVariable = $this->transStudly2Camel->transform($relatedObject->getLocalBoundColumn());
+                $localBoundVariable = $relatedObject->getLocalBoundColumn();
                 #echo "In {$this->getClassName()} column {$localBoundVariable} has a related object called {$relatedObject->getLocalClass()}::{$relatedObject->getRemoteClass()}\n";
                 $this->columns[$localBoundVariable]
                     ->addRelatedObject($relatedObject);
@@ -289,7 +311,7 @@ class Model extends Entity
     /**
      * @param Model[] $models
      */
-    public function scanForRemoteRelations(array &$models)
+    public function scanForRemoteRelations(array $models)
     {
         #echo "Scan: {$this->getClassName()}\n";
         foreach ($this->getColumns() as $column) {
@@ -347,19 +369,19 @@ class Model extends Entity
     /**
      * @return array
      *
-     * @todo verify this actually works.
+     * @to do verify this actually works.
      */
-    public function computeAutoIncrementColumns()
-    {
-        $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
-        $query   = $this->getAdaptor()->query($sql);
-        $columns = [];
-
-        foreach ($query->execute() as $aiColumn) {
-            $columns[] = $aiColumn['Field'];
-        }
-        return $columns;
-    }
+//    public function computeAutoIncrementColumns()
+//    {
+//        $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
+//        $query   = $this->getAdaptor()->query($sql);
+//        $columns = [];
+//
+//        foreach ($query->execute() as $aiColumn) {
+//            $columns[] = $aiColumn['Field'];
+//        }
+//        return $columns;
+//    }
 
     /**
      * @return DbAdaptor
@@ -387,6 +409,7 @@ class Model extends Entity
                 ->setPermittedValues($column->getErrata('permitted_values'))
                 ->setMaxDecimalPlaces($column->getNumericScale())
                 ->setIsUnsigned($column->getNumericUnsigned())
+                ->setIsNullable($column->isNullable())
                 ->setDefaultValue($column->getColumnDefault());
 
             /**
@@ -443,17 +466,41 @@ class Model extends Entity
             'object_name_singular'   => $this->getClassName(),
             'controller_route'       => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
             'namespace_model'        => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
-            'columns'                => $this->columns,
+            'columns'                => $this->getColumns(),
             'related_objects'        => $this->getRelatedObjects(),
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
             'remote_objects'         => $this->getRemoteObjects(),
+            'required_columns'       => $this->getRequiredColumns(),
 
             'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
-            // @todo: work out why there are two.
-            'autoincrement_parameters' => $this->getAutoIncrements()
+
+            'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
         ];
+    }
+
+    public function hasField($field){
+        $field = strtolower($field);
+        foreach ($this->getColumns() as $column){
+            if(strtolower($column->getField()) === $field){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return Column[]
+     */
+    public function getRequiredColumns(){
+        $columns = [];
+        foreach ($this->getColumns() as $column){
+            if(!$column->isNullable()){
+                $columns[] = $column->getField();
+            }
+        }
+        return $columns;
     }
 
     /**

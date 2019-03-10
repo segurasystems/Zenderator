@@ -17,6 +17,10 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
     protected $table = '{{ table }}';
 
     protected $database = '{{ database }}';
+{% if isView %}
+
+    protected $isView = true;
+{% endif %}
 
     protected $model = Models\{{ class_name }}Model::class;
 
@@ -149,4 +153,26 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
     {
         return parent::save($model);
     }
+{% if isView %}
+
+    public function getViewModelBreakdown(){
+        return [
+{% for tableName, data in view_model_data %}
+            "{{ tableName }}" => [
+                "columns" => [
+{% for column in data.columns %}
+                    "{{ column }}",
+{% endfor %}
+                ],
+                "dependent" => [
+{% for dependent, source in data.dependent %}
+                    "{{ dependent }}" => "{{ source }}",
+{% endfor %}
+                ],
+                "pk" => "{{ data.pk }}",
+            ],
+{% endfor %}
+        ];
+    }
+{% endif %}
 }

@@ -4,34 +4,39 @@
      * @param ${{ callbackProperty.name }}
 {% endfor %}
 {% endif %}
-     * @param $hydrate bool
-     *
-     * @return array{% if route.singular and route.hydratable %}|Models\{{ route.singular }}Model{% endif %}
+     * @return Models\{{ route.singular }}Model
      * @throws Exceptions\SDKException
      **/
     public function {{ route.function }}(
 {% if route.callbackProperties %}
 {% for callbackProperty in route.callbackProperties %}
-        ${{ callbackProperty.name }}{% if not callbackProperty.isMandatory %} = "{{ callbackProperty.default }}"{% endif %},
+        ${{ callbackProperty.name }}{% if not callbackProperty.isMandatory %} = "{{ callbackProperty.default }}"{% endif %}{% if not loop.last %},{% endif %}
 {% endfor %}
+
 {% endif %}
-    bool $hydrate = true
     )
     {
-        $endpoint = "{{ route.pattern }}";
 {% if route.callbackProperties %}
         $propertyArray = [
 {% for callbackProperty in route.callbackProperties %}
             '{{ callbackProperty.name }}' => ${{ callbackProperty.name }},
 {% endfor %}
         ];
-
-        $endpoint = $this->replaceUrlElements(
-            $endpoint,
-            $propertyArray
-        );
 {% endif %}
+        /** @var $response \GuzzleHttp\Psr7\Response */
 
+{% if route.callbackProperties %}
+        $endpoint = $this->replaceUrlElements(
+            "{{ route.pattern }}",
+            [
+{% for callbackProperty in route.callbackProperties %}
+                '{{ callbackProperty.name }}' => ${{ callbackProperty.name }},
+{% endfor %}
+            ]
+        );
+{% else %}
+        $endpoint = "{{ route.pattern }}";
+{% endif %}
         $method = "{{ route.method }}";
 
         try {
@@ -41,48 +46,31 @@
                 [
                     'headers' => [
                         'Accept' => 'application/json',
-{% if route.callbackProperties %}
-{% for callbackProp in route.callbackProperties %}
-{% if callbackProp.in == "header" %}
-                        '{{ callbackProp.name }}' => ${{ callbackProp.name }},
-{% endif %}
-{% endfor %}
-{% endif %}
                     ],
-{% if route.callbackProperties and route.method != "GET" %}
+{% if route.callbackProperties %}
                     'body' => json_encode($propertyArray),
 {% endif %}
                 ]
             );
             $body = $response->getBody()->getContents();
-            $json = json_decode($body, true);
-            if($json === null){
+            if(json_decode($body) === null){
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
             }
-{% if route.responseKey %}
-{% if route.hydratable %}
-            if($hydrate) {
-                return new Models\{{ route.singular }}Model($json['{{ route.responseKey }}']);
-            } else {
-                return $json['{{ route.responseKey }}'];
-            }
-{% else %}
-            return $json['{{ route.responseKey }}'];
-{% endif %}
-{% else %}
-            return $json;
-{% endif %}
+            $body = json_decode($body, true);
+            return $this->hydrate($body['{{ route.singular }}']);
         } catch (GuzzleException\ClientException $clientException) {
             $body = $clientException->getResponse()->getBody()->getContents();
             if (json_decode($body) === null) {
-                throw Exceptions\SDKException::Factory("Response from API was not expected JSON")
-                    ->setMethod($method)
-                    ->setGuzzleConfig($this->guzzleClient->getConfig())
-                    ->setEndpoint($endpoint)
+                throw new Exceptions\SDKException(
+                    "Response from API ({$endpoint}) was not expected JSON:\n" .
+                    "Method: {$method}\n" .
+                    "GuzzleConfig: " . var_export($this->guzzleClient->getConfig(), true) . "\n".
+                    "URL: {$endpoint}\n" .
 {% if route.callbackProperties %}
-                    ->setRequest($propertyArray)
+                    "Request: " .  json_encode($propertyArray, JSON_PRETTY_PRINT) . "\n\n" .
 {% endif %}
-                    ->setResponse($body);
+                    var_export($body, true)
+                );
             }
             $body = json_decode($body, true);
             return $body;

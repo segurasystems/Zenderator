@@ -262,9 +262,41 @@ class RelatedModel extends Entity
         return $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
     }
 
+    public function getRemoteClassSC()
+    {
+        return $this->transStudly2Camel->transform($this->getRemoteClass());
+    }
+
+    public function getRemoteService(){
+        return $this->getRemoteClass() . "Service";
+    }
+
+    public function getRemoteModel(){
+        return $this->getRemoteClass() . "Model";
+    }
+
+    public function getRemoteServiceLC(){
+        return lcfirst($this->getRemoteService());
+    }
+
     public function getLocalBoundColumnGetter()
     {
         return "get" . $this->transCamel2Studly->transform($this->getLocalBoundColumn());
+    }
+
+    public function getBoundModelReferenceName()
+    {
+        return preg_replace('/Id$/', '', $this->transCamel2Studly->transform($this->getLocalBoundColumn()));
+    }
+
+    public function getBoundModelReferenceNameLC()
+    {
+        return lcfirst($this->getBoundModelReferenceName());
+    }
+
+    public function getBoundModelReferenceNameSC()
+    {
+        return $this->transStudly2Snake->transform($this->getBoundModelReferenceName());
     }
 
     public function getRemoteBoundColumnGetter()

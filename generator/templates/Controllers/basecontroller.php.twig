@@ -1,8 +1,13 @@
 <?php
 namespace {{ namespace }}\Controllers\Base;
 
+use Gone\SDK\Common\Filters\Filter;
+use Gone\SDK\Common\Filters\FilterCondition;
 use Gone\AppCore\Abstracts\CrudController as AbstractCrudController;
 use \{{ namespace }}\Services;
+use \{{ namespace }}\Models;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 {% include '_overwrite_warning.twig' %}
 
@@ -10,14 +15,25 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
 {
     const RESPONSIBLE_MODEL = '{{ class_name }}';
 
+{% for related in related_objects %}
+    /** @var Services\{{ related.getRemoteService }} */
+    protected ${{ related.getRemoteServiceLC }};
+{% endfor %}
+
     /**
      * @param Services\{{ class_name }}Service ${{ variable_name }}
      */
     public function __construct(
         Services\{{ class_name }}Service ${{ variable_name }}
+{% for related in related_objects %}
+        ,Services\{{ related.getRemoteService }} ${{ related.getRemoteServiceLC }}
+{% endfor %}
     )
     {
         $this->service = ${{ variable_name }};
+{% for related in related_objects %}
+        $this->{{ related.getRemoteServiceLC }} = ${{ related.getRemoteServiceLC }};
+{% endfor %}
     }
 
     /**
@@ -27,4 +43,46 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
     {
         return parent::getService();
     }
+
+{% for related in related_objects %}
+    public function {{ related.getBoundModelReferenceNameLC }}Request(Request $request, Response $response, $args) : Response
+    {
+        $id = $args['id'];
+        ${{ related.getBoundModelReferenceNameLC }} = $this->{{ related.getRemoteServiceLC }}->getFilter(
+            Filter::Factory()
+                ->addJoin(
+                    Models\{{ class_name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }},
+                    Models\{{ class_name }}Model::TABLE_NAME,
+                    Models\{{ related.getRemoteModel }}::FIELD_{{ related.getRemoteBoundColumn|upper }}
+                )
+                ->addWhere(
+                    Models\{{ class_name }}Model::FIELD_ID,
+                    $id,
+                    FilterCondition::CONDITION_EQUAL,
+                    Models\{{ class_name }}Model::TABLE_NAME
+                )
+        );
+        if (${{ related.getBoundModelReferenceNameLC }}) {
+            return $this->jsonSuccessResponse(
+                [
+                    'Action'                          => 'GET_{{ related.getBoundModelReferenceName|upper }}',
+                    $this->{{ related.getRemoteServiceLC }}->getTermSingular() => ${{ related.getBoundModelReferenceNameLC }}->__toArray(),
+                ],
+                $request,
+                $response
+            );
+        }
+        return $this->jsonFailureResponse(
+            sprintf(
+                "No such related %s found for %s with id %s",
+                strtolower($this->{{ related.getRemoteServiceLC }}->getTermSingular()),
+                strtolower($this->service->getTermSingular()),
+                $args['id']
+            ),
+            $request,
+            $response
+        );
+    }
+
+{% endfor %}
 }

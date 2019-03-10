@@ -1,15 +1,12 @@
     /**
-     * Return a single Models\{{ routes['create'].singular }}Model by ID
+     * Reinstate a single Models\{{ routes['create'].singular }}Model by ID
      *
-     * @param int $id
-     * @param bool $hydrate
-     *
-     * @return Models\{{ routes['create'].singular }}Model|array
+     * @return Models\{{ routes['create'].singular }}Model
      *
      * @throws Exceptions\ObjectNotFoundException
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}($id, bool $hydrate=true)
+    public function {{ route.function }}($id) : Models\{{ routes['create'].singular }}Model
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = $this->replaceUrlElements(
@@ -33,11 +30,7 @@
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
             }
             $body = json_decode($body, true);
-            if($hydrate){
-                return $this->hydrate($body['{{ route.singular }}']);
-            } else {
-                return $body['{{ route.singular }}'];
-            }
+            return $this->hydrate($body['{{ route.singular }}']);
         }catch(\GuzzleHttp\Exception\ClientException $clientException){
             $body = $clientException->getResponse()->getBody()->getContents();
             if(json_decode($body) === null){
@@ -51,4 +44,3 @@
             }
         }
     }
-

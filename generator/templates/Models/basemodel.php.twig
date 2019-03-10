@@ -18,6 +18,10 @@ abstract class Base{{ class_name }}Model
     implements ModelInterface
 {
 
+    const NAME_SINGULAR = '{{ object_name_singular }}';
+    const NAME_PLURAL = '{{ object_name_plural }}';
+    const TABLE_NAME = '{{ table }}';
+
     // Declare what fields are available on this object
 {% for column in columns %}
     const FIELD_{{ column.getField|upper }} = '{{ column.getField }}';
@@ -25,13 +29,6 @@ abstract class Base{{ class_name }}Model
 
 {% for column in columns %}
     const TYPE_{{ column.getField|upper }} = '{{ column.getDbType }}';
-{% endfor %}
-
-    // Constant arrays defined by ENUMs
-{% for column in columns %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-    const OPTIONS_{{ column.getField|upper }} = ["{{ column.getPermittedValues | join('", "') | raw }}"];
-{% endif %}
 {% endfor %}
 
     // Constants defined by ENUMs
@@ -42,6 +39,18 @@ abstract class Base{{ class_name }}Model
 {% endfor %}
 {% endif %}
 {% endfor %}
+
+    // Constant arrays defined by ENUMs
+{% for column in columns %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+    const OPTIONS_{{ column.getField|upper }} = [
+{% for permittedValue in column.getPermittedValues %}
+        self::{{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+{% endfor %}
+    ];
+{% endif %}
+{% endfor %}
+
 
 {% if primary_keys %}
     protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
@@ -59,6 +68,12 @@ abstract class Base{{ class_name }}Model
 {% endif %}
 {% endfor %}
 
+{% if required_columns is empty %}
+    protected $requiredFields = [];
+{% else %}
+    protected $requiredFields = ['{{ required_columns|join('\', \'')|raw }}'];
+{% endif %}
+
     /**
      * @param array $data An array of a {{ class_name }}Model's properties.
      * @return {{ class_name }}Model
@@ -68,17 +83,48 @@ abstract class Base{{ class_name }}Model
         return parent::factory($data);
     }
 
+    public function getRequiredFields(){
+        return $this->requiredFields;
+    }
+
     /**
      * @return array
      */
-    public function getPropertyMeta()
+    public static function getPropertyMeta()
     {
+{#
 {% for column in columns %}
 {% if column.hasRelatedObjects %}
         ${{ column.getField|replace({"Id":"s"}) }}Service = App::Container()->get(Services\{{ column.getModel.getClassName }}Service::class);
 {% endif %}
 {% endfor %}
 
+        $properties = [
+{% for column in columns %}
+            self::FIELD_{{ column.getField|upper }} => [
+                    'type' => self::TYPE_{{ column.getField|upper }},
+{% if column.getMaxLength > 0 %}
+                    'length' => {{ column.getMaxLength }},
+{% endif %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        self::{{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+{% endfor %}
+                    ],
+{% if column.getDefaultvalue %}
+                    'default' => '{{ column.getDefaultValue() }}',
+{% endif %}
+{% endif %}
+{% if column.hasRelatedObjects %}
+                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
+{% endif %}
+                    'unique'     => {{ column.isUnique|json_encode|raw }},
+                    'isNullable' => {{ column.isNullable|json_encode|raw }},
+                ],
+{% endfor %}
+        ];
+#}
         $properties = [
 {% for column in columns %}
             self::FIELD_{{ column.getField|upper }} => [
@@ -97,8 +143,27 @@ abstract class Base{{ class_name }}Model
 {% endif %}
 {% endif %}
 {% if column.hasRelatedObjects %}
-                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
+                    'related' => [
+{% for related in column.getRelatedObjects %}
+                        [
+                            'model' => '{{ related.getRemoteModelName }}',
+                            'column' => '{{ related.getRemoteBoundColumn }}',
+                        ],
+{% endfor %}
+                    ],
 {% endif %}
+{% if column.hasRemoteObjects %}
+                    'remote' => [
+{% for remote in column.getRemoteObjects %}
+                        [
+                            'model' => '{{ remote.getRemoteModelName }}',
+                            'column' => '{{ remote.getRemoteBoundColumn }}',
+                        ],
+{% endfor %}
+                    ],
+{% endif %}
+                    'unique'     => {{ column.isUnique|json_encode|raw }},
+                    'nullable' => {{ column.isNullable|json_encode|raw }},
                 ],
 {% endfor %}
         ];
@@ -172,7 +237,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Object(
+    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}ObjectRemote(
 {% if remote_object.local_model_key != 'id' %}
         $orderBy = null,
         $orderDirection='ASC'
@@ -241,7 +306,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function save()
+    public function save(): self
     {
         /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
         $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
@@ -249,13 +314,13 @@ abstract class Base{{ class_name }}Model
     }
 
     /**
-     * Destroy the current record.
-     *
-     * @return int Number of affected rows.
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
+    * Destroy the current record.
+    *
+    * @return int Number of affected rows.
+    *
+    * @throws \Psr\Container\ContainerExceptionInterface
+    * @throws \Psr\Container\NotFoundExceptionInterface
+    */
     public function destroy() : int
     {
         /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
@@ -305,7 +370,7 @@ abstract class Base{{ class_name }}Model
     {
         return [
 {% for column in columns %}
-            '{{ column.getField }}',
+            self::FIELD_{{ column.getField|upper }},
 {% endfor %}
         ];
     }

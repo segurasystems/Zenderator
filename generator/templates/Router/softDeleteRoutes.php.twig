@@ -1,0 +1,31 @@
+<?php
+
+// Router proper begins
+$router = \Gone\AppCore\Router\Router::Instance()
+{% for model in models %}
+{% if model.has_soft_delete and model.class_name not in skip_routes %}
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ model.class_name }} Reinstate')
+            ->setCallback(\{{ model.namespace }}\Controllers\{{ model.class_name }}Controller::class . ':reinstateRequest')
+            ->setSDKClass('{{ model.class_name }}')
+            ->setSDKFunction('reinstate')
+            ->setSDKTemplate('reinstate')
+            ->setRouterPattern('/v1/{{ model.controller_route }}/reinstate/{id}')
+            ->setHttpEndpoint('/v1/{{ model.controller_route }}/reinstate/id')
+            ->setHttpMethod('GET')
+            ->setSingular('{{ model.object_name_singular }}')
+            ->setPlural('{{ model.object_name_plural }}')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+            ->setSDKModelSafe(true)
+            ->setCallbackProperties([
+                "id" => [
+                    "name" => "id",
+                    "default" => null,
+                    "description" => "ID of the object to be reinstated",
+                    "in" => "path",
+                    "isMandatory" => true,
+                    "type" => "integer",
+                ],
+            ])
+    ){% endif %}{% endfor %};

@@ -3,11 +3,12 @@
 {% endfor %}
 
     /**
-     * @param $filter Filter instance
-     * @return null|Models\{{ route.singular }}Model[]
+     * @param Filter|null $filter
+     * @param bool $hydrate
+     * @return null|array|Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}(Filter $filter = null) : ?array
+    public function {{ route.function }}(Filter $filter = null,bool $hydrate = true)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
@@ -40,8 +41,49 @@
                     "Available Keys were: ['" . implode("', '", array_keys($body)) . "'].\n"
                 );
             }
-            return $this->hydrate($body['{{ route.plural }}']);
+            if($hydrate){
+                return $this->hydrate($body['{{ route.plural }}']);
+            } else {
+                return $body['{{ route.plural }}'];
+            }
         }
         return null;
     }
 
+    /**
+     * Get a single result with an optional filter.
+     *
+     * @param Filter|null $filter
+     * @param bool $hydrate
+     *
+     * @throws Exceptions\SDKException
+     *
+     * @return Models\{{ route.singular }}Model|array|null
+     */
+    public function getFiltered(Filter $filter = null,bool $hydrate = true)
+    {
+        $singular = $this->list($filter->setLimit(1),$hydrate);
+
+        return (is_array($singular) && count($singular) == 1)
+            ? reset($singular)
+            : null;
+    }
+
+    /**
+     * Get many results with an optional filter
+     *
+     * @param Filter|null $filter
+     * @param bool $hydrate
+     *
+     * @throws Exceptions\SDKException
+     *
+     * @return Models\{{ route.singular }}Model[]|array|null
+     */
+    public function getManyFiltered(Filter $filter = null,bool $hydrate = true) : ?array
+    {
+        $list = $this->list($filter,$hydrate);
+
+        return (is_array($list) && count($list) > 0)
+            ? $list
+            : [];
+    }
