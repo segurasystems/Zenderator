@@ -369,19 +369,19 @@ class Model extends Entity
     /**
      * @return array
      *
-     * @todo verify this actually works.
+     * @to do verify this actually works.
      */
-    public function computeAutoIncrementColumns()
-    {
-        $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
-        $query   = $this->getAdaptor()->query($sql);
-        $columns = [];
-
-        foreach ($query->execute() as $aiColumn) {
-            $columns[] = $aiColumn['Field'];
-        }
-        return $columns;
-    }
+//    public function computeAutoIncrementColumns()
+//    {
+//        $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
+//        $query   = $this->getAdaptor()->query($sql);
+//        $columns = [];
+//
+//        foreach ($query->execute() as $aiColumn) {
+//            $columns[] = $aiColumn['Field'];
+//        }
+//        return $columns;
+//    }
 
     /**
      * @return DbAdaptor
@@ -475,8 +475,7 @@ class Model extends Entity
             'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
-            // @todo: work out why there are two.
-            'autoincrement_parameters' => $this->getAutoIncrements(),
+
             'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
         ];
     }

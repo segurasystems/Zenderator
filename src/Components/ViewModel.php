@@ -81,8 +81,7 @@ class ViewModel extends Entity
             'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
-//            // @todo: work out why there are two.
-            'autoincrement_parameters' => $this->getAutoIncrements(),
+
             'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
 
             "view_model_data"       => $this->getViewModelData(),
@@ -144,7 +143,9 @@ class ViewModel extends Entity
         return $columns;
     }
 
-
+    public function scanForRemoteRelations($models){
+        // TODO  : scan for relation models
+    }
 
     public function getColumn($name): Column
     {

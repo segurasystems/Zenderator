@@ -675,6 +675,12 @@ class Zenderator
             $oModel->scanForRemoteRelations(array_merge($models,$views));
         }
 
+        // Scan for remote relations
+        //\Kint::dump(array_keys($models));
+        foreach ($views as $oView) {
+            $oView->scanForRemoteRelations(array_merge($models,$views));
+        }
+
         // Check for Conflicts.
         $conflictCheck = [];
         foreach ($allModels as $oModel) {
