@@ -187,7 +187,7 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
 {% endif %}
 {% endfor %}
 
-{% if autoincrement_parameters %}
+{% if autoincrement_keys %}
     public function testAutoincrementedIdIsApplied()
     {
         /** @var {{ class_name }}TableGateway $table */
@@ -195,7 +195,7 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
         $new{{ remote_object.getLocalModelName }} = $table->getNewMockModelInstance();
 
         // Set primary keys to null.
-{% for primary_parameter in autoincrement_parameters %}
+{% for primary_parameter in autoincrement_keys %}
         $new{{ remote_object.getLocalModelName }}->set{{ primary_parameter }}(null);
 {% endfor %}
 
