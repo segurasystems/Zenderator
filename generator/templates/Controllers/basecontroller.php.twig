@@ -13,7 +13,10 @@ use Slim\Http\Response;
 
 abstract class Base{{ class_name }}Controller extends AbstractCrudController
 {
-    const RESPONSIBLE_MODEL = '{{ class_name }}';
+    const RESPONSIBLE_MODEL = Model\{{ class_name }}Model::class;
+
+    protected $singularTerm = Model\{{ class_name }}Model::NAME_SINGULAR;
+    protected $pluralTerm = Model\{{ class_name }}Model::NAME_SINGULAR;
 
 {% for related in related_objects %}
     /** @var Services\{{ related.getRemoteService }} */
