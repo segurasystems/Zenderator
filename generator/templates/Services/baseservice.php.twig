@@ -1,106 +1,127 @@
 <?php
+
 namespace {{ namespace }}\Services\Base;
 
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
 use Gone\SDK\Common\Filters\Filter;
-use \{{ namespace }}\TableAccessLayers;
+use \{{ namespace }}\AccessLayers;
 use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
 
 {% include '_overwrite_warning.twig' %}
 
-// @todo: Make all Services implement a ServicesInterface. - MB
+// @todo: Make all Services implement a ServicesInterface
 abstract class Base{{ class_name }}Service
     extends AbstractService
-    implements ServiceInterface
+//    implements ServiceInterface
 {
-
+{% if related_objects_shared %}
     // Related Objects Table Access Layers
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-    /** @var TableAccessLayers\{{ related_object.getRemoteClass }}TableAccessLayer */
-    protected ${{ related_object.getRemoteVariable }}TableAccessLayer;
+    /** @var AccessLayers\{{ related_object.getRemoteClass }}AccessLayer */
+    protected ${{ related_object.getRemoteVariable }}AccessLayer;
 {% endif %}
 {% endfor %}
 
+{% endif %}
+{% if remote_constraints %}
     // Remote Constraints Table Access Layers
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-    /** @var TableAccessLayers\{{ remote_constraint.getLocalClass }}TableAccessLayer */
-    protected ${{ remote_constraint.getLocalVariable }}TableAccessLayer;
+    /** @var AccessLayers\{{ remote_constraint.getLocalClass }}AccessLayer */
+    protected ${{ remote_constraint.getLocalVariable }}AccessLayer;
 {% endif %}
 {% endfor %}
 
+{% endif %}
     /**
-     * Constructor.
-     *
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-     * @param TableAccessLayers\{{ related_object.getRemoteClass }}TableAccessLayer ${{ related_object.getRemoteVariable }}TableAccessLayer
+     * @param AccessLayers\{{ related_object.getRemoteClass }}AccessLayer ${{ related_object.getRemoteVariable }}AccessLayer
 {% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-     * @param TableAccessLayers\{{ remote_constraint.getLocalClass }}TableAccessLayer ${{ remote_constraint.getLocalVariable }}TableAccessLayer
+     * @param AccessLayers\{{ remote_constraint.getLocalClass }}AccessLayer ${{ remote_constraint.getLocalVariable }}AccessLayer
 {% endif %}
 {% endfor %}
-     * @param TableAccessLayers\{{ class_name }}TableAccessLayer ${{ variable_name }}TableAccessLayer
+     * @param AccessLayers\{{ class_name }}AccessLayer ${{ variable_name }}AccessLayer
      */
     public function __construct(
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-        TableAccessLayers\{{ related_object.getRemoteClass }}TableAccessLayer ${{ related_object.getRemoteVariable }}TableAccessLayer,
+        AccessLayers\{{ related_object.getRemoteClass }}AccessLayer ${{ related_object.getRemoteVariable }}AccessLayer,
 {% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-        TableAccessLayers\{{ remote_constraint.getLocalClass }}TableAccessLayer ${{ remote_constraint.getLocalVariable }}TableAccessLayer,
+        AccessLayers\{{ remote_constraint.getLocalClass }}AccessLayer ${{ remote_constraint.getLocalVariable }}AccessLayer,
 {% endif %}
 {% endfor %}
-        TableAccessLayers\{{ class_name }}TableAccessLayer ${{ variable_name }}TableAccessLayer
+        AccessLayers\{{ class_name }}AccessLayer ${{ variable_name }}AccessLayer
     )
     {
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-        $this->{{ related_object.getRemoteVariable }}TableAccessLayer = ${{ related_object.getRemoteVariable }}TableAccessLayer;
+        $this->{{ related_object.getRemoteVariable }}AccessLayer = ${{ related_object.getRemoteVariable }}AccessLayer;
 {% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-    $this->{{ remote_constraint.getLocalVariable }}TableAccessLayer = ${{ remote_constraint.getLocalVariable }}TableAccessLayer;
+    $this->{{ remote_constraint.getLocalVariable }}AccessLayer = ${{ remote_constraint.getLocalVariable }}AccessLayer;
 {% endif %}
 {% endfor %}
-        parent::__co$this->{{ variable_name }}TableAccessLayer = ${{ variable_name }}TableAccessLayer;
+        parent::__construct(${{ variable_name }}AccessLayer);
     }
 
     /**
-     * @param int $id
+     * @param $id
+     *
      * @return Models\{{ class_name }}Model|null
      */
-    public function getById(int $id) : ?Models\{{ class_name }}Model
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getById($id);
+    public function getByPK(
+{% for key in primary_keys %}
+        ${{ key }}{% if not loop.last %},{% endif %}
+
+{% endfor %}
+    ){
+        $pks = [
+{% for key in primary_keys %}
+            Models\{{ class_name }}Model::FIELD_{{ key|upper }} => ${{ key }},
+{% endfor %}
+        ];
+        return $this->getAccessLayer()
+            ->getByPK($pks);
     }
 
     /**
-     * @param $dataExchange
-     * @return Models\{{ class_name }}Model|null|null
+     * @param $properties
+     * @return Models\{{ class_name }}Model|null
      */
-    public function create($dataExchange)
+    public function create($properties)
     {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        ${{ variable_name }} = $this->getNewModelInstance($dataExchange);
-        return ${{ variable_name }}Table->save(${{ variable_name }});
+        ${{ variable_name }}Model = new Models\{{ class_name }}Model($properties);
+        return $this->getAccessLayer()->create(${{ variable_name }}Model);
     }
 
-    public function updatePK($oldPK, $newPK){
-        ${{ variable_name }} = $this->getById($oldPK);
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->updatePK(${{ variable_name }},$newPK);
+    /**
+     * @param $pk
+     * @param $properties
+     * @return Models\{{ class_name }}Model|null
+     */
+    public function update($pk, $properties)
+    {
+        ${{ variable_name }}Model = $this->getAccessLayer()->getByPK($pk);
+        ${{ variable_name }}Model->setProperties($properties);
+        return $this->getAccessLayer()->update(${{ variable_name }}Model);
+    }
+
+    public function updatePK($oldPK, $newPK)
+    {
+        ${{ variable_name }}Model = $this->getAccessLayer()->getByPK($oldPK);
+        return $this->getAccessLayer()->updatePK(${{ variable_name }}Model, $newPK);
     }
 }

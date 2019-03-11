@@ -1,376 +1,133 @@
 <?php
 namespace {{ namespace }}\Models\Base;
-use \{{ app_container }} as App;
-use \{{ namespace }}\{{ namespace }};
-use \Gone\AppCore\Exceptions;
-use \Gone\AppCore\Abstracts\Model as AbstractModel;
-use \Gone\AppCore\Interfaces\ModelInterface as ModelInterface;
-use \{{ namespace }}\Services;
-use \{{ namespace }}\Models;
-use \{{ namespace }}\TableGateways;
-use \{{ namespace }}\Models\{{ class_name }}Model;
 
-{% include '_overwrite_warning.twig' %}
-{% set existingMethods = [] %}
+use Gone\SDK\Common\Abstracts\AbstractModel;
+use {{ namespace }}\Models;
 
-abstract class Base{{ class_name }}Model
-    extends AbstractModel
-    implements ModelInterface
+/**
+ * Class Base{{ class_name }}Model
+ *
+ * @package {{ namespace }}\Models\Base
+ */
+abstract class Base{{ class_name }}Model extends AbstractModel
 {
+{% if object_name_singular is not empty %}
+    const NAME_SINGULAR = "{{ object_name_singular }}";
+{% endif %}
+{% if object_name_plural is not empty %}
+    const NAME_PLURAL = "{{ object_name_plural }}";
+{% endif %}
+    const TABLE_NAME = "{{ table }}";
 
-    const NAME_SINGULAR = '{{ object_name_singular }}';
-    const NAME_PLURAL = '{{ object_name_plural }}';
-    const TABLE_NAME = '{{ table }}';
-
-    // Declare what fields are available on this object
-{% for column in columns %}
-    const FIELD_{{ column.getField|upper }} = '{{ column.getField }}';
+{% for propertyName, data in propertyData %}
+    const FIELD_{{ propertyName|upper }} = '{{ propertyName }}';
 {% endfor %}
 
-{% for column in columns %}
-    const TYPE_{{ column.getField|upper }} = '{{ column.getDbType }}';
+    //Property DB Types
+{% for propertyName, data in propertyData %}
+    const DBTYPE_{{ propertyName|upper }} = '{{ data.type }}';
 {% endfor %}
 
-    // Constants defined by ENUMs
-{% for column in columns %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-{% for permittedValue in column.getPermittedValues %}
-    const {{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
+{% for propertyName, data in propertyData %}
+{% if data.options is not empty %}
+{% for permittedValue in data.options %}
+    const {{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
 {% endfor %}
 {% endif %}
 {% endfor %}
 
+
     // Constant arrays defined by ENUMs
-{% for column in columns %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-    const OPTIONS_{{ column.getField|upper }} = [
-{% for permittedValue in column.getPermittedValues %}
-        self::{{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+{% for propertyName, data in propertyData %}
+{% if data.options is not empty %}
+    const OPTIONS_{{ propertyName|upper }} = [
+{% for permittedValue in data.options %}
+        self::{{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
 {% endfor %}
     ];
 {% endif %}
 {% endfor %}
 
 
-{% if primary_keys %}
-    protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
-{% endif %}
-
-{% if autoincrement_keys %}
-    protected $_autoincrement_keys = ['{{ autoincrement_keys|join('\', \'')|raw }}'];
-{% endif %}
-
-{% for column in columns %}
-{% if column.default_value %}
-    protected ${{ column.getField }} = '{{ column.default_value }}';
-{% else %}
-    protected ${{ column.getField }};
-{% endif %}
+    // Properties
+{% for propertyName, data in propertyData %}
+    /** @var {{ data.phpType }} ${{ propertyName }} */
+    protected ${{ propertyName }};
 {% endfor %}
 
-{% if required_columns is empty %}
-    protected $requiredFields = [];
-{% else %}
-    protected $requiredFields = ['{{ required_columns|join('\', \'')|raw }}'];
-{% endif %}
-
-    /**
-     * @param array $data An array of a {{ class_name }}Model's properties.
-     * @return {{ class_name }}Model
-     */
-    static public function factory(array $data = [])
+    public function __toArray() : array
     {
-        return parent::factory($data);
-    }
-
-    public function getRequiredFields(){
-        return $this->requiredFields;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getPropertyMeta()
-    {
-{#
-{% for column in columns %}
-{% if column.hasRelatedObjects %}
-        ${{ column.getField|replace({"Id":"s"}) }}Service = App::Container()->get(Services\{{ column.getModel.getClassName }}Service::class);
-{% endif %}
-{% endfor %}
-
-        $properties = [
-{% for column in columns %}
-            self::FIELD_{{ column.getField|upper }} => [
-                    'type' => self::TYPE_{{ column.getField|upper }},
-{% if column.getMaxLength > 0 %}
-                    'length' => {{ column.getMaxLength }},
-{% endif %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-                    'options' => [
-{% for permittedValue in column.getPermittedValues %}
-                        self::{{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
-{% endfor %}
-                    ],
-{% if column.getDefaultvalue %}
-                    'default' => '{{ column.getDefaultValue() }}',
-{% endif %}
-{% endif %}
-{% if column.hasRelatedObjects %}
-                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
-{% endif %}
-                    'unique'     => {{ column.isUnique|json_encode|raw }},
-                    'isNullable' => {{ column.isNullable|json_encode|raw }},
-                ],
+        return [
+{% for propertyName, data in propertyData %}
+            self::FIELD_{{ propertyName|upper }} => $this->get{{ propertyName }}(),
 {% endfor %}
         ];
-#}
-        $properties = [
-{% for column in columns %}
-            self::FIELD_{{ column.getField|upper }} => [
-                    'type' => self::TYPE_{{ column.getField|upper }},
-{% if column.getMaxLength > 0 %}
-                    'length' => {{ column.getMaxLength }},
-{% endif %}
-{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
-                    'options' => [
-{% for permittedValue in column.getPermittedValues %}
-                        '{{ permittedValue }}',
-{% endfor %}
-                    ],
-{% if column.getDefaultvalue %}
-                    'default' => '{{ column.getDefaultValue() }}',
-{% endif %}
-{% endif %}
-{% if column.hasRelatedObjects %}
-                    'related' => [
-{% for related in column.getRelatedObjects %}
-                        [
-                            'model' => '{{ related.getRemoteModelName }}',
-                            'column' => '{{ related.getRemoteBoundColumn }}',
-                        ],
-{% endfor %}
-                    ],
-{% endif %}
-{% if column.hasRemoteObjects %}
-                    'remote' => [
-{% for remote in column.getRemoteObjects %}
-                        [
-                            'model' => '{{ remote.getRemoteModelName }}',
-                            'column' => '{{ remote.getRemoteBoundColumn }}',
-                        ],
-{% endfor %}
-                    ],
-{% endif %}
-                    'unique'     => {{ column.isUnique|json_encode|raw }},
-                    'nullable' => {{ column.isNullable|json_encode|raw }},
-                ],
-{% endfor %}
-        ];
-        return $properties;
     }
 
-{% for column in columns %}
+    // Getters and Setters
+{% for propertyName, data in propertyData %}
     /**
-     * @return {{ column.phptype }}
-     */
-    public function get{{ column.getPropertyFunction }}() {% if column.phptype %}: ?{{ column.phptype }}{% endif %}
+    * @return {{ data.phpType }}|null
+    */
+    public function get{{ data.name }}()
     {
-        return $this->{{ column.getField }};
+        return $this->{{ propertyName }};
     }
 
-    /**
-     * @param {{ column.phptype }} ${{ column.getField }}
-     * @return {{ class_name }}Model
-     */
-    public function set{{ column.getPropertyFunction }}({{ column.phptype }} ${{ column.getField }} = null) : {{ class_name }}Model
+    public function set{{ data.name }}(${{ propertyName }}) : Models\{{ class_name }}Model
     {
-        $this->{{ column.getField }} = ${{ column.getField }};
+        if ($this->{{ propertyName }} !== ${{ propertyName }}) {
+            $this->addDirtyKey(self::FIELD_{{ propertyName|upper }});
+            $this->{{ propertyName }} = ${{ propertyName }};
+        }
         return $this;
     }
 
 {% endfor %}
-
-    /*****************************************************
-     * "Referenced To" Remote Constraint Object Fetchers *
-     *****************************************************/
-{% for related_object in related_objects %}
-    /**
-     * @return null|Models\{{ related_object.getRemoteClass }}Model
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-{% if related_object.getRemoteFunctionName != class_name %}
-    public function fetch{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
-{% else %}
-    public function fetchRelated{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
-{% endif %}
-    {
-        /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
-        ${{ related_object.getRemoteClass }}Service = App::Container()->get(Services\{{ related_object.getRemoteClass }}Service::class);
-{% if related_object.getRemoteBoundColumn == 'id' %}
-        return ${{ related_object.getRemoteClass }}Service->getById($this->{{ related_object.getLocalBoundColumnGetter }}());
-{% else %}
-        return ${{ related_object.getRemoteClass }}Service->getByField('{{ related_object.getRemoteBoundColumn }}', $this->{{ related_object.getLocalBoundColumnGetter }}());
-{% endif %}
-    }
-
-{% endfor %}
-{% if remote_objects %}
-    /*****************************************************
-     * "Referenced By" Remote Constraint Object Fetchers *
-     *****************************************************/
-{% for remote_object in remote_objects %}
-{% if remote_object.getLocalClass != class_name %}
-{% if remote_object.getLocalFunctionName|singularize|transform_camel_to_studly not in existingMethods %}
-{% set existingMethods = existingMethods|merge([ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly ]) %}
-
-    /**
-     * Fetch a singular {{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }} that references this {{ class_name }}Model.
-     *
-     * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
-     * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
-     *
-     * @return null|Models\{{ remote_object.getLocalClass }}Model
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}ObjectRemote(
-{% if remote_object.local_model_key != 'id' %}
-        $orderBy = null,
-        $orderDirection='ASC'
-{% endif %}
-    ) : ?Models\{{ remote_object.getLocalClass }}Model {
-        /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
-        ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
-{% if remote_object.local_model_key == 'id' %}
-        return ${{ remote_object.getLocalVariable }}Service->getById($this->{{ column.getLocalBoundColumnGetter }}());
-{% else %}
-        return ${{ remote_object.getLocalVariable }}Service->getByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $orderBy, $orderDirection);
-{% endif %}
-    }
-
-    /**
-     * Fetch all matching {{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }} that reference this {{ class_name }}Model.
-     *
-     * @param $limit int Number to fetch maximum
-     * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
-     * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
-     *
-     * @return Models\{{ remote_object.getLocalClass }}Model[]
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects(
-        int $limit = null,
-        string $orderBy = null,
-        string $orderDirection='ASC'
-    ) : ?array {
-        /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
-        ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
-{% if remote_object.local_model_key == 'id' %}
-        return ${{ remote_object.getLocalVariable }}Service->getManyById($this->{{ column.getLocalBoundColumnGetter }}(), $orderBy, $orderDirection);
-{% else %}
-        return ${{ remote_object.getLocalVariable }}Service->getManyByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $limit, $orderBy, $orderDirection);
-{% endif %}
-    }
-
-    /**
-     * Count the number of matching {{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }} that reference this {{ class_name }}Model.
-     *
-     * @return int Number of objects found.
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function count{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects() : int {
-        /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
-        ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
-{% if remote_object.local_model_key == 'id' %}
-        return ${{ remote_object.getLocalVariable }}Service->countById($this->{{ column.getLocalBoundColumnGetter }}());
-{% else %}
-        return ${{ remote_object.getLocalVariable }}Service->countByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
-{% endif %}
-    }
-{% endif %}
-{% endif %}
-{% endfor %}
-{% endif %}
-
-    /**
-     * @return {{ class_name }}Model
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function save(): self
-    {
-        /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
-        $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
-        return $tableGateway->save($this);
-    }
-
-    /**
-    * Destroy the current record.
-    *
-    * @return int Number of affected rows.
-    *
-    * @throws \Psr\Container\ContainerExceptionInterface
-    * @throws \Psr\Container\NotFoundExceptionInterface
-    */
-    public function destroy() : int
-    {
-        /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
-        $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
-        return $tableGateway->delete($this->getPrimaryKeys());
-    }
-
-    /**
-     * Destroy the current record, and any dependencies upon it, recursively.
-     *
-     * @return int Number of affected models.
-     *
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function destroyThoroughly() : int
-    {
-{% if remote_objects.length > 0 %}
-        $countOfThingsDestroyed = 0;
-        $thingsToDestroy = [];
-{% for remote_object in remote_objects %}
-        ${{ remote_object.getLocalFunctionName }}Objects = $this->fetch{{ remote_object.getLocalFunctionName }}Objects();
-        if ( is_array(${{ remote_object.getLocalFunctionName }}Objects) ) {
-            $thingsToDestroy = array_merge($thingsToDestroy, ${{ remote_object.getLocalFunctionName }}Objects);
-        }
-{% endfor %}
-        if(count($thingsToDestroy) > 0){
-            foreach($thingsToDestroy as $thingToDestroy){
-                /** @var $thingToDestroy ModelInterface */
-                $countOfThingsDestroyed+= $thingToDestroy->destroyThoroughly();
-            }
-        }
-        $this->destroy();
-        $countOfThingsDestroyed++;
-        return $countOfThingsDestroyed;
-{% else %}
-        return $this->destroy();
-{% endif %}
-    }
-
-
-    /**
-     * Provides an array of all properties in this model.
-     * @return array
-     */
-    public function getListOfProperties()
+    public function getPrimaryKeyFields(): array
     {
         return [
-{% for column in columns %}
-            self::FIELD_{{ column.getField|upper }},
+{% for key in primary_keys %}
+            self::FIELD_{{ key|upper }},
+{% endfor %}
+        ];
+    }
+
+    public static function getPropertyMeta()
+    {
+        return [
+{% for propertyName, data in propertyData %}
+            self::FIELD_{{ propertyName|upper }} => [
+                'type' => self::DBTYPE_{{ propertyName|upper }},
+                'nullable' => {{ data.nullable|json_encode|raw }},
+{% if data.length %}
+                'length' => {{ data.length }},
+{% endif %}
+                'unique' => {{ data.unique|json_encode()|raw }},
+{% if data.options is not empty %}
+                'options' => self::OPTIONS_{{ propertyName|upper }},
+{% endif %}
+{% if data.related is not empty %}
+                'related' => [
+{% for related in data.related %}
+                    [
+                        'model' => Models\{{ related.model }}Model::class,
+                        'column' => Models\{{ related.model }}Model::FIELD_{{ related.column|upper }},
+                    ],
+{% endfor %}
+                ],
+{% endif %}
+{% if data.remote is not empty %}
+                'remote' => [
+{% for remote in data.remote %}
+                    [
+                        'model' => Models\{{ remote.model }}Model::class,
+                        'column' => Models\{{ remote.model }}Model::FIELD_{{ remote.column|upper }},
+                    ],
+{% endfor %}
+                ],
+{% endif %}
+            ],
 {% endfor %}
         ];
     }
