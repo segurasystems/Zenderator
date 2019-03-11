@@ -5,7 +5,7 @@ $baseSKDData = \Gone\AppCore\Router\RouteSDKProperties::Factory()
                     ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
                     ->setTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
-                    ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta());
+                    ->setClassSource(\{{ class.namespace }}\Models\{{ class.name }}Model::class);
 
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
