@@ -389,4 +389,48 @@ class Column extends Entity
     public static function cleanName($name) {
         return ucfirst(preg_replace('/Id$/', '', $name));
     }
+
+    public function getMethodFieldName(){
+        $name = ucfirst($this->getField());
+        if($name == "Id")$name = "ID";
+        return $name;
+    }
+
+    public function getRelatedData(){
+        $data = [];
+        foreach ($this->getRelatedObjects() as $relatedObject){
+            $data[] = [
+                "model" => $relatedObject->getRemoteClass(),
+                "column" => $relatedObject->getRemoteBoundColumn(),
+            ];
+        }
+        return $data;
+    }
+
+    public function getRemoteData(){
+        $data = [];
+        foreach ($this->getRemoteObjects() as $remoteObject){
+            $data[] = [
+                "model" => $remoteObject->getLocalClass(),
+                "column" => $remoteObject->getLocalBoundColumn(),
+            ];
+        }
+        return $data;
+    }
+
+    public function getPropertyData() {
+        $data = [
+            "name" => $this->getMethodFieldName(),
+            "type" => $this->getDbType(),
+            "options" => $this->getPermittedValues(),
+            "phpType" => $this->getPhpType(),
+            "unique" => $this->isUnique(),
+            "nullable" => $this->isNullable(),
+            "length" => $this->getMaxLength(),
+            "related" => $this->getRelatedData(),
+            "remote" => $this->getRemoteData(),
+        ];
+
+        return $data;
+    }
 }

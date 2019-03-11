@@ -1,1 +1,21 @@
-clean
+#!/usr/bin/env php
+<?php
+
+$rootOfApp = __DIR__ . "/../../../../";
+
+require_once($rootOfApp . "/bootstrap.php");
+ini_set("memory_limit", "256M");
+
+$scope = APP_CORE_NAME;
+
+try {
+    $databaseConfigs = $scope::Container()->get(\Gone\AppCore\DbConfig::class);
+}catch(\Gone\AppCore\Exceptions\DbConfigException $dbConfigException){
+    $databaseConfigs = null;
+}
+
+$zenderator = new \Zenderator\Zenderator(
+    $rootOfApp,
+    $databaseConfigs
+);
+$zenderator->cleanCodePHPCSFixer();

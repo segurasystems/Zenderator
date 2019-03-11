@@ -475,9 +475,18 @@ class Model extends Entity
             'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
+            'propertyData'       => $this->getPropertyData(),
 
             'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
         ];
+    }
+
+    public function getPropertyData(){
+        $data = [];
+        foreach ($this->getColumns() as $name => $column){
+            $data[$column->getField()] = $column->getPropertyData();
+        }
+        return $data;
     }
 
     public function hasField($field){

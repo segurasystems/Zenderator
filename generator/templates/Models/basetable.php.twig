@@ -1,18 +1,18 @@
 <?php
-namespace {{ namespace }}\TableGateways\Base;
-use \Gone\AppCore\Abstracts\TableGateway as AbstractTableGateway;
+{% include '_overwrite_warning.twig' %}
+
+namespace {{ namespace }}\TableAccessLayers\Base;
+
+use \Gone\AppCore\Abstracts\TableAccessLayer as AbstractTableAccessLayer;
 use \Gone\AppCore\Abstracts\Model;
 use \Gone\AppCore\Db;
-use \{{ namespace }}\TableGateways;
+use \{{ namespace }}\TableAccessLayers;
 use \{{ namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
 use \Zend\Db\ResultSet\ResultSet;
 use \Gone\AppCore\Exceptions;
 
-{% include '_overwrite_warning.twig' %}
-
-// @todo: Make all TableGateways implement a TableGatewayInterface. -MB
-abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
+abstract class Base{{ class_name }}TableAccessLayer extends AbstractTableAccessLayer
 {
     protected $table = '{{ table }}';
 
@@ -24,134 +24,18 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     protected $model = Models\{{ class_name }}Model::class;
 
-    /** @var \Faker\Generator */
-    protected $faker;
-
-    /** @var Db */
-    private $databaseConnector;
-
-    private $databaseAdaptor;
-
-{% for related_object in related_objects_shared|sort|unique %}
-    /** @var TableGateways\{{ related_object.getRemoteClass }}TableGateway */
-    protected ${{ related_object.getRemoteVariable }}TableGateway;
-{% endfor %}
-
     /**
      * AbstractTableGateway constructor.
      *
-{% for related_object in related_objects_shared|sort|unique %}
-     * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
-{% endfor %}
      * @param Db $databaseConnector
      *
      * @throws Exceptions\DbException
      */
-    public function __construct(
-{% for related_object in related_objects_shared|sort|unique %}
-        {% if related_object.getRemoteClass != class_name %}
-        TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
-        {% endif %}
-{% endfor %}
-        \Faker\Generator $faker,
-        Db $databaseConnector
-    )
+    public function __construct(Db $databaseConnector)
     {
-{% for related_object in related_objects_shared|sort|unique %}
-{% if related_object.getRemoteClass != class_name %}
-        $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
-{% else %}
-        $this->{{ related_object.getRemoteVariable }}TableGateway = $this;
-{% endif %}
-{% endfor %}
-        $this->faker = $faker;
-        $this->databaseConnector = $databaseConnector;
-
-        /** @var $adaptor AdapterInterface */
-        // @todo rename all uses of 'adaptor' to 'adapter'. I cannot spell - MB
-        $this->databaseAdaptor = $this->databaseConnector->getDatabase($this->database);
-        $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->model);
-        return parent::__construct($this->table, $this->databaseAdaptor, null, $resultSetPrototype);
-    }
-
-    /**
-     * @return Models\{{ class_name }}Model
-     */
-    public function getNewMockModelInstance()
-    {
-{% for column in columns|sort %}
-{% if column.hasRelatedObjects %}
-      // Generate a Random {{ column.getRelatedObjects()[0].getRemoteClass }}.
-      $random{{ column.getRelatedObjects()[0].getRemoteClass }} = $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom();
-
-{% endif %}
-{% if column.getDbType == 'json' %}
-        // Generate an array of lastnames to make a filler json array.
-        ${{ column.getField }}Array = [];
-        for($i = 0; $i < $this->faker->numberBetween(1,10); $i++) {
-            ${{ column.getField }}Array[] = $this->faker->lastName;
-        }
-
-{% endif %}
-{% endfor %}
-      $new{{ class_name }}Data = [
-{% for column in columns|sort %}
-        // {{ column.getField }}. Type = {{ column.getDbType }}. PHPType = {{ column.getPhpType }}. {% if(column.hasRelatedObjects) %}Has{% else %}Has no{% endif %} related objects.
-{% if column.isAutoIncrement %}
-{% elseif column.hasRelatedObjects %}
-{% if class_name|capitalize != column.getRelatedObjects()[0].getRemoteVariable|capitalize %}
-{% if column.isUnique == false %}
-        '{{ column.getField }}' =>
-            $random{{ column.getRelatedObjects()[0].getRemoteClass }} instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
-                ? $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}()
-                : $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
-{% else %}
-        '{{ column.getField }}' =>
-            $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
-{% endif %}
-{% else %}
-    '{{ column.getField }}' => null, // This is a circular reference - We'd just be creating elements for eternity if we don't stop the madness.
-{% endif %}
-
-{% elseif column.getPhpType == 'int' and 'max_field_length' in column|keys %}
-        '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 1) < column.getMaxFieldLength ? 10 ** (column.getMaxLength - 1) : column.getMaxFieldLength}}),
-{% elseif column.getPhpType == 'int' %}
-        '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 2) }}),
-{% elseif column.getDbType == 'enum' and column.getPhpType == 'string' %}
-        '{{ column.getField }}' => '{{ column.getPermittedValues()[0] }}',
-{% elseif column.getDbType == 'datetime' and column.getPhpType == 'string' %}
-        '{{ column.getField }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings. - MB
-{% elseif column.getPhpType == 'float' %}
-        '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, {{ column.isUnsigned ? 0 : -5 }}, 5),
-{% elseif column.getMaxLength %}
-        '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} >= 5 ? {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} : 5), 0, {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }}),
-{% elseif column.getDbType == 'json' %}
-        '{{ column.getField }}' => json_encode(${{ column.getField }}Array, JSON_PRETTY_PRINT),
-{% else %}
-        'column.getField' => $this->faker->word,
-{% endif %}
-{% endfor %}
-      ];
-      $new{{ class_name }} = $this->getNewModelInstance($new{{ class_name }}Data);
-      return $new{{ class_name }};
-    }
-
-    /**
-     * @param array $data
-     * @return Models\{{ class_name }}Model
-     */
-    public function getNewModelInstance(array $data = [])
-    {
-        return parent::getNewModelInstance($data);
-    }
-
-    /**
-     * @param Models\{{ class_name }}Model $model
-     * @return Models\{{ class_name }}Model
-     */
-    public function save(Model $model)
-    {
-        return parent::save($model);
+        //Setup Database Adapter
+        $databaseAdapter = $databaseConnector->getDatabase($this->database);
+        return parent::__construct($databaseAdapter, $this->table, null);
     }
 {% if isView %}
 

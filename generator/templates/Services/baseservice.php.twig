@@ -4,7 +4,7 @@ namespace {{ namespace }}\Services\Base;
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
 use Gone\SDK\Common\Filters\Filter;
-use \{{ namespace }}\TableGateways;
+use \{{ namespace }}\TableAccessLayers;
 use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
@@ -17,169 +17,62 @@ abstract class Base{{ class_name }}Service
     implements ServiceInterface
 {
 
-    // Related Objects Table Gateways
+    // Related Objects Table Access Layers
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-    /** @var TableGateways\{{ related_object.getRemoteClass }}TableGateway */
-    protected ${{ related_object.getRemoteVariable }}TableGateway;
+    /** @var TableAccessLayers\{{ related_object.getRemoteClass }}TableAccessLayer */
+    protected ${{ related_object.getRemoteVariable }}TableAccessLayer;
 {% endif %}
 {% endfor %}
 
-    // Remote Constraints Table Gateways
+    // Remote Constraints Table Access Layers
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-    /** @var TableGateways\{{ remote_constraint.getLocalClass }}TableGateway */
-    protected ${{ remote_constraint.getLocalVariable }}TableGateway;
+    /** @var TableAccessLayers\{{ remote_constraint.getLocalClass }}TableAccessLayer */
+    protected ${{ remote_constraint.getLocalVariable }}TableAccessLayer;
 {% endif %}
 {% endfor %}
-
-    // Self Table Gateway
-    /** @var TableGateways\{{ class_name }}TableGateway */
-    protected ${{ variable_name }}TableGateway;
 
     /**
      * Constructor.
      *
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-     * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway
+     * @param TableAccessLayers\{{ related_object.getRemoteClass }}TableAccessLayer ${{ related_object.getRemoteVariable }}TableAccessLayer
 {% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-     * @param TableGateways\{{ remote_constraint.getLocalClass }}TableGateway ${{ remote_constraint.getLocalVariable }}TableGateway
+     * @param TableAccessLayers\{{ remote_constraint.getLocalClass }}TableAccessLayer ${{ remote_constraint.getLocalVariable }}TableAccessLayer
 {% endif %}
 {% endfor %}
-     * @param TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
+     * @param TableAccessLayers\{{ class_name }}TableAccessLayer ${{ variable_name }}TableAccessLayer
      */
     public function __construct(
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-        TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
+        TableAccessLayers\{{ related_object.getRemoteClass }}TableAccessLayer ${{ related_object.getRemoteVariable }}TableAccessLayer,
 {% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-        TableGateways\{{ remote_constraint.getLocalClass }}TableGateway ${{ remote_constraint.getLocalVariable }}TableGateway,
+        TableAccessLayers\{{ remote_constraint.getLocalClass }}TableAccessLayer ${{ remote_constraint.getLocalVariable }}TableAccessLayer,
 {% endif %}
 {% endfor %}
-        TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
+        TableAccessLayers\{{ class_name }}TableAccessLayer ${{ variable_name }}TableAccessLayer
     )
     {
 {% for related_object in related_objects_shared|sort|unique %}
 {% if related_object.getRemoteClass != class_name %}
-        $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
+        $this->{{ related_object.getRemoteVariable }}TableAccessLayer = ${{ related_object.getRemoteVariable }}TableAccessLayer;
 {% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
 {% if remote_contraint.getRemoteClass != class_name %}
-    $this->{{ remote_constraint.getLocalVariable }}TableGateway = ${{ remote_constraint.getLocalVariable }}TableGateway;
+    $this->{{ remote_constraint.getLocalVariable }}TableAccessLayer = ${{ remote_constraint.getLocalVariable }}TableAccessLayer;
 {% endif %}
 {% endfor %}
-        $this->{{ variable_name }}TableGateway = ${{ variable_name }}TableGateway;
-    }
-
-    public function getNewTableGatewayInstance() : TableGateways\{{ class_name }}TableGateway
-    {
-        return $this->{{ variable_name }}TableGateway;
-    }
-    
-    public function getNewModelInstance($dataExchange = []) : Models\{{ class_name }}Model
-    {
-        return $this->{{ variable_name }}TableGateway->getNewModelInstance($dataExchange);
-    }
-
-    /**
-     * @param Filter $filter
-     *
-     * @return Models\{{ class_name }}Model|null
-     */
-    public function getFilter(Filter $filter)
-    {
-        return parent::get(
-            $filter->getOffset(),
-            $filter->getWheres(),
-            $filter->getOrder(),
-            $filter->getOrderDirection(),
-            $filter->getJoins()
-        );
-    }
-
-    /**
-     * @param int|null $offset
-     * @param array|\Closure[]|null $wheres
-     * @param string|Expression|null $order
-     * @param string|null $orderDirection
-     * @param array|\Closure[]|null $joins
-     *
-     * @return Models\{{ class_name }}Model|null
-     */
-    public function get(
-        int $offset = null,
-        array $wheres = [],
-        $order = null,
-        string $orderDirection = null,
-        array $joins = []
-    )
-    {
-        return parent::get(
-            $offset,
-            $wheres,
-            $order,
-            $orderDirection,
-            $joins
-        );
-    }
-
-    /**
-     * @param Filter $filter
-     * @param bool $doCount
-     *
-     * @return Models\{{ class_name }}Model[]
-     */
-    public function getAllFilter(Filter $filter, bool $doCount = true)
-    {
-        return parent::getAll(
-            $filter->getLimit(),
-            $filter->getOffset(),
-            $filter->getWheres(),
-            $filter->getOrder(),
-            $filter->getOrderDirection(),
-            $filter->getJoins(),
-            $doCount
-        );
-    }
-
-    /**
-     * @param int|null $limit
-     * @param int|null $offset
-     * @param array|\Closure[]|null $wheres
-     * @param string|Expression|null $order
-     * @param string|null $orderDirection
-     * @param array|\Closure[]|null $joins
-     * @param bool $doCount
-     *
-     * @return Models\{{ class_name }}Model[]
-     */
-    public function getAll(
-        int $limit = null,
-        int $offset = null,
-        array $wheres = [],
-        $order = null,
-        string $orderDirection = null,
-        array $joins = [],
-        bool $doCount = true
-    )
-    {
-        return parent::getAll(
-            $limit,
-            $offset,
-            $wheres,
-            $order,
-            $orderDirection,
-            $joins,
-            $doCount
-        );
+        parent::__co$this->{{ variable_name }}TableAccessLayer = ${{ variable_name }}TableAccessLayer;
     }
 
     /**
@@ -194,89 +87,10 @@ abstract class Base{{ class_name }}Service
     }
 
     /**
-     * @param string $field
-     * @param $value
-     * @param $orderBy string Field to sort by
-     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
-     *
-     * @return Models\{{ class_name }}Model|null
-     */
-    public function getByField(string $field, $value, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?Models\{{ class_name }}Model
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getByField($field, $value, $orderBy, $orderDirection);
-    }
-
-    /**
-     * @param string $field
-     * @param $value
-     * @param $limit int
-     * @param $orderBy string Field to sort by
-     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
-     * @return Models\{{ class_name }}Model[]|null
-     */
-    public function getManyByField(string $field, $value, int $limit = null, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?array
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getManyByField($field, $value, $limit, $orderBy, $orderDirection);
-    }
-
-    /**
-     * @param string $field
-     * @param $value
-     * @return int
-     */
-    public function countByField(string $field, $value) : int
-    {
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->countByField($field, $value);
-    }
-
-    /**
-     * @return Models\{{ class_name }}Model
-     */
-    public function getRandom() : ?Models\{{ class_name }}Model
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->fetchRandom();
-    }
-
-
-    /**
-     * @param Where|\Closure|string|array|Predicate\PredicateInterface $keyValue
-     * @param $orderBy string Field to sort by
-     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
-     * @return Models\{{ class_name }}Model
-     */
-    public function getMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?Models\{{ class_name }}Model
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getMatching($keyValue, $orderBy, $orderDirection);
-    }
-
-    /**
-     * @param Where|\Closure|string|array|Predicate\PredicateInterface $keyValue
-     * @param $orderBy string Field to sort by
-     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
-     * @param $limit int Limit the number of matches returned
-     * @return Models\{{ class_name }}Model[]
-     */
-    public function getManyMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING, int $limit = null) : ?array
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getManyMatching($keyValue, $orderBy, $orderDirection, $limit);
-    }
-
-    /**
      * @param $dataExchange
      * @return Models\{{ class_name }}Model|null|null
      */
-    public function createFromArray($dataExchange)
+    public function create($dataExchange)
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
@@ -288,34 +102,5 @@ abstract class Base{{ class_name }}Service
         ${{ variable_name }} = $this->getById($oldPK);
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
         return ${{ variable_name }}Table->updatePK(${{ variable_name }},$newPK);
-    }
-
-    /**
-     * @param int $id
-     * @return int
-     */
-    public function deleteByID($id) : int
-    {
-        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->delete(['id' => $id]);
-    }
-
-    public function getTermPlural() : string
-    {
-        return '{{ object_name_plural }}';
-    }
-
-    public function getTermSingular() : string
-    {
-        return '{{ object_name_singular }}';
-    }
-
-    /**
-     * @returns Models\{{ class_name }}Model
-     */
-    public function getMockObject()
-    {
-        return $this->getNewTableGatewayInstance()->getNewMockModelInstance();
     }
 }

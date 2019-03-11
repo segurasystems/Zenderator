@@ -66,6 +66,8 @@ class Zenderator
     private $waitForKeypressEnabled = true;
 
     private $pathsToPSR2 = [
+        APP_ROOT . "/src/AccessLayers/Base",
+        APP_ROOT . "/src/AccessLayers",
         APP_ROOT . "/src/Controllers/Base",
         APP_ROOT . "/src/Controllers",
         APP_ROOT . "/src/Models/Base",
@@ -73,8 +75,6 @@ class Zenderator
         APP_ROOT . "/src/Routes",
         APP_ROOT . "/src/Services/Base",
         APP_ROOT . "/src/Services",
-        APP_ROOT . "/src/TableGateways/Base",
-        APP_ROOT . "/src/TableGateways",
         APP_ROOT . "/src/*.php",
         APP_ROOT . "/tests/Api/Generated",
         APP_ROOT . "/tests/Models/Generated",
@@ -738,7 +738,7 @@ class Zenderator
             APP_ROOT . "/src/Models/Base/",
             APP_ROOT . "/src/Routes/Generated/",
             APP_ROOT . "/src/Services/Base/",
-            APP_ROOT . "/src/TableGateways/Base/",
+            APP_ROOT . "/src/TableAccessLayers/Base/",
             APP_ROOT . "/tests/Api/Generated/",
             APP_ROOT . "/tests/Models/Generated/",
             APP_ROOT . "/tests/Services/Generated/",
@@ -773,7 +773,6 @@ class Zenderator
             $this->makeCoreFilesForModel($model->getClassName(),$renderData);
 
             $allModelData[$model->getClassName()]["has_soft_delete"] = $model->hasField($this->softDeletedField());
-
         }
 
         foreach ($views as $view) {
@@ -817,8 +816,8 @@ class Zenderator
             $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "Models/basemodel.php.twig", $renderData);
             $this->renderToFile(false, APP_ROOT . "/src/Models/{$className}Model.php", "Models/model.php.twig", $renderData);
             $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "Models/tests.models.php.twig", $renderData);
-            $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "Models/basetable.php.twig", $renderData);
-            $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "Models/table.php.twig", $renderData);
+            $this->renderToFile(true, APP_ROOT . "/src/AccessLayers/Base/Base{$className}AccessLayer.php", "Models/basetable.php.twig", $renderData);
+            $this->renderToFile(false, APP_ROOT . "/src/AccessLayers/{$className}AccessLayer.php", "Models/table.php.twig", $renderData);
         }
 
         // "Service" suite
