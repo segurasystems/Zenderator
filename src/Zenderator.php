@@ -612,6 +612,7 @@ class Zenderator
     {
         /** @var Model[] $models */
         $models = [];
+        /** @var Model[] $allModels */
         $allModels = [];
         $views = [];
         if (is_array($this->adapters)) {
@@ -672,13 +673,7 @@ class Zenderator
         // Scan for remote relations
         //\Kint::dump(array_keys($models));
         foreach ($allModels as $oModel) {
-            $oModel->scanForRemoteRelations(array_merge($models,$views));
-        }
-
-        // Scan for remote relations
-        //\Kint::dump(array_keys($models));
-        foreach ($views as $oView) {
-            $oView->scanForRemoteRelations(array_merge($models,$views));
+            $oModel->scanForRemoteRelations($allModels,array_diff($this->ignoredTables,$this->viewModelClassNames()));
         }
 
         // Check for Conflicts.
@@ -708,6 +703,25 @@ class Zenderator
 
         // Finally return some models.
         return [$models,$views];
+    }
+
+    public function viewTableRemaps(){
+        $remaps = [];
+        foreach ($this->getViewModelConfigs() as $name=>$config){
+            $remap = $config["name"];
+            foreach ($this->viewModelSubModelData($name) as $sub => $data){
+                $remaps[$sub] = $remap;
+            }
+        }
+        return $remaps;
+    }
+
+    public function viewModelClassNames(){
+        $names = [];
+        foreach ($this->getViewModelConfigs() as $name=>$config){
+            $names[] = $config["name"];
+        }
+        return $names;
     }
 
     public function viewModelSubModels($name){

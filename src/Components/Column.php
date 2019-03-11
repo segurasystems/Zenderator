@@ -2,6 +2,7 @@
 
 namespace Zenderator\Components;
 
+use Gone\Inflection\Inflect;
 use Zenderator\Exception\DBTypeNotTranslatedException;
 use Zenderator\Zenderator;
 
@@ -9,7 +10,8 @@ class Column extends Entity
 {
     /** @var Model */
     protected $model;
-    
+
+    protected $className;
     protected $field;
     protected $dbType;
     protected $phpType;
@@ -38,7 +40,7 @@ class Column extends Entity
     /**
      * @return Model
      */
-    public function getModel() : Model
+    public function getModel(): Model
     {
         return $this->model;
     }
@@ -274,14 +276,15 @@ class Column extends Entity
     {
         $this->dbType = $dbType;
         $type = self::ConvertColumnType($this->getDbType());
-        if(empty($type)){
+        if (empty($type)) {
             throw new DBTypeNotTranslatedException("Type not translated: {$this->getDbType()}");
         }
         $this->setPhpType($type);
         return $this;
     }
 
-    public static function convertColumnType($dbType){
+    public static function convertColumnType($dbType)
+    {
         $type = null;
         switch ($dbType) {
             case 'float':
@@ -360,20 +363,39 @@ class Column extends Entity
         return $this;
     }
 
-    public function hasRelatedObjects() : bool
+    public function hasRelatedObjects(): bool
     {
         return count($this->relatedObjects) > 0;
     }
 
-    public function hasRemoteObjects() : bool
+    public function hasRemoteObjects(): bool
     {
         return count($this->remoteObjects) > 0;
     }
 
     /**
+     * @return mixed
+     */
+    public function getClassName()
+    {
+        return $this->className;
+    }
+
+    /**
+     * @param mixed $className
+     *
+     * @return Column
+     */
+    public function setClassName($className)
+    {
+        $this->className = $className;
+        return $this;
+    }
+
+    /**
      * @return RelatedModel[]
      */
-    public function getRelatedObjects() : array
+    public function getRelatedObjects(): array
     {
         return $this->relatedObjects;
     }
@@ -381,54 +403,103 @@ class Column extends Entity
     /**
      * @return RelatedModel[]
      */
-    public function getRemoteObjects() : array
+    public function getRemoteObjects(): array
     {
         return $this->remoteObjects;
     }
 
-    public static function cleanName($name) {
+    public static function cleanName($name)
+    {
         return ucfirst(preg_replace('/Id$/', '', $name));
     }
 
-    public function getMethodFieldName(){
+    public function getMethodFieldName()
+    {
         $name = ucfirst($this->getField());
-        if($name == "Id")$name = "ID";
+        if ($name == "Id") {
+            $name = "ID";
+        }
         return $name;
     }
 
-    public function getRelatedData(){
+    public function getRelatedData()
+    {
         $data = [];
-        foreach ($this->getRelatedObjects() as $relatedObject){
+        foreach ($this->getRelatedObjects() as $relatedObject) {
             $data[] = [
-                "model" => $relatedObject->getRemoteClass(),
-                "column" => $relatedObject->getRemoteBoundColumn(),
+                "class" => [
+                    "name"           => $relatedObject->getRemoteClass(),
+                    "plural"         => Inflect::pluralize($relatedObject->getRemoteClass()),
+                    "variable"       => lcfirst($relatedObject->getRemoteClass()),
+                    "variablePlural" => lcfirst(Inflect::pluralize($relatedObject->getRemoteClass())),
+                ],
+                "field" => [
+                    "local"   => [
+                        "name"           => $this->getField(),
+                        "variable"       => $this->getField(),
+                        "variablePlural" => Inflect::pluralize($this->getField()),
+                    ],
+                    "related" => [
+                        "name"             => $relatedObject->getRemoteBoundColumn(),
+                        "variable"         => $relatedObject->getRelatedVariableName(),
+                        "variableUC"       => ucfirst($relatedObject->getRelatedVariableName()),
+                        "variablePlural"   => Inflect::pluralize($relatedObject->getRelatedVariableName()),
+                        "variablePluralUC" => ucfirst(Inflect::pluralize($relatedObject->getRelatedVariableName())),
+                    ],
+                ],
             ];
         }
         return $data;
     }
 
-    public function getRemoteData(){
+    public function getRemoteData()
+    {
         $data = [];
-        foreach ($this->getRemoteObjects() as $remoteObject){
+        foreach ($this->getRemoteObjects() as $remoteObject) {
+            $variable = $remoteObject->getLocalClass();
+            if(strtolower($variable) !== strtolower($remoteObject->getRemoteClass())){
+                $variable = preg_replace("/{$remoteObject->getRemoteClass()}/i", "", $variable);
+            }
             $data[] = [
-                "model" => $remoteObject->getLocalClass(),
-                "column" => $remoteObject->getLocalBoundColumn(),
+                "class" => [
+                    "name"           => $remoteObject->getLocalClass(),
+                    "plural"         => Inflect::pluralize($remoteObject->getLocalClass()),
+                    "variable"       => lcfirst($variable),
+                    "variablePlural" => lcfirst(Inflect::pluralize($variable)),
+                    "trueClass"      => $remoteObject->getLocalClassPreMap(),
+                ],
+                "field" => [
+                    "local"  => [
+                        "name"           => $this->getField(),
+                        "variable"       => $this->getField(),
+                        "variablePlural" => Inflect::pluralize($this->getField()),
+                    ],
+                    "remote" => [
+                        "name"             => $remoteObject->getLocalBoundColumn(),
+                        "variable"         => $remoteObject->getRemoteVariableName(),
+                        "variableUC"       => ucfirst($remoteObject->getRemoteVariableName()),
+                        "variablePlural"   => Inflect::pluralize($remoteObject->getRemoteVariableName()),
+                        "variablePluralUC" => ucfirst(Inflect::pluralize($remoteObject->getRemoteVariableName())),
+                    ],
+                ],
             ];
         }
         return $data;
     }
 
-    public function getPropertyData() {
+    public function getPropertyData()
+    {
         $data = [
-            "name" => $this->getMethodFieldName(),
-            "type" => $this->getDbType(),
-            "options" => $this->getPermittedValues(),
-            "phpType" => $this->getPhpType(),
-            "unique" => $this->isUnique(),
-            "nullable" => $this->isNullable(),
-            "length" => $this->getMaxLength(),
-            "related" => $this->getRelatedData(),
-            "remote" => $this->getRemoteData(),
+            "name"      => $this->getMethodFieldName(),
+            "type"      => $this->getDbType(),
+            "options"   => $this->getPermittedValues(),
+            "phpType"   => $this->getPhpType(),
+            "unique"    => $this->isUnique(),
+            "nullable"  => $this->isNullable(),
+            "length"    => $this->getMaxLength(),
+            "related"   => $this->getRelatedData(),
+            "remote"    => $this->getRemoteData(),
+            "className" => $this->getClassName(),
         ];
 
         return $data;

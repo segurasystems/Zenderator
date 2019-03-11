@@ -223,7 +223,14 @@ class RelatedModel extends Entity
         return $this->hasClassConflict;
     }
 
-    public function getLocalClass()
+    public function getLocalClass(){
+        $class = $this->getLocalClassPreMap();
+        $remaps = $this->getZenderator()->viewTableRemaps();
+        return $remaps[$class] ?? $class;
+    }
+    
+    
+    public function getLocalClassPreMap()
     {
         if (Zenderator::isUsingClassPrefixes()) {
             return
@@ -287,6 +294,21 @@ class RelatedModel extends Entity
     public function getBoundModelReferenceName()
     {
         return preg_replace('/Id$/', '', $this->transCamel2Studly->transform($this->getLocalBoundColumn()));
+    }
+
+    public function getRelatedVariableName(){
+        return lcfirst($this->getBoundModelReferenceName());
+    }
+
+    public function getRemoteVariableName(){
+        $name = $this->getLocalBoundColumn();
+        $name = preg_replace('/ID$/', '', $name);
+        $name = preg_replace("/{$this->getRemoteClass()}/i", '', $name);
+        $name .= $this->getLocalClass();
+        if(strtolower($this->getLocalClass()) !== strtolower($this->getRemoteClass())){
+            $name = preg_replace("/{$this->getRemoteClass()}/i", '', $name);
+        }
+        return lcfirst($name);
     }
 
     public function getBoundModelReferenceNameLC()

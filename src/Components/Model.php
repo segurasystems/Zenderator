@@ -18,10 +18,10 @@ class Model extends Entity
     /** @var string */
     protected $table;
     /** @var Column[] */
-    protected $columns        = [];
-    protected $constraints    = [];
+    protected $columns = [];
+    protected $constraints = [];
     protected $relatedObjects = [];
-    protected $primaryKeys    = [];
+    protected $primaryKeys = [];
     protected $autoIncrements;
 
     /**
@@ -89,9 +89,10 @@ class Model extends Entity
     /**
      * @return string[]
      */
-    public function getRelatedObjectsClassNames(){
+    public function getRelatedObjectsClassNames()
+    {
         $names = [];
-        foreach ($this->getRelatedObjects() as $relatedObject){
+        foreach ($this->getRelatedObjects() as $relatedObject) {
             $names[] = $relatedObject->getRemoteClass();
         }
         return $names;
@@ -206,7 +207,7 @@ class Model extends Entity
                     $columnCount = count($zendConstraint->getColumns());
                     foreach ($zendConstraint->getColumns() as $affectedColumn) {
                         if ($column->getPropertyName() == $affectedColumn) {
-                            if($columnCount === 1){
+                            if ($columnCount === 1) {
                                 $column->setIsUnique(true);
                             }
                             $column->setIsNullable(false);
@@ -216,13 +217,13 @@ class Model extends Entity
             }
             if ($zendConstraint->getType() == "UNIQUE") {
                 //if ($this->getClassName() == 'PermissionGroup') {
-                    foreach ($this->columns as $column) {
-                        foreach ($zendConstraint->getColumns() as $affectedColumn) {
-                            if ($column->getPropertyName() == $affectedColumn) {
-                                $column->setIsUnique(true);
-                            }
+                foreach ($this->columns as $column) {
+                    foreach ($zendConstraint->getColumns() as $affectedColumn) {
+                        if ($column->getPropertyName() == $affectedColumn) {
+                            $column->setIsUnique(true);
                         }
                     }
+                }
                 //}
             }
         }
@@ -257,7 +258,7 @@ class Model extends Entity
                 $this->transStudly2Studly->transform($this->getTableSanitised());
         }
         return
-                $this->transStudly2Studly->transform($this->getTableSanitised());
+            $this->transStudly2Studly->transform($this->getTableSanitised());
     }
 
     /**
@@ -311,7 +312,7 @@ class Model extends Entity
     /**
      * @param Model[] $models
      */
-    public function scanForRemoteRelations(array $models)
+    public function scanForRemoteRelations(array $models, $ignored)
     {
         #echo "Scan: {$this->getClassName()}\n";
         foreach ($this->getColumns() as $column) {
@@ -402,7 +403,8 @@ class Model extends Entity
 
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
-            $oColumn       = Column::Factory($this->getZenderator())
+            $oColumn = Column::Factory($this->getZenderator())
+                ->setClassName($this->getClassName())
                 ->setModel($this)
                 ->setField($column->getName())
                 ->setDbType(reset($typeFragments))
@@ -475,13 +477,14 @@ class Model extends Entity
 //            'primary_keys'       => $this->getPrimaryKeys(),
 //            'primary_parameters' => $this->getPrimaryParameters(),
 //            'autoincrement_keys' => $this->getAutoIncrements(),
-            'class'             => $this->getClassData(),
+'class' => $this->getClassData(),
 
-            'skip_routes'              => $this->getZenderator()->getRoutesToSkip(),
+'skip_routes' => $this->getZenderator()->getRoutesToSkip(),
         ];
     }
 
-    public function getClassData(){
+    public function getClassData()
+    {
         return [
             "namespace"   => $this->getNamespace(),
             "name"        => $this->getClassName(),
@@ -492,23 +495,68 @@ class Model extends Entity
             "properties"  => $this->getPropertyData(),
             "primaryKeys" => $this->getPrimaryKeys(),
             "database"    => $this->getDatabase(),
-            "remoteData"  => $this->getRemoteObjects(),
-            "relatedData" => $this->getRelatedObjects(),
+            "remoteData"  => $this->getRemoteData(),
+            "relatedData" => $this->getRelatedData(),
         ];
     }
 
-    public function getPropertyData(){
+    public function getRemoteData()
+    {
         $data = [];
-        foreach ($this->getColumns() as $name => $column){
+        foreach ($this->getPropertyData() as $propertyName => $property) {
+            foreach ($property["remote"] as $remote) {
+                $data[$remote["class"]["name"]]["class"] = $remote["class"];
+                $data[$remote["class"]["name"]]["fields"][] = $remote["field"];
+            }
+        }
+        return $data;
+    }
+
+    public function getRelatedData()
+    {
+        $data = [];
+        foreach ($this->getPropertyData() as $propertyName => $property) {
+
+            foreach ($property["related"] as $related) {
+                $data[$related["class"]["name"]]["class"] = $related["class"];
+                $data[$related["class"]["name"]]["fields"][] = $related["field"];
+            }
+        }
+        return $data;
+    }
+
+    public function getRemoteObjectsKeyd()
+    {
+        $keyd = [];
+        foreach ($this->getRemoteObjects() as $remoteObject) {
+            $keyd[$remoteObject->getRemoteClass()] = $remoteObject;
+        }
+        return $keyd;
+    }
+
+    public function getRelatedObjectsKeyd()
+    {
+        $keyd = [];
+        foreach ($this->getRelatedObjects() as $relatedObject) {
+            $keyd[$relatedObject->getRemoteClass()] = $relatedObject;
+        }
+        return $keyd;
+    }
+
+    public function getPropertyData()
+    {
+        $data = [];
+        foreach ($this->getColumns() as $name => $column) {
             $data[$column->getField()] = $column->getPropertyData();
         }
         return $data;
     }
 
-    public function hasField($field){
+    public function hasField($field)
+    {
         $field = strtolower($field);
-        foreach ($this->getColumns() as $column){
-            if(strtolower($column->getField()) === $field){
+        foreach ($this->getColumns() as $column) {
+            if (strtolower($column->getField()) === $field) {
                 return true;
             }
         }
@@ -518,10 +566,11 @@ class Model extends Entity
     /**
      * @return Column[]
      */
-    public function getRequiredColumns(){
+    public function getRequiredColumns()
+    {
         $columns = [];
-        foreach ($this->getColumns() as $column){
-            if(!$column->isNullable()){
+        foreach ($this->getColumns() as $column) {
+            if (!$column->isNullable()) {
                 $columns[] = $column->getField();
             }
         }

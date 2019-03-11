@@ -1,20 +1,20 @@
 <?php
-namespace {{ namespace }}\Test\Models\Generated;
+namespace {{ class.namespace }}\Test\Models\Generated;
 
-use \{{ namespace }}\TableGateways;
-use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
-use \{{ namespace }}\Models\{{ class_name }}Model;
-use \{{ namespace }}\Models;
+use \{{ class.namespace }}\TableGateways;
+use \{{ class.namespace }}\TableGateways\{{ class.name }}TableGateway;
+use \{{ class.namespace }}\Models\{{ class.name }}Model;
+use \{{ class.namespace }}\Models;
 use \Gone\UUID\UUID;
 
 {% set existingMethods = [] %}
 
-class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
+class {{ class.name }}Test extends \Gone\AppCore\Test\BaseTestCase
 {
-    /** @var {{ class_name }}TableGateway */
+    /** @var {{ class.name }}TableGateway */
     protected $testTableGateway;
 
-    /** @var {{ class_name }}Model */
+    /** @var {{ class.name }}Model */
     protected $testInstance;
 
     /** @var Model[] */
@@ -23,7 +23,7 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->testTableGateway = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
+        $this->testTableGateway = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
         $this->testInstance = $this->testTableGateway->getNewMockModelInstance();
     }
 
@@ -38,23 +38,23 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
     public function testExchangeArray()
     {
         $data = [];
-{% for column in columns %}
-{% if column.phptype == 'int' or column.phptype == 'float' %}
-        $data['{{ column.field }}'] = self::getFaker()->randomDigitNotNull;
+{% for propertyName, data in class.properties %}
+{% if data.phpType == 'int' or column.phpType == 'float' %}
+        $data['{{ propertyName }}'] = self::getFaker()->randomDigitNotNull;
 {% else %}
-        $data['{{ column.field }}'] = self::getFaker()->word;
+        $data['{{ propertyName }}'] = self::getFaker()->word;
 {% endif %}
 {% endfor %}
-        $this->testInstance = new {{ class_name }}Model($data);
-{% for column in columns %}
-        $this->assertEquals($data['{{ column.getField }}'], $this->testInstance->get{{ column.getPropertyFunction }}());
+        $this->testInstance = new {{ class.name }}Model($data);
+{% for propertyName, data in class.properties %}
+        $this->assertEquals($data['{{ propertyName }}'], $this->testInstance->get{{ column.getPropertyFunction }}());
 {% endfor %}
     }
 
     public function testGetRandom()
     {
-        /** @var {{ class_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
+        /** @var {{ class.name }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
 
         // If there is no data in the table, create some.
         if($table->getCount() == 0){
@@ -62,20 +62,20 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
             $table->save($dummyObject);
         }
 
-        ${{ class_name|singularize|transform_studly_to_camel }} = $table->fetchRandom();
-        $this->assertTrue(${{ class_name|singularize|transform_studly_to_camel }} instanceof {{ class_name }}Model, "Make sure that \"" . get_class(${{ class_name|singularize|transform_studly_to_camel }}) . "\" matches \"{{ class_name }}Model\"") ;
+        ${{ class.variable }} = $table->fetchRandom();
+        $this->assertTrue(${{ class.variable }} instanceof {{ class.name }}Model, "Make sure that \"" . get_class(${{ class.name|singularize|transform_studly_to_camel }}) . "\" matches \"{{ class.name }}Model\"") ;
 
-        return ${{ class_name|singularize|transform_studly_to_camel }};
+        return ${{ class.variable }};
     }
 
     public function testNewMockModelInstance()
     {
-        /** @var {{ class_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
+        /** @var {{ class.name }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
         $new{{ remote_object.getLocalModelName }} = $table->getNewMockModelInstance();
 
         $this->assertInstanceOf(
-            Models\{{ class_name }}Model::class,
+            Models\{{ class.name }}Model::class,
             $new{{ remote_object.getLocalModelName }}
         );
 
@@ -88,20 +88,20 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
 
     public function testNewModelFactory()
     {
-        $instance = {{ class_name }}Model::factory();
+        $instance = {{ class.name }}Model::factory();
 
         $this->assertInstanceOf(
-            Models\{{ class_name }}Model::class,
+            Models\{{ class.name }}Model::class,
             $instance
         );
     }
 
     public function testSave()
     {
-        /** @var {{ class_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
-        /** @var Models\{{ class_name }}Model $mockModel */
-        /** @var Models\{{ class_name }}Model $savedModel */
+        /** @var {{ class.name }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
+        /** @var Models\{{ class.name }}Model $mockModel */
+        /** @var Models\{{ class.name }}Model $savedModel */
         $mockModel = $table->getNewMockModelInstance();
         $savedModel = $mockModel->save();
 
@@ -118,13 +118,13 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
             }
         }
 
-{% for column in columns|sort %}
-{% if column.getDbType == 'json' %}
+{% for propertyName, data in class.properties %}
+{% if data.type == 'json' %}
         // Reserialize JSON fields
         $mockModelArray['{{ column.getPropertyFunction }}']  = json_encode(json_decode($mockModelArray['{{ column.getPropertyFunction }}'],true), JSON_PRETTY_PRINT);
         $savedModelArray['{{ column.getPropertyFunction }}'] = json_encode(json_decode($savedModelArray['{{ column.getPropertyFunction }}'],true), JSON_PRETTY_PRINT);
 {% endif %}
-{% if column.getDbType == 'float' %}
+{% if data.type == 'float' %}
         // Remove float fields from comparison - they're always going to be slightly different in painful-to-test ways.
         unset($mockModelArray['{{ column.getPropertyFunction }}'], $savedModelArray['{{ column.getPropertyFunction }}']);
 {% endif %}
@@ -133,52 +133,52 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
         $this->assertEquals($mockModelArray, $savedModelArray);
     }
 
-{% if columns.id is defined %}
+{% if class.properties.id is defined %}
     /**
      * @depends testGetRandom
      */
-    public function testGetById({{ class_name }}Model ${{ variable_name }})
+    public function testGetById({{ class.name }}Model ${{ class.variable }})
     {
-        /** @var {{ variable_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
-        $results = $table->select(['id' => ${{ variable_name }}->getId()]);
-        ${{ variable_name }}Row = $results->current();
-        $this->assertTrue(${{ variable_name }}Row instanceof {{ class_name }}Model);
+        /** @var {{ class.variable }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
+        $results = $table->select(['id' => ${{ class.variable }}->getId()]);
+        ${{ class.variable }}Row = $results->current();
+        $this->assertTrue(${{ class.variable }}Row instanceof {{ class.name }}Model);
     }
 {% endif %}
 
     /**
      * @depends testGetRandom
      */
-    public function testSettersAndGetters({{ class_name }}Model ${{ variable_name }})
+    public function testSettersAndGetters({{ class.name }}Model ${{ class.variable }})
     {
-{% for column in columns %}
-        $this->assertTrue(method_exists(${{ variable_name }}, "get{{ column.field }}"));
-        $this->assertTrue(method_exists(${{ variable_name }}, "set{{ column.field }}"));
+{% for propertyName, data in class.properties %}
+        $this->assertTrue(method_exists(${{ class.variable }}, "get{{ data.name }}"));
+        $this->assertTrue(method_exists(${{ class.variable }}, "set{{ data.name }}"));
 {% endfor %}
 
-        $test{{ class_name }} = new {{ class_name }}Model();
-{% for column in columns %}
-{% if column.phptype == 'int' or column.phptype == 'float' %}
+        $test{{ class.name }} = new {{ class.name }}Model();
+{% for propertyName, data in class.properties %}
+{% if data.phpType == 'int' or data.phpType == 'float' %}
         $input = self::getFaker()->randomDigitNotNull;
 {% else %}
         $input = self::getFaker()->word;
 {% endif %}
-        $test{{ class_name }}->set{{ column.field|transform_camel_to_studly }}($input);
-        $this->assertEquals($input, $test{{ class_name }}->get{{ column.field }}());
+        $test{{ class.name }}->set{{ data.name }}($input);
+        $this->assertEquals($input, $test{{ class.name }}->get{{ data.name }}());
 {% endfor %}
     }
 
-{% for column in columns %}
+{% for propertyName, data in class.properties %}
 {% if 'constraints' in column|keys %}
     /**
     * @depends testGetRandom
     */
-    public function testFetch{{ column.field }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
+    public function testFetch{{ column.field }}Object({{ class.name }}Model ${{ class.name|singularize|transform_studly_to_camel }})
     {
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ column.field }}Object"));
+        $this->assertTrue(method_exists(${{ class.name|singularize|transform_studly_to_camel }}, "fetch{{ column.field }}Object"));
 
-        ${{ column.field }}Object = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ column.field }}Object();
+        ${{ column.field }}Object = ${{ class.name|singularize|transform_studly_to_camel }}->fetch{{ column.field }}Object();
         $this->assertInstanceOf(
             Models\{{ column.constraints.remote_model_class }}Model::class,
             ${{ column.field }}Object
@@ -190,8 +190,8 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
 {% if autoincrement_keys %}
     public function testAutoincrementedIdIsApplied()
     {
-        /** @var {{ class_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
+        /** @var {{ class.name }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
         $new{{ remote_object.getLocalModelName }} = $table->getNewMockModelInstance();
 
         // Set primary keys to null.
@@ -211,9 +211,9 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
 
     public function testDestroy()
     {
-        /** @var {{ class_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
-        /** @var Models\{{ class_name }}Model $destroyableModel */
+        /** @var {{ class.name }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
+        /** @var Models\{{ class.name }}Model $destroyableModel */
         $destroyableModel = $table->getNewMockModelInstance();
         $destroyableModel->save();
         $this->assertTrue(true, $destroyableModel->destroy());
@@ -221,9 +221,9 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
 
     public function testDestroyThoroughly()
     {
-        /** @var {{ class_name }}TableGateway $table */
-        $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
-        /** @var Models\{{ class_name }}Model $destroyableModel */
+        /** @var {{ class.name }}TableGateway $table */
+        $table = $this->getDIContainer()->get({{ class.name }}TableGateway::class);
+        /** @var Models\{{ class.name }}Model $destroyableModel */
         $destroyableModel = $table->getNewMockModelInstance();
         $destroyableModel->save();
         $this->assertGreaterThan(0, $destroyableModel->destroyThoroughly());
@@ -237,15 +237,15 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName|transform_camel_to_studly }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
+    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName|transform_camel_to_studly }}Object({{ class.name }}Model ${{ class.name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object"));
+        $this->assertTrue(method_exists(${{ class.name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object"));
 
         // Call the function on it
-        ${{ class_name|singularize|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ related_object.getRemoteFunctionName|transform_camel_to_studly }}Object();
+        ${{ class.name|singularize|transform_studly_to_camel }}Model = ${{ class.name|singularize|transform_studly_to_camel }}->fetch{{ related_object.getRemoteFunctionName|transform_camel_to_studly }}Object();
 
-        $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class_name|singularize|transform_studly_to_camel }}Model);
+        $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class.name|singularize|transform_studly_to_camel }}Model);
     }
 
 {% endif %}
@@ -259,21 +259,21 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize }}Objects({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
+    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize }}Objects({{ class.name }}Model ${{ class.name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects"));
+        $this->assertTrue(method_exists(${{ class.name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects"));
 
         /** @var TableGateways\{{ remote_object.getLocalTableGatewayName }} $tableGateway */
         $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalTableGatewayName }}::class);
 
-        ${{ class_name|singularize|transform_studly_to_camel }}->save();
+        ${{ class.name|singularize|transform_studly_to_camel }}->save();
 
-        $this->assertNotNull(${{ class_name|singularize|transform_studly_to_camel }}->{{ remote_object.getRemoteBoundColumnGetter }}());
+        $this->assertNotNull(${{ class.name|singularize|transform_studly_to_camel }}->{{ remote_object.getRemoteBoundColumnGetter }}());
 
         /** @var Models\{{ remote_object.getLocalModelName }} $new{{ remote_object.getLocalModelName }} */
         $new{{ remote_object.getLocalModelName }} = $tableGateway->getNewMockModelInstance();
-        $new{{ remote_object.getLocalModelName }}->{{ remote_object.getLocalBoundColumnSetter }}(${{ class_name|singularize|transform_studly_to_camel }}->{{ remote_object.getRemoteBoundColumnGetter }}());
+        $new{{ remote_object.getLocalModelName }}->{{ remote_object.getLocalBoundColumnSetter }}(${{ class.name|singularize|transform_studly_to_camel }}->{{ remote_object.getRemoteBoundColumnGetter }}());
 
         // Alas, some non-generic business logic has snuck in here.
         // If this model has a field called UUID, make it an actual UUID
@@ -291,17 +291,17 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
         $this->assertNotNull($new{{ remote_object.getLocalModelName }}->{{ remote_object.getLocalBoundColumnGetter }}());
 
         // Call the singular function on it
-        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName|singularize }}Object();
+        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model = ${{ class.name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName|singularize }}Object();
 
         $this->assertInstanceOf(Models\{{ remote_object.getLocalModelName }}::class, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model);
 
         // Call the plural function on it
-        ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName|singularize }}Objects();
+        ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models = ${{ class.name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName|singularize }}Objects();
 
         $this->assertGreaterThanOrEqual(1, count(${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models), "fetch{{ remote_object.getLocalFunctionName|singularize }}Objects() failed to return atleast 1 Models\{{ remote_object.getLocalModelName }}.");
         $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalModelName }}::class, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models);
 
-        return [${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models];
+        return [${{ class.name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models];
     }
 
     /**
@@ -310,16 +310,16 @@ class {{ class_name }}Test extends \Gone\AppCore\Test\BaseTestCase
     public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects($list)
     {
         /**
-         * @var ${{ class_name|singularize|transform_studly_to_camel }} Models\{{ class_name|transform_camel_to_studly }}Model
+         * @var ${{ class.name|singularize|transform_studly_to_camel }} Models\{{ class.name|transform_camel_to_studly }}Model
          * @var ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models Models\{{ remote_object.getLocalModelName }}[]
          */
-        list(${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models) = $list;
+        list(${{ class.name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models) = $list;
 
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "count{{ remote_object.getLocalFunctionName|singularize }}Objects"));
+        $this->assertTrue(method_exists(${{ class.name|singularize|transform_studly_to_camel }}, "count{{ remote_object.getLocalFunctionName|singularize }}Objects"));
 
         // Call the function on it
-        $count = ${{ class_name|singularize|transform_studly_to_camel }}->count{{ remote_object.getLocalFunctionName|singularize }}Objects();
+        $count = ${{ class.name|singularize|transform_studly_to_camel }}->count{{ remote_object.getLocalFunctionName|singularize }}Objects();
 
         $this->assertCount($count, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models);
     }

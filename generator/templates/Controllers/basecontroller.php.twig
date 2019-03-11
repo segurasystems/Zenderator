@@ -13,30 +13,19 @@ use Slim\Http\Response;
 
 abstract class Base{{ class.name }}Controller extends AbstractCrudController
 {
-    const RESPONSIBLE_MODEL = Model\{{ class.name }}Model::class;
+    const RESPONSIBLE_MODEL = Models\{{ class.name }}Model::class;
 
-    protected $singularTerm = Model\{{ class.name }}Model::NAME_SINGULAR;
-    protected $pluralTerm = Model\{{ class.name }}Model::NAME_SINGULAR;
-
-{% for related in class.relatedData %}
-    /** @var Services\{{ related.getRemoteService }} */
-    protected ${{ related.getRemoteServiceLC }};
-{% endfor %}
+    protected $singularTerm = Models\{{ class.name }}Model::NAME_SINGULAR;
+    protected $pluralTerm = Models\{{ class.name }}Model::NAME_SINGULAR;
 
     /**
-     * @param Services\{{ class.name }}Service ${{ class.variable }}
+     * @param Services\{{ class.name }}Service ${{ class.variable }}Service
      */
     public function __construct(
-        Services\{{ class.name }}Service ${{ class.variable }}
-{% for related in class.relatedData %}
-        ,Services\{{ related.getRemoteService }} ${{ related.getRemoteServiceLC }}
-{% endfor %}
+        Services\{{ class.name }}Service ${{ class.variable }}Service
     )
     {
-        $this->service = ${{ class.variable }};
-{% for related in class.relatedData %}
-        $this->{{ related.getRemoteServiceLC }} = ${{ related.getRemoteServiceLC }};
-{% endfor %}
+        $this->service = ${{ class.variable }}Service;
     }
 
     /**
@@ -47,33 +36,26 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
         return parent::getService();
     }
 
-{% for related in class.relatedObjects %}
-    public function {{ related.getBoundModelReferenceNameLC }}Request(Request $request, Response $response, $args) : Response
+{% for related in class.relatedData %}
+{% if loop.first %}
+    //Related Data
+{% endif %}
+{% for field in related.fields %}
+    public function {{ field.related.variableLC }}Request(Request $request, Response $response, $args) : Response
     {
+        $pks = [
 {% for key in class.primaryKeys %}
-        ${{ key }} = $args['{{ key }}'];
+            "{{ key }}" => $args['{{ key }}'] ?? null,
 {% endfor %}
-        ${{ related.getBoundModelReferenceNameLC }} = $this->{{ related.getRemoteServiceLC }}->get(
-            Filter::Factory()
-                ->addJoin(
-                    Models\{{ class.name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }},
-                    Models\{{ class.name }}Model::TABLE_NAME,
-                    Models\{{ related.getRemoteModel }}::FIELD_{{ related.getRemoteBoundColumn|upper }}
-                )
-{% for key in class.primaryKeys %}
-                ->addWhere(
-                    Models\{{ class.name }}Model::FIELD_{{ key|upper }},
-                    ${{ key }},
-                    FilterCondition::CONDITION_EQUAL,
-                    Models\{{ class.name }}Model::TABLE_NAME
-                )
-{% endfor %}
-        );
-        if (${{ related.getBoundModelReferenceNameLC }}) {
+        ];
+
+        ${{ field.related.variableLC }} = $this->getService()->get{{ field.related.variableUC }}($pks);
+
+        if (${{ field.related.variableLC }}) {
             return $this->jsonSuccessResponse(
                 [
-                    'Action'                          => 'GET_{{ related.getBoundModelReferenceName|upper }}',
-                    Models\{{ related.getRemoteModel }}::NAME_SINGULAR => ${{ related.getBoundModelReferenceNameLC }}->__toArray(),
+                    'Action'                          => 'GET_{{ field.related.variable|upper }}',
+                    Models\{{ related.class.name }}Model::NAME_SINGULAR => ${{ field.related.variableLC }},
                 ],
                 $request,
                 $response
@@ -82,7 +64,7 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
         return $this->jsonFailureResponse(
             sprintf(
                 "No such related %s found for %s with id %s",
-                strtolower(Models\{{ related.getRemoteModel }}::NAME_SINGULAR),
+                strtolower(Models\{{ related.class.name }}Model::NAME_SINGULAR),
                 strtolower(Models\{{ class.name }}Model::NAME_SINGULAR),
                 $args['id']
             ),
@@ -91,5 +73,36 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
         );
     }
 
+{% endfor %}
+{% endfor %}
+
+{% for remote in class.remoteData %}
+{% if loop.first %}
+    //Remote Data
+{% endif %}
+{% for field in remote.fields %}
+    public function {{ field.remote.variablePlural }}Request(Request $request, Response $response, $args) : Response
+    {
+        $pks = [
+{% for key in class.primaryKeys %}
+            "{{ key }}" => $args['{{ key }}'] ?? null,
+{% endfor %}
+        ];
+
+        $filter = $this->parseFilters($request, $response);
+
+        ${{ field.remote.variablePlural }} = $this->getService()->get{{ field.remote.variablePluralUC }}($pks,$filter);
+
+        return $this->jsonSuccessResponse(
+            [
+                'Action'                          => 'GET_{{ field.remote.variablePlural|transform_studly_to_screamingsnake }}',
+                Models\{{ remote.class.name }}Model::NAME_PLURAL => ${{ field.remote.variablePlural }},
+            ],
+            $request,
+            $response
+        );
+    }
+
+{% endfor %}
 {% endfor %}
 }

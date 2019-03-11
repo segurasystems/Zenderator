@@ -88,33 +88,93 @@ class ViewModel extends Entity
 //            'skip_routes' => $this->getZenderator()->getRoutesToSkip(),
 //
 //            "view_model_data" => $this->getViewModelData(),
-            "class" => $this->getClassData(),
+"class" => $this->getClassData(),
         ];
     }
 
-    public function getClassData(){
+    public function getClassData()
+    {
         return [
             "namespace"   => $this->getNamespace(),
             "name"        => $this->getClassName(),
+            "variable"    => lcfirst($this->getClassName()),
             "singular"    => $this->getClassName(),
             "plural"      => Inflect::pluralize($this->getClassName()),
             "table"       => $this->getView(),
             "properties"  => $this->getPropertyData(),
             "primaryKeys" => $this->getPrimaryKeys(),
             'database'    => $this->getDatabase(),
-            "remoteData"  => $this->getRemoteObjects(),
-            "relatedData" => $this->getRelatedObjects(),
+            "remoteData"  => $this->getRemoteData(),
+            "relatedData" => $this->getRelatedData(),
             "isView"      => true,
             "viewData"    => $this->getViewModelData(),
         ];
+    }
+
+    public function getRemoteData()
+    {
+        $data = [];
+        foreach ($this->getPropertyData() as $propertyName => $property) {
+            foreach ($property["remote"] as $remote) {
+                $data[$remote["class"]["name"]]["class"] = $remote["class"];
+                $data[$remote["class"]["name"]]["fields"][] = $remote["field"];
+            }
+        }
+        return $data;
+    }
+
+    public function getRelatedData()
+    {
+        $data = [];
+        foreach ($this->getPropertyData() as $propertyName => $property) {
+            foreach ($property["related"] as $related) {
+                $data[$related["class"]["name"]]["class"] = $related["class"];
+                $data[$related["class"]["name"]]["fields"][] = $related["field"];
+            }
+        }
+        return $data;
+    }
+
+    public function getRemoteObjectsKeyd()
+    {
+        $keyd = [];
+        foreach ($this->getRemoteObjects() as $remoteObject) {
+            $keyd[$remoteObject->getRemoteClass()] = $remoteObject;
+        }
+        return $keyd;
+    }
+
+    public function getRelatedObjectsKeyd()
+    {
+        $keyd = [];
+        foreach ($this->getRelatedObjects() as $relatedObject) {
+            $keyd[$relatedObject->getRemoteClass()] = $relatedObject;
+        }
+        return $keyd;
     }
 
     public function getPropertyData()
     {
         $data = [];
         foreach ($this->getColumns() as $name => $column) {
-            $data[$column->getField()] = $column->getPropertyData();
+            $data[$column->getField()] = $this->getSafeColumnData($column);
         }
+        return $data;
+    }
+
+    public function getSafeColumnData(Column $column)
+    {
+        $data = $column->getPropertyData();
+        $_remote = [];
+        foreach ($data["remote"] as $remote) {
+            if ($remote["class"]["name"] == $this->getClassName()) {
+                if ($this->ignoreField($remote["field"]["remote"]["name"], $remote["class"]["trueClass"])) {
+                    continue;
+                }
+            }
+            $_remote[] = $remote;
+        }
+        $data["remote"] = $_remote;
         return $data;
     }
 
@@ -167,18 +227,25 @@ class ViewModel extends Entity
         return [];
     }
 
+    /**
+     * @return Column[]
+     */
     public function getColumns()
     {
         $columns = [];
         foreach ($this->baseModels as $modelName => $baseModel) {
             foreach ($baseModel->getColumns() as $propName => $column) {
-                if (in_array($propName, $this->getSubModelIgnoreColumns($modelName))) {
-                    continue;
+                if (!$this->ignoreField($propName, $modelName)) {
+                    $columns[$propName] = $column;
                 }
-                $columns[$propName] = $column;
             }
         }
         return $columns;
+    }
+
+    public function ignoreField($fieldName, $modelName)
+    {
+        return in_array($fieldName, $this->getSubModelIgnoreColumns($modelName));
     }
 
     public function scanForRemoteRelations($models)

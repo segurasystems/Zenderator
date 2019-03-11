@@ -107,8 +107,10 @@ abstract class Base{{ class.name }}Model extends AbstractModel
                 'related' => [
 {% for related in data.related %}
                     [
-                        'model' => Models\{{ related.model }}Model::class,
-                        'column' => Models\{{ related.model }}Model::FIELD_{{ related.column|upper }},
+                        'name' => "{{ related.class.name }}",
+                        'variable' => "{{ related.class.variable }}",
+                        'model' => Models\{{ related.class.name }}Model::class,
+                        'column' => Models\{{ related.class.name }}Model::FIELD_{{ related.field.related.name|upper }},
                     ],
 {% endfor %}
                 ],
@@ -117,8 +119,10 @@ abstract class Base{{ class.name }}Model extends AbstractModel
                 'remote' => [
 {% for remote in data.remote %}
                     [
-                        'model' => Models\{{ remote.model }}Model::class,
-                        'column' => Models\{{ remote.model }}Model::FIELD_{{ remote.column|upper }},
+                        'name' => "{{ remote.class.name }}",
+                        'variable' => "{{ remote.class.variable }}",
+                        'model' => Models\{{ remote.class.name }}Model::class,
+                        'column' => Models\{{ remote.class.name }}Model::FIELD_{{ remote.field.remote.name|upper }},
                     ],
 {% endfor %}
                 ],
@@ -128,3 +132,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
         ];
     }
 }
+
+/*
+{{ class|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+*/
