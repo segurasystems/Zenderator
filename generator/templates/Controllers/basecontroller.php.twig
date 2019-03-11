@@ -41,7 +41,7 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
     //Related Data
 {% endif %}
 {% for field in related.fields %}
-    public function {{ field.related.variableLC }}Request(Request $request, Response $response, $args) : Response
+    public function {{ field.related.variable }}Request(Request $request, Response $response, $args) : Response
     {
         $pks = [
 {% for key in class.primaryKeys %}
@@ -49,13 +49,13 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
 {% endfor %}
         ];
 
-        ${{ field.related.variableLC }} = $this->getService()->get{{ field.related.variableUC }}($pks);
+        ${{ field.related.variable }} = $this->getService()->get{{ field.related.variableUC }}($pks);
 
-        if (${{ field.related.variableLC }}) {
+        if (${{ field.related.variable }}) {
             return $this->jsonSuccessResponse(
                 [
                     'Action'                          => 'GET_{{ field.related.variable|upper }}',
-                    Models\{{ related.class.name }}Model::NAME_SINGULAR => ${{ field.related.variableLC }},
+                    Models\{{ related.class.name }}Model::NAME_SINGULAR => ${{ field.related.variable }},
                 ],
                 $request,
                 $response

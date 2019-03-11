@@ -426,6 +426,14 @@ class Zenderator
         return $this->config;
     }
 
+    public function getRoutesConfig(){
+        return $this->getConfig()["routes"] ?? [];
+    }
+
+    public function getRouteIgnoreKeys(){
+        return $this->getRoutesConfig()["skip_argument"] ?? [];
+    }
+
     public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false){
         $routes = $this->getRoutes($remoteApiUri);
         $swaggerGenerator = new SwaggerGenerator($this,$outputPath);
@@ -876,10 +884,6 @@ class Zenderator
 
     private function skipRoute($name){
         return in_array($name,$this->getRoutesToSkip());
-    }
-
-    private function getRoutesConfig(){
-        return $this->config["routes"] ?? [];
     }
 
     public function getRoutesToSkip(){

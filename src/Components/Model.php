@@ -456,30 +456,9 @@ class Model extends Entity
     public function getRenderDataset()
     {
         return [
-//            'namespace'              => $this->getNamespace(),
-//            'database'               => $this->getDatabase(),
-//            'table'                  => $this->getTable(),
-//            'app_name'               => APP_NAME,
-//            'app_container'          => APP_CORE_NAME,
-//            'class_name'             => $this->getClassName(),
-//            'variable_name'          => $this->transStudly2Camel->transform($this->getClassName()),
-//            'name'                   => $this->getClassName(),
-//            'object_name_plural'     => Inflect::pluralize($this->getClassName()),
-//            'object_name_singular'   => $this->getClassName(),
-//            'controller_route'       => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
-//            'namespace_model'        => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
-//            'columns'                => $this->getColumns(),
-//            'related_objects'        => $this->getRelatedObjects(),
-//            'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
-//            'remote_objects'         => $this->getRemoteObjects(),
-//            'required_columns'       => $this->getRequiredColumns(),
-//
-//            'primary_keys'       => $this->getPrimaryKeys(),
-//            'primary_parameters' => $this->getPrimaryParameters(),
-//            'autoincrement_keys' => $this->getAutoIncrements(),
-'class' => $this->getClassData(),
-
-'skip_routes' => $this->getZenderator()->getRoutesToSkip(),
+            'class' => $this->getClassData(),
+            'config' => $this->getZenderator()->getConfig(),
+            'skip_routes' => $this->getZenderator()->getRoutesToSkip(),
         ];
     }
 
@@ -494,10 +473,16 @@ class Model extends Entity
             "table"       => $this->getTable(),
             "properties"  => $this->getPropertyData(),
             "primaryKeys" => $this->getPrimaryKeys(),
+            'routePKs'    => $this->getRoutePrimaryKeys(),
             "database"    => $this->getDatabase(),
             "remoteData"  => $this->getRemoteData(),
             "relatedData" => $this->getRelatedData(),
         ];
+    }
+
+    public function getRoutePrimaryKeys(){
+        $keys = $this->getPrimaryKeys();
+        return array_diff($keys,$this->getZenderator()->getRouteIgnoreKeys());
     }
 
     public function getRemoteData()

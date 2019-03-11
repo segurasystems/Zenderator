@@ -1,97 +1,141 @@
 <?php
 
+$baseSKDData = \Gone\AppCore\Router\RouteSDKProperties::Factory()
+                    ->setClass(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
+                    ->setTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
+                    ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta());
+
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} List')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':listRequest')
-            ->setSDKClass('{{ class.name }}')
-            ->setSDKFunction('list')
-            ->setSDKTemplate('list')
-            ->setRouterPattern('/v1/{{ controller_route }}')
-            ->setHttpEndpoint('/v1/{{ controller_route }}')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('list')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
+                    ->setArguments([
+                        "filter" => [
+                            "default" => null,
+                            "description" => "Filter object with rules to filter the list results by",
+                            "in" => "header",
+                            "isMandatory" => false,
+                            "type" => \Gone\SDK\Common\Filters\Filter::class,
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
             ->setHttpMethod('GET')
-            ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
-            ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta())
-            ->setSDKTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
-            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
-            ->setCallbackProperties([
-                "Filter" => [
-                    "name" => "Filter",
-                    "default" => null,
-                    "description" => "Filter object with rules to filter the list results by",
-                    "in" => "header",
-                    "isMandatory" => false,
-                    "type" => \Gone\SDK\Common\Filters\Filter::class,
-                ],
-            ])
     )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Create')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':createRequest')
-            ->setSDKClass('{{ class.name }}')
-            ->setSDKFunction('create')
-            ->setSDKTemplate('create')
-            ->setRouterPattern('/v1/{{ controller_route }}')
-            ->setHttpEndpoint('/v1/{{ controller_route }}')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('create')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setArguments([
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "isMandatory" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR,
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
             ->setHttpMethod('PUT')
-            ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
-            ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
-            ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta())
-            ->setSDKTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
-    )/*
+    )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Create Bulk')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':createBulkRequest')
-            ->setSDKClass('{{ class.name }}')
-            ->setSDKFunction('createBulk')
-            //->setSDKTemplate('create')
-            ->setRouterPattern('/v1/{{ controller_route }}/bulk')
-            ->setHttpEndpoint('/v1/{{ controller_route }}/bulk')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('createBulk')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
+                    ->setArguments([
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "isMandatory" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/bulk')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/bulk')
             ->setHttpMethod('PUT')
-            ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
-            ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
-            ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta())
-            ->setSDKTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
-            ->setSDKResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
-    )*/
+    )
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class.name }} Update')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':updateRequest')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('update')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "isMandatory" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use to create the model",
+                            "in" => "body",
+                            "isMandatory" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR,
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ '}' }}{{ loop.last ? '' : '/' }}{% endfor %}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}')
+            ->setHttpMethod('PATCH')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+    )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Get')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getRequest')
-            ->setSDKClass('{{ class.name }}')
-            ->setSDKFunction('get')
-            ->setSDKTemplate('get')
-            ->setRouterPattern('/v1/{{ controller_route }}/{id}')
-            ->setHttpEndpoint('/v1/{{ controller_route }}/id')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('get')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "isMandatory" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ '}' }}{{ loop.last ? '' : '/' }}{% endfor %}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}')
             ->setHttpMethod('GET')
-            ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
-            ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
-            ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta())
-            ->setSDKTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
-            ->setCallbackProperties([
-                "id" => [
-                    "name" => "id",
-                    "default" => null,
-                    "description" => "ID of the object to be returned",
-                    "in" => "path",
-                    "isMandatory" => true,
-                    "type" => "integer",
-                ],
-            ])
     )
-    ->addRoute(
+{#    ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Delete')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':deleteRequest')
@@ -117,69 +161,100 @@ $router = \Gone\AppCore\Router\Router::Instance()
                 ],
             ])
     )
+#}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
-            ->setName('{{ class.name }} Update ID')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':updateIDRequest')
-            ->setSDKClass('{{ class.name }}')
-            ->setSDKFunction('updateID')
-            //->setSDKTemplate('delete')
-            ->setRouterPattern('/v1/{{ controller_route }}/{oldID}/updateID/{newID}')
-            ->setHttpEndpoint('/v1/{{ controller_route }}/oldID/updateID/newID')
-            ->setHttpMethod('POST')
-            ->setSingular(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
-            ->setPlural(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
-            ->setPropertyData(\{{ class.namespace }}\Models\{{ class.name }}Model::getPropertyMeta())
-            ->setSDKTableName(\{{ class.namespace }}\Models\{{ class.name }}Model::TABLE_NAME)
+            ->setName('{{ class.name }} Update PK')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':updatePKRequest')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('updatePK')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setArguments([
+                        "newPK" => [
+                            "default" => null,
+                            "description" => "Old Primary key for model",
+                            "in" => "query",
+                            "isMandatory" => true,
+                            "type" => "int",
+                        ],
+                        "oldPK" => [
+                            "default" => null,
+                            "description" => "New Primary key for model",
+                            "in" => "query",
+                            "isMandatory" => true,
+                            "type" => "int",
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/{{ '{' }}oldPK{{ '}' }}/updatePK/{{ '{' }}newPK{{ '}' }}')
+            ->setHttpEndpoint('/v1/oldPK/updatePK/newPK')
+            ->setHttpMethod('PATCH')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setCallbackProperties([
-                "oldID" => [
-                    "name" => "oldID",
-                    "default" => null,
-                    "description" => "ID of the object to be updated",
-                    "in" => "path",
-                    "isMandatory" => true,
-                    "type" => "integer",
-                ],
-                "newID" => [
-                    "name" => "newID",
-                    "default" => null,
-                    "description" => "new ID for the object to use",
-                    "in" => "path",
-                    "isMandatory" => true,
-                    "type" => "integer",
-                ],
-            ])
     )
-{% for related in related_objects %}
-    ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
-            ->setName('{{ class.name }} Get {{ related.getRemoteModelName }} Model')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':{{ related.getBoundModelReferenceNameLC }}Request')
-            ->setSDKClass('{{ class.name }}')
-            ->setSDKFunction('get{{ related.getBoundModelReferenceName }}')
-            ->setRouterPattern('/v1/{{ controller_route }}/{id}/{{ related.getBoundModelReferenceNameSC }}')
-            ->setHttpEndpoint('/v1/{{ controller_route }}/id/{{ related.getBoundModelReferenceNameSC }}')
-            ->setHttpMethod('GET')
-            ->setSingular(\{{ class.namespace }}\Models\{{ related.getRemoteModelName }}::NAME_SINGULAR)
-            ->setPlural(\{{ class.namespace }}\Models\{{ related.getRemoteModelName }}::NAME_PLURAL)
-            ->setPropertyData(\{{ class.namespace }}\Models\{{ related.getRemoteModelName }}::getPropertyMeta())
-            ->setSDKModelSafe(true)
-{% if related.getRemoteClass not in skip_routes %}
-            ->setSDKHydrate(true)
+{% for related in class.relatedData %}
+{% if loop.first %}
+    //Related Data
 {% endif %}
+{% for field in related.fields %}
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class.name }} Get {{ field.related.variableUC }} Model')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':{{ field.related.variable }}Request')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('get{{ field.related.variableUC }}')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ related.class.name }}Model::NAME_SINGULAR)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "isMandatory" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ '}' }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.related.variable }}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.related.variable }}')
+            ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setCallbackProperties([
-                "id" => [
-                    "name" => "id",
-                    "default" => null,
-                    "description" => "ID of the base object to get the related model for",
-                    "in" => "path",
-                    "isMandatory" => true,
-                    "type" => "integer",
-                ],
-            ])
     )
+{% endfor %}
+{% endfor %}
+{% for remote in class.remoteData %}
+{% if loop.first %}
+    //Remote Data
+{% endif %}
+{% for field in remote.fields %}
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class.name }} Get {{ field.remote.variableUC }} Model')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':{{ field.remote.variablePlural }}Request')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('get{{ field.remote.variablePluralUC }}')
+                    ->setResponseKey(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::NAME_PLURAL)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "isMandatory" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ '}' }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}')
+            ->setHttpMethod('GET')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+    )
+{% endfor %}
 {% endfor %}
 ;
 

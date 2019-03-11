@@ -304,9 +304,10 @@ class RelatedModel extends Entity
         $name = $this->getLocalBoundColumn();
         $name = preg_replace('/ID$/', '', $name);
         $name = preg_replace("/{$this->getRemoteClass()}/i", '', $name);
-        $name .= $this->getLocalClass();
         if(strtolower($this->getLocalClass()) !== strtolower($this->getRemoteClass())){
-            $name = preg_replace("/{$this->getRemoteClass()}/i", '', $name);
+            $name .= preg_replace("/^{$this->getRemoteClass()}/i", '', $this->getLocalClass());
+        } else {
+            $name .= $this->getLocalClass();
         }
         return lcfirst($name);
     }
