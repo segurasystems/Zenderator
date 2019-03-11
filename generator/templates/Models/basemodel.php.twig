@@ -1,34 +1,30 @@
 <?php
-namespace {{ namespace }}\Models\Base;
+namespace {{ class.namespace }}\Models\Base;
 
 use Gone\SDK\Common\Abstracts\AbstractModel;
-use {{ namespace }}\Models;
+use {{ class.namespace }}\Models;
 
 /**
- * Class Base{{ class_name }}Model
+ * Class Base{{ class.name }}Model
  *
- * @package {{ namespace }}\Models\Base
+ * @package {{ class.namespace }}\Models\Base
  */
-abstract class Base{{ class_name }}Model extends AbstractModel
+abstract class Base{{ class.name }}Model extends AbstractModel
 {
-{% if object_name_singular is not empty %}
-    const NAME_SINGULAR = "{{ object_name_singular }}";
-{% endif %}
-{% if object_name_plural is not empty %}
-    const NAME_PLURAL = "{{ object_name_plural }}";
-{% endif %}
-    const TABLE_NAME = "{{ table }}";
+    const NAME_SINGULAR = "{{ class.singular }}";
+    const NAME_PLURAL = "{{ class.plural }}";
+    const TABLE_NAME = "{{ class.table }}";
 
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
     const FIELD_{{ propertyName|upper }} = '{{ propertyName }}';
 {% endfor %}
 
     //Property DB Types
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
     const DBTYPE_{{ propertyName|upper }} = '{{ data.type }}';
 {% endfor %}
 
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
 {% if data.options is not empty %}
 {% for permittedValue in data.options %}
     const {{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
@@ -38,7 +34,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 
 
     // Constant arrays defined by ENUMs
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
 {% if data.options is not empty %}
     const OPTIONS_{{ propertyName|upper }} = [
 {% for permittedValue in data.options %}
@@ -50,7 +46,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 
 
     // Properties
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
     /** @var {{ data.phpType }} ${{ propertyName }} */
     protected ${{ propertyName }};
 {% endfor %}
@@ -58,14 +54,14 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     public function __toArray() : array
     {
         return [
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
             self::FIELD_{{ propertyName|upper }} => $this->get{{ propertyName }}(),
 {% endfor %}
         ];
     }
 
     // Getters and Setters
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
     /**
     * @return {{ data.phpType }}|null
     */
@@ -87,7 +83,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     public function getPrimaryKeyFields(): array
     {
         return [
-{% for key in primary_keys %}
+{% for key in class.primaryKeys %}
             self::FIELD_{{ key|upper }},
 {% endfor %}
         ];
@@ -96,7 +92,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     public static function getPropertyMeta()
     {
         return [
-{% for propertyName, data in propertyData %}
+{% for propertyName, data in class.properties %}
             self::FIELD_{{ propertyName|upper }} => [
                 'type' => self::DBTYPE_{{ propertyName|upper }},
                 'nullable' => {{ data.nullable|json_encode|raw }},

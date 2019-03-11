@@ -1,71 +1,71 @@
 <?php
-namespace {{ namespace }}\Controllers\Base;
+namespace {{ class.namespace }}\Controllers\Base;
 
 use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\Filters\FilterCondition;
 use Gone\AppCore\Abstracts\CrudController as AbstractCrudController;
-use \{{ namespace }}\Services;
-use \{{ namespace }}\Models;
+use \{{ class.namespace }}\Services;
+use \{{ class.namespace }}\Models;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 {% include '_overwrite_warning.twig' %}
 
-abstract class Base{{ class_name }}Controller extends AbstractCrudController
+abstract class Base{{ class.name }}Controller extends AbstractCrudController
 {
-    const RESPONSIBLE_MODEL = Model\{{ class_name }}Model::class;
+    const RESPONSIBLE_MODEL = Model\{{ class.name }}Model::class;
 
-    protected $singularTerm = Model\{{ class_name }}Model::NAME_SINGULAR;
-    protected $pluralTerm = Model\{{ class_name }}Model::NAME_SINGULAR;
+    protected $singularTerm = Model\{{ class.name }}Model::NAME_SINGULAR;
+    protected $pluralTerm = Model\{{ class.name }}Model::NAME_SINGULAR;
 
-{% for related in related_objects %}
+{% for related in class.relatedData %}
     /** @var Services\{{ related.getRemoteService }} */
     protected ${{ related.getRemoteServiceLC }};
 {% endfor %}
 
     /**
-     * @param Services\{{ class_name }}Service ${{ variable_name }}
+     * @param Services\{{ class.name }}Service ${{ class.variable }}
      */
     public function __construct(
-        Services\{{ class_name }}Service ${{ variable_name }}
-{% for related in related_objects %}
+        Services\{{ class.name }}Service ${{ class.variable }}
+{% for related in class.relatedData %}
         ,Services\{{ related.getRemoteService }} ${{ related.getRemoteServiceLC }}
 {% endfor %}
     )
     {
-        $this->service = ${{ variable_name }};
-{% for related in related_objects %}
+        $this->service = ${{ class.variable }};
+{% for related in class.relatedData %}
         $this->{{ related.getRemoteServiceLC }} = ${{ related.getRemoteServiceLC }};
 {% endfor %}
     }
 
     /**
-     * @returns Services\{{ class_name }}Service
+     * @returns Services\{{ class.name }}Service
      */
-    public function getService() : Services\{{ class_name }}Service
+    public function getService() : Services\{{ class.name }}Service
     {
         return parent::getService();
     }
 
-{% for related in related_objects %}
+{% for related in class.relatedObjects %}
     public function {{ related.getBoundModelReferenceNameLC }}Request(Request $request, Response $response, $args) : Response
     {
-{% for key in primary_keys %}
+{% for key in class.primaryKeys %}
         ${{ key }} = $args['{{ key }}'];
 {% endfor %}
         ${{ related.getBoundModelReferenceNameLC }} = $this->{{ related.getRemoteServiceLC }}->get(
             Filter::Factory()
                 ->addJoin(
-                    Models\{{ class_name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }},
-                    Models\{{ class_name }}Model::TABLE_NAME,
+                    Models\{{ class.name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }},
+                    Models\{{ class.name }}Model::TABLE_NAME,
                     Models\{{ related.getRemoteModel }}::FIELD_{{ related.getRemoteBoundColumn|upper }}
                 )
-{% for key in primary_keys %}
+{% for key in class.primaryKeys %}
                 ->addWhere(
-                    Models\{{ class_name }}Model::FIELD_{{ key|upper }},
+                    Models\{{ class.name }}Model::FIELD_{{ key|upper }},
                     ${{ key }},
                     FilterCondition::CONDITION_EQUAL,
-                    Models\{{ class_name }}Model::TABLE_NAME
+                    Models\{{ class.name }}Model::TABLE_NAME
                 )
 {% endfor %}
         );
@@ -83,7 +83,7 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
             sprintf(
                 "No such related %s found for %s with id %s",
                 strtolower(Models\{{ related.getRemoteModel }}::NAME_SINGULAR),
-                strtolower(Models\{{ class_name }}Model::NAME_SINGULAR),
+                strtolower(Models\{{ class.name }}Model::NAME_SINGULAR),
                 $args['id']
             ),
             $request,

@@ -1,29 +1,29 @@
 <?php
 
-namespace {{ namespace }}\AccessLayers\Base;
+namespace {{ class.namespace }}\AccessLayers\Base;
 
 use \Gone\AppCore\Abstracts\TableAccessLayer as AbstractAccessLayer;
 use \Gone\AppCore\Abstracts\Model;
 use \Gone\AppCore\Db;
-use \{{ namespace }}\TableAccessLayers;
-use \{{ namespace }}\Models;
+use \{{ class.namespace }}\TableAccessLayers;
+use \{{ class.namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
 use \Zend\Db\ResultSet\ResultSet;
 use \Gone\AppCore\Exceptions;
 
 {% include '_overwrite_warning.twig' %}
 
-abstract class Base{{ class_name }}AccessLayer extends AbstractAccessLayer
+abstract class Base{{ class.name }}AccessLayer extends AbstractAccessLayer
 {
-    protected $table = '{{ table }}';
+    protected $table = '{{ class.table }}';
 
-    protected $database = '{{ database }}';
+    protected $database = '{{ class.database }}';
 {% if isView %}
 
     protected $isView = true;
 {% endif %}
 
-    protected $model = Models\{{ class_name }}Model::class;
+    protected $model = Models\{{ class.name }}Model::class;
 
     /**
      * AbstractTableGateway constructor.
@@ -38,11 +38,11 @@ abstract class Base{{ class_name }}AccessLayer extends AbstractAccessLayer
         $databaseAdapter = $databaseConnector->getDatabase($this->database);
         return parent::__construct($databaseAdapter, $this->table, null);
     }
-{% if isView %}
+{% if class.isView %}
 
     public function getViewModelBreakdown(){
         return [
-{% for tableName, data in view_model_data %}
+{% for tableName, data in class.viewData %}
             "{{ tableName }}" => [
                 "columns" => [
 {% for column in data.columns %}
