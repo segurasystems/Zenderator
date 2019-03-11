@@ -47,26 +47,30 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
 {% for related in related_objects %}
     public function {{ related.getBoundModelReferenceNameLC }}Request(Request $request, Response $response, $args) : Response
     {
-        $id = $args['id'];
-        ${{ related.getBoundModelReferenceNameLC }} = $this->{{ related.getRemoteServiceLC }}->getFilter(
+{% for key in primary_keys %}
+        ${{ key }} = $args['{{ key }}'];
+{% endfor %}
+        ${{ related.getBoundModelReferenceNameLC }} = $this->{{ related.getRemoteServiceLC }}->get(
             Filter::Factory()
                 ->addJoin(
                     Models\{{ class_name }}Model::FIELD_{{ related.getLocalBoundColumn|upper }},
                     Models\{{ class_name }}Model::TABLE_NAME,
                     Models\{{ related.getRemoteModel }}::FIELD_{{ related.getRemoteBoundColumn|upper }}
                 )
+{% for key in primary_keys %}
                 ->addWhere(
-                    Models\{{ class_name }}Model::FIELD_ID,
-                    $id,
+                    Models\{{ class_name }}Model::FIELD_{{ key|upper }},
+                    ${{ key }},
                     FilterCondition::CONDITION_EQUAL,
                     Models\{{ class_name }}Model::TABLE_NAME
                 )
+{% endfor %}
         );
         if (${{ related.getBoundModelReferenceNameLC }}) {
             return $this->jsonSuccessResponse(
                 [
                     'Action'                          => 'GET_{{ related.getBoundModelReferenceName|upper }}',
-                    $this->{{ related.getRemoteServiceLC }}->getTermSingular() => ${{ related.getBoundModelReferenceNameLC }}->__toArray(),
+                    Models\{{ related.getRemoteModel }}::NAME_SINGULAR => ${{ related.getBoundModelReferenceNameLC }}->__toArray(),
                 ],
                 $request,
                 $response
@@ -75,8 +79,8 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
         return $this->jsonFailureResponse(
             sprintf(
                 "No such related %s found for %s with id %s",
-                strtolower($this->{{ related.getRemoteServiceLC }}->getTermSingular()),
-                strtolower($this->service->getTermSingular()),
+                strtolower(Models\{{ related.getRemoteModel }}::NAME_SINGULAR),
+                strtolower(Models\{{ class_name }}Model::NAME_SINGULAR),
                 $args['id']
             ),
             $request,
