@@ -23,7 +23,7 @@ abstract class Base{{ class.name }}AccessLayer extends AbstractAccessLayer
     protected $isView = true;
 {% endif %}
 
-    protected $model = Models\{{ class.name }}Model::class;
+    protected $modelClass = Models\{{ class.name }}Model::class;
 
     /**
      * AbstractTableGateway constructor.
