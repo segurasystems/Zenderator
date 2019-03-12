@@ -1,0 +1,7 @@
+{% for argName,arg in args %}
+{% if argName == "body" and name == "bodyArgs" %}
+        ${{ name }} = ${{ argName }};
+{% else %}
+        ${{ name }}["{{ argName }}"] = ${{ argName }};
+{% endif %}
+{% endfor %}
