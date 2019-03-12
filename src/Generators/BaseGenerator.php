@@ -4,6 +4,7 @@ namespace Zenderator\Generators;
 
 use Gone\Twig\InflectionExtension;
 use Gone\Twig\TransformExtension;
+use Zenderator\Interfaces\DataProviderInterface;
 use Zenderator\Interfaces\IZenderatorGenerator;
 use Zenderator\Zenderator;
 use Symfony\Component\Yaml\Yaml;
@@ -14,11 +15,13 @@ abstract class BaseGenerator implements IZenderatorGenerator
     private $loader;
     protected $zenderator;
     private $outputPath;
+    private $dataProvider;
 
     protected $baseTemplatePath = __DIR__ . "/../../generator/templates";
 
-    public function __construct(Zenderator $zenderator, string $outputPath)
+    public function __construct(Zenderator $zenderator, string $outputPath, DataProviderInterface $dataProvider)
     {
+        $this->dataProvider = $dataProvider;
         $this->outputPath = rtrim($outputPath, "/") . "/";
         $this->zenderator = $zenderator;
         $this->loader = new \Twig_Loader_Filesystem($this->baseTemplatePath);
@@ -33,6 +36,11 @@ abstract class BaseGenerator implements IZenderatorGenerator
 
         $fct = new \Twig_SimpleFunction('var_export', 'var_export');
         $this->twig->addFunction($fct);
+    }
+
+    protected function getDataProvider(): DataProviderInterface
+    {
+        return $this->dataProvider;
     }
 
     protected function renderToFile(bool $overwrite, string $path, string $template, array $data)
@@ -52,7 +60,7 @@ abstract class BaseGenerator implements IZenderatorGenerator
         $this->putFile(
             $overwrite,
             $path,
-            Yaml::dump($content,10,2)
+            Yaml::dump($content, 10, 2)
         );
     }
 

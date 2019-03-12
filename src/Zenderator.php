@@ -22,6 +22,7 @@ use Zend\Db\Metadata\Metadata;
 use Zend\Db\Metadata\Object\ViewObject;
 use Zend\Stdlib\ConsoleHelper;
 use Zenderator\Components\Model;
+use Zenderator\DataProviders\HttpProvider;
 use Zenderator\Exception\Exception;
 use Zenderator\Exception\SchemaToAdaptorException;
 use Zenderator\Generators\PhpSdkGenerator;
@@ -436,8 +437,8 @@ class Zenderator
 
     public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false){
         $routes = $this->getRoutes($remoteApiUri);
-        $swaggerGenerator = new SwaggerGenerator($this,$outputPath);
-        $swaggerGenerator->generateFromRoutes($routes);
+        $swaggerGenerator = new SwaggerGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE . "\\SDK\\" . APP_NAME));
+        $swaggerGenerator->generate();
         return $this;
     }
 
@@ -445,8 +446,8 @@ class Zenderator
     {
         $routes = $this->getRoutes($remoteApiUri);
 
-        $phpGenerator = new PhpSdkGenerator($this,$outputPath);
-        $phpGenerator->generateFromRoutes($routes);
+        $phpGenerator = new PhpSdkGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE . "\\SDK\\" . APP_NAME));
+        $phpGenerator->generate();
 
         $this->removePHPVCRCassettes($outputPath);
         if ($cleanByDefault) {

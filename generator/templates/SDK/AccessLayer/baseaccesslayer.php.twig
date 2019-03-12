@@ -1,26 +1,21 @@
 <?php
-namespace {{ app_namespace }}\SDK\{{ app_name }}\AccessLayer\Base;
+namespace {{ class.namespace }}\AccessLayer\Base;
 
-use Gone\SDK\Common\Abstracts\AbstractAccessLayer;
+use Gone\SDK\Common\Abstracts\HttpAccessLayer;
 use Gone\SDK\Common\Exceptions;
-use {{ app_namespace }}\SDK\{{ app_name }}\Models;
+use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
 use GuzzleHttp\Exception as GuzzleException;
 
-/**
- * @property \{{ app_namespace }}\SDK\{{ app_name }}\Client $sdkClient
- */
-abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
+abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
 {
 
-{% for route in routes %}
-{% set test_file = "SDK/AccessLayer/" ~ "_function_" ~ route.template ~ ".php.twig" %}
-{% include test_file %}
-
+{% for method in class.methods %}
+    public function {{ method.function }}(){
+        $method = "{{ method.method }}";
+    }
 {% endfor %}
-
-{% if routes['create'].singular %}
-{% include "SDK/AccessLayer/_hydrator.php.twig" %}
-{% endif %}
-
+/*
+{{ class|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+*/
 }

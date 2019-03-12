@@ -1,17 +1,18 @@
 <?php
 
 $baseSKDData = \Gone\AppCore\Router\RouteSDKProperties::Factory()
-                    ->setClassSource(\{{ class.namespace }}\Models\{{ class.name }}Model::class);
+                    ->setResponseClass(\{{ class.namespace }}\Models\{{ class.name }}Model::class)
+                    ->setClass(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR);
 
 // Router proper begins
 $router = \Gone\AppCore\Router\Router::Instance()
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
-            ->setName('{{ class.name }} Get All')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getAllRequest')
+            ->setName('{{ class.name }} List')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':listRequest')
             ->setSdkProperties(
                 $baseSKDData
-                    ->setFunction('getAll')
+                    ->setFunction('list')
                     ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
                     ->setArguments([
                         "filter" => [
@@ -184,7 +185,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                     ])
             )
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{{ '{' }}oldPK{{ '}' }}/updatePK/{{ '{' }}newPK{{ '}' }}')
-            ->setHttpEndpoint('/v1/oldPK/updatePK/newPK')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/oldPK/updatePK/newPK')
             ->setHttpMethod('PATCH')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
@@ -201,6 +202,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                 $baseSKDData
                     ->setFunction('get{{ field.related.variableUC }}')
                     ->setResponseKey(\{{ class.namespace }}\Models\{{ related.class.name }}Model::NAME_SINGULAR)
+                    ->setResponseClass(\{{ class.namespace }}\Models\{{ related.class.name }}Model::class)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
@@ -233,6 +235,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                 $baseSKDData
                     ->setFunction('get{{ field.remote.variablePluralUC }}')
                     ->setResponseKey(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::NAME_PLURAL)
+                    ->setResponseClass(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::class)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
