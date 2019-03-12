@@ -8,11 +8,11 @@ $baseSKDData = \Gone\AppCore\Router\RouteSDKProperties::Factory()
 $router = \Gone\AppCore\Router\Router::Instance()
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
-            ->setName('{{ class.name }} List')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':listRequest')
+            ->setName('{{ class.name }} Get All')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getAll')
             ->setSdkProperties(
                 $baseSKDData
-                    ->setFunction('list')
+                    ->setFunction('getAll')
                     ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
                     ->setArguments([
                         "filter" => [
