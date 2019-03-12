@@ -11,7 +11,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getAllRequest')
             ->setSdkProperties(
                 $baseSKDData
-                    ->setFunction('list')
+                    ->setFunction('getAll')
                     ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
                     ->setArguments([
                         "filter" => [
