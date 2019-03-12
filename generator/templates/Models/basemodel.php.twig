@@ -24,6 +24,11 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     const DBTYPE_{{ propertyName|upper }} = '{{ data.type }}';
 {% endfor %}
 
+    //Property PHP Types
+{% for propertyName, data in class.properties %}
+    const TYPE_{{ propertyName|upper }} = '{{ data.phpType }}';
+{% endfor %}
+
 {% for propertyName, data in class.properties %}
 {% if data.options is not empty %}
 {% for permittedValue in data.options %}
