@@ -65,6 +65,16 @@ abstract class Base{{ class.name }}Service
         parent::__construct(${{ class.variable }}AccessLayer);
     }
 
+    public function getByPK($pk){
+        $_pk = [];
+        foreach($pk as $property => $value){
+            if(in_array($property,Models\{{ class.name }}Model::PRIMARY_KEYS)){
+                $_pk[$property] = $value;
+            }
+        }
+        return parent::getByPK($_pk);
+    }
+
 {% for related in class.relatedData %}
 {% if loop.first %}
     //Related Data
