@@ -1,18 +1,20 @@
 <?php
-namespace {{ app_namespace }}\SDK\{{ app_name }};
+namespace {{ classNamespace }};
+
+use Slim\Container;
 
 class DependencyInjector
 {
-    public static function Setup($container,$config = []) {
+    public static function Setup(Container $container,$config = []) {
 
-        $container[Client::class] = function($container) use ($config) {
+        $container[Client::class] = function(Container $container) use ($config) {
             $client = new Client($config["baseUrl"] ?? Client::DEFAULT_BASE_URL,$config["extraHeaders"] ?? []);
             return $client;
         };
 
-{% for pack in packs|keys %}
-        $container[AccessLayer\{{ pack }}AccessLayer::class] = function($container) {
-            return new AccessLayer\{{ pack }}AccessLayer($container->get(Client::class)->getGuzzle());
+{% for accessLayer in accessLayers|sort %}
+        $container[AccessLayer\{{ accessLayer }}AccessLayer::class] = function(Container $container) {
+            return new AccessLayer\{{ accessLayer }}AccessLayer($container->get(Client::class)->getGuzzle());
         };
 {% endfor %}
 

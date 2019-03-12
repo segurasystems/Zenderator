@@ -31,8 +31,8 @@
 
     <testsuites>
         <testsuite name="access_layer">
-{% for pack in packs|keys %}
-            <file>tests/AccessLayer/{{ pack }}Test.php</file>
+{% for accessLayer in accessLayers|sort %}
+            <file>tests/AccessLayer/{{ accessLayer }}Test.php</file>
 {% endfor %}
         </testsuite>
         <testsuite name="custom">

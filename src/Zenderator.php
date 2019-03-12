@@ -437,7 +437,7 @@ class Zenderator
 
     public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false){
         $routes = $this->getRoutes($remoteApiUri);
-        $swaggerGenerator = new SwaggerGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE . "\\SDK\\" . APP_NAME));
+        $swaggerGenerator = new SwaggerGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE, APP_NAME));
         $swaggerGenerator->generate();
         return $this;
     }
@@ -446,7 +446,7 @@ class Zenderator
     {
         $routes = $this->getRoutes($remoteApiUri);
 
-        $phpGenerator = new PhpSdkGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE . "\\SDK\\" . APP_NAME));
+        $phpGenerator = new PhpSdkGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE, APP_NAME));
         $phpGenerator->generate();
 
         $this->removePHPVCRCassettes($outputPath);
@@ -598,7 +598,7 @@ class Zenderator
                 $outputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
             }
         }
-
+        echo "TODO : swagger\n";return $this;
         return $this->makeSwagger($outputPath, $remoteApiUri);
     }
 

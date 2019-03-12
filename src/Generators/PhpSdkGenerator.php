@@ -13,26 +13,31 @@ class PhpSdkGenerator extends BaseGenerator
 
     public function generate()
     {
-
-
-        // Access Layer
         $this->generateAccessLayers();
-        // Models
         $this->generateModels();
-        die();
-        // Tests
-        $this->renderToFile(true, "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
+        //$this->generateTests($packName, $routeRenderData);
+        $this->generateBaseFiles();
 
-        $this->mkdir("/tests/fixtures/touch");
+        return $this;
+    }
 
+    private function generateBaseFiles()
+    {
+        $renderData = [
+            "accessLayers" => array_keys($this->getDataProvider()->getAccessLayerData()),
+            "defaultUrl" => strtolower("http://" . $this->getDataProvider()->getAppName() . ".segurasystems.test"),
+            "namespace" => $this->getDataProvider()->getNameSpace(),
+            "appName" => $this->getDataProvider()->getAppName(),
+            "classNamespace" => $this->getDataProvider()->getBaseClassNameSpace(),
+            "releaseTime" => date("Y-m-d H:i:s"),
+        ];
+        echo "\n";
+        echo str_pad("Generating Dependency Injector:", 50);
+        $this->renderToFile(true, "/src/DependencyInjector.php", "SDK/dependencyinjector.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo str_pad("Generating Client Container:", 50);
         $this->renderToFile(true, "/src/Client.php", "SDK/client.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo str_pad("Generating Dependency Injector:", 50);
-        $this->renderToFile(true, "/src/DependencyInjector.php", "SDK/dependencyinjector.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo str_pad("Generating Composer.json:", 50);
@@ -50,8 +55,6 @@ class PhpSdkGenerator extends BaseGenerator
         $this->renderToFile(true, "/Dockerfile.tests", "SDK/Dockerfile.twig", $renderData);
         $this->renderToFile(true, "/test-compose.yml", "SDK/docker-compose.yml.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        return $this;
     }
 
     private function generateModels()
@@ -59,12 +62,12 @@ class PhpSdkGenerator extends BaseGenerator
         print "\nGenerating Models ...\n";
         $modelData = $this->getDataProvider()->getModelData();
         foreach ($modelData as $className => $class) {
-            print "   > {$className} ...";
-            print " Base...";
-            $this->renderToFile(true, "/src/Models/Base/Base{$className}Model.php", "SDK/Models/basemodel.php.twig", ["class" => $class]);
-            print " Main...";
-            $this->renderToFile(false, "/src/Models/{$className}Model.php", "SDK/Models/model.php.twig", ["class" => $class]);
-            print " Done\n";
+            print str_pad("   > {$className}",40);
+            print " Base";
+            $this->renderToFile(true, "/src/Models/Base/Base{$className}Model.php", "Models/basemodel.php.twig", ["class" => $class]);
+            print " Main";
+            $this->renderToFile(false, "/src/Models/{$className}Model.php", "Models/model.php.twig", ["class" => $class]);
+            echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
         }
     }
 
@@ -73,17 +76,24 @@ class PhpSdkGenerator extends BaseGenerator
         print "\nGenerating AccessLayers ...\n";
         $accessLayerData = $this->getDataProvider()->getAccessLayerData();
         foreach ($accessLayerData as $className => $class) {
-            print "   > {$className} ...";
-            print " Base...";
+            print str_pad("   > {$className}",40);
+            print " Base";
             $this->renderToFile(true, "/src/AccessLayer/Base/Base{$className}AccessLayer.php", "SDK/AccessLayer/baseaccesslayer.php.twig", ["class" => $class]);
-            print " Main...";
+            print " Main";
             $this->renderToFile(false, "/src/AccessLayer/{$className}AccessLayer.php", "SDK/AccessLayer/accesslayer.php.twig", ["class" => $class]);
-            print " Done\n";
+            echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";;
         }
     }
 
-    private function generateBaseFiles()
+    /**
+     * @param $packName
+     * @param $routeRenderData
+     */
+    private function generateTests($packName, $routeRenderData): void
     {
+// Tests
+        $this->renderToFile(true, "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
 
+        $this->mkdir("/tests/fixtures/touch");
     }
 }

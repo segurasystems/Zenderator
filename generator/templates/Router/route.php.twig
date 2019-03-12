@@ -13,13 +13,13 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('getAll')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
+                    ->setReturnsArray(true)
                     ->setArguments([
                         "filter" => [
                             "default" => null,
                             "description" => "Filter object with rules to filter the list results by",
                             "in" => "header",
-                            "isMandatory" => false,
+                            "required" => false,
                             "type" => \Gone\SDK\Common\Filters\Filter::class,
                         ],
                     ])
@@ -36,14 +36,14 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('create')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setReturnsArray(false)
                     ->setArguments([
                         "body" => [
                             "default" => null,
                             "description" => "Array of data to use tor create the model",
                             "in" => "body",
-                            "isMandatory" => true,
-                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR,
+                            "required" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
                         ],
                     ])
             )
@@ -59,14 +59,14 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('createBulk')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_PLURAL)
+                    ->setReturnsArray(true)
                     ->setArguments([
                         "body" => [
                             "default" => null,
                             "description" => "Array of data to use tor create the model",
                             "in" => "body",
-                            "isMandatory" => true,
-                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                            "required" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[][]",
                         ],
                     ])
             )
@@ -82,14 +82,14 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('update')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setReturnsArray(false)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
                             "default" => null,
                             "description" => "Primary key for model",
                             "in" => "query",
-                            "isMandatory" => true,
+                            "required" => true,
                             "type" => "{{ class.properties[key].phpType }}",
                         ],
 {% endfor %}
@@ -97,8 +97,8 @@ $router = \Gone\AppCore\Router\Router::Instance()
                             "default" => null,
                             "description" => "Array of data to use to create the model",
                             "in" => "body",
-                            "isMandatory" => true,
-                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR,
+                            "required" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
                         ],
                     ])
             )
@@ -114,14 +114,14 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('get')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setReturnsArray(false)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
                             "default" => null,
                             "description" => "Primary key for model",
                             "in" => "query",
-                            "isMandatory" => true,
+                            "required" => true,
                             "type" => "{{ class.properties[key].phpType }}",
                         ],
 {% endfor %}
@@ -153,7 +153,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                     "default" => null,
                     "description" => "ID of the object to be deleted",
                     "in" => "path",
-                    "isMandatory" => true,
+                    "required" => true,
                     "type" => "integer",
                 ],
             ])
@@ -166,20 +166,20 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('updatePK')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setReturnsArray(false)
                     ->setArguments([
                         "newPK" => [
                             "default" => null,
                             "description" => "Old Primary key for model",
                             "in" => "query",
-                            "isMandatory" => true,
+                            "required" => true,
                             "type" => "int",
                         ],
                         "oldPK" => [
                             "default" => null,
                             "description" => "New Primary key for model",
                             "in" => "query",
-                            "isMandatory" => true,
+                            "required" => true,
                             "type" => "int",
                         ],
                     ])
@@ -201,15 +201,15 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('get{{ field.related.variableUC }}')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ related.class.name }}Model::NAME_SINGULAR)
                     ->setResponseClass(\{{ class.namespace }}\Models\{{ related.class.name }}Model::class)
+                    ->setReturnsArray(false)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
                             "default" => null,
                             "description" => "Primary key for model",
                             "in" => "query",
-                            "isMandatory" => true,
+                            "required" => true,
                             "type" => "{{ class.properties[key].phpType }}",
                         ],
 {% endfor %}
@@ -234,7 +234,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('get{{ field.remote.variablePluralUC }}')
-                    ->setResponseKey(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::NAME_PLURAL)
+                    ->setReturnsArray(true)
                     ->setResponseClass(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::class)
                     ->setArguments([
 {% for key in class.routePKs %}
@@ -242,10 +242,17 @@ $router = \Gone\AppCore\Router\Router::Instance()
                             "default" => null,
                             "description" => "Primary key for model",
                             "in" => "query",
-                            "isMandatory" => true,
+                            "required" => true,
                             "type" => "{{ class.properties[key].phpType }}",
                         ],
 {% endfor %}
+                        "filter" => [
+                            "default" => null,
+                            "description" => "Filter object with rules to filter the list results by",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => \Gone\SDK\Common\Filters\Filter::class,
+                        ],
                     ])
             )
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ '}' }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}')

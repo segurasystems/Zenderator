@@ -1,7 +1,7 @@
 version: '2.3'
 
 services:
-  lib{{ app_name|lower }}:
+  lib{{ appName|lower }}:
     build:
       context: .
       dockerfile: Dockerfile.tests

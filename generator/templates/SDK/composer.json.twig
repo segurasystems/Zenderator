@@ -1,5 +1,5 @@
 {
-    "name": "{{ app_namespace|lower }}/lib{{ app_name|lower }}",
+    "name": "{{ namespace|lower }}/lib{{ appName|lower }}",
     "authors": [
         {
             "name": "Matthew Baggett",
@@ -11,7 +11,7 @@
         }
     ],
     "license": "proprietary",
-    "time": "{{ release_time }}",
+    "time": "{{ releaseTime }}",
     "repositories": [
         {
             "type": "vcs",
@@ -29,12 +29,12 @@
     },
     "autoload": {
         "psr-4": {
-            "{{ app_namespace }}\\SDK\\{{ app_name }}\\": "src"
+            "{{ classNamespace }}\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "{{ app_namespace }}\\SDK\\{{ app_name }}\\Test\\": "tests/"
+            "{{ classNamespace }}\\Test\\": "tests/"
         }
     }
 }

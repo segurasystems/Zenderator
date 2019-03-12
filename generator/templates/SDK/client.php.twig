@@ -1,11 +1,11 @@
 <?php
-namespace {{ app_namespace }}\SDK\{{ app_name }};
+namespace {{ classNamespace }};
 
 use Gone\SDK\Common\Abstracts\AbstractClient;
 
 class Client extends AbstractClient
 {
-    const DEFAULT_BASE_URL = "{{ default_base_url }}";
+    const DEFAULT_BASE_URL = "{{ defaultUrl }}";
 
     public function __construct($baseUrl = self::DEFAULT_BASE_URL, $extraHeaders = []){
         parent::__construct($baseUrl,$extraHeaders);

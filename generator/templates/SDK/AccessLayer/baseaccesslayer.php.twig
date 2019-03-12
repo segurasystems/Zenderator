@@ -5,17 +5,65 @@ use Gone\SDK\Common\Abstracts\HttpAccessLayer;
 use Gone\SDK\Common\Exceptions;
 use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
-use GuzzleHttp\Exception as GuzzleException;
 
 abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
 {
 
 {% for method in class.methods %}
-    public function {{ method.function }}(){
-        $method = "{{ method.method }}";
-    }
+    /**
+{% for name, argument in method.arguments %}
+     * @param {{ argument.phpType }} ${{ name }}
 {% endfor %}
+     *
+{% if method.responseKey %}
+     * @return Models\{{ method.responseClass }}Model{{ method.returnsArray ? '[]' : '' }}|null
+{% else %}
+     * @return array|null
+{% endif %}
+     * @throws Exceptions\SDKException
+     */
+    public function {{ method.function }}(
+{% for name, argument in method.arguments %}
+{% if argument.required %}
+        {{ argument.phpType }} ${{ name }}{{ loop.last ? '' : ',' }}
+{% else %}
+        {{ argument.phpType }} ${{ name }} = {{ argument.default|json_encode()|raw }}{{ loop.last ? '' : ',' }}
+{% endif %}
+{% endfor %}
+    ){
+        $endpoint = "{{ method.pattern }}";
+        $options = [];
+
+{% if method.groupedArguments.query %}
+{% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'queryArgs','args':method.groupedArguments.query} %}
+        $endpoint = $this->replaceUrlElements($endpoint,$queryArgs);
+{% endif %}
+{% if method.groupedArguments.body %}
+{% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'bodyArgs','args':method.groupedArguments.body} %}
+        $options["body"] = $bodyArgs;
+{% endif %}
+{% if method.groupedArguments.header %}
+{% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'headerArgs','args':method.groupedArguments.header} %}
+        $options["headers"] = $headerArgs;
+{% endif %}
+
+        $response = $this->request(
+            "{{ method.method }}",
+            $endpoint,
+            $options
+        );
+{% if method.responseKey %}
+        $data = $response["{{ method.responseKey }}"];
+        return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+{% else %}
+        return $response;
+{% endif %}
+    }
+
+{% endfor %}
+
 /*
 {{ class|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 */
+
 }
