@@ -15,5 +15,5 @@ interface DataProviderInterface
     public function getAccessLayerData() : array;
     public function getNameSpace() : string;
     public function getAppName() : string;
-    public function getBaseClassNameSpace() : string;
+    public function getBaseClassNameSpace($jsonSafe = false) : string;
 }

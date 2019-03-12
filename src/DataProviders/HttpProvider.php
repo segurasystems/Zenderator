@@ -28,9 +28,13 @@ class HttpProvider implements DataProviderInterface
         ]);
     }
 
-    public function getBaseClassNameSpace(): string
+    public function getBaseClassNameSpace($jsonSafe = false): string
     {
-        return $this->getNamespace() . "\\SDK\\" . $this->getAppName();
+        return $this->getNamespace() .
+            ($jsonSafe ? "\\" : "") .
+            "\\SDK\\" .
+            ($jsonSafe ? "\\" : "") .
+            $this->getAppName();
     }
 
     /**

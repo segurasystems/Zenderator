@@ -29,6 +29,7 @@ class PhpSdkGenerator extends BaseGenerator
             "namespace" => $this->getDataProvider()->getNameSpace(),
             "appName" => $this->getDataProvider()->getAppName(),
             "classNamespace" => $this->getDataProvider()->getBaseClassNameSpace(),
+            "classNamespaceJSONSAFE" => $this->getDataProvider()->getBaseClassNameSpace(true),
             "releaseTime" => date("Y-m-d H:i:s"),
         ];
         echo "\n";
