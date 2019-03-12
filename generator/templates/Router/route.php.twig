@@ -8,7 +8,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} List')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':listRequest')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getAllRequest')
             ->setSdkProperties(
                 $baseSKDData
                     ->setFunction('list')
