@@ -109,7 +109,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
                     [
                         'name' => "{{ related.class.name }}",
                         'variable' => "{{ related.class.variable }}",
-                        'model' => Models\{{ related.class.name }}Model::class,
+//                        'model' => Models\{{ related.class.name }}Model::class,
                         'column' => Models\{{ related.class.name }}Model::FIELD_{{ related.field.related.name|upper }},
                     ],
 {% endfor %}
@@ -121,7 +121,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
                     [
                         'name' => "{{ remote.class.name }}",
                         'variable' => "{{ remote.class.variable }}",
-                        'model' => Models\{{ remote.class.name }}Model::class,
+//                        'model' => Models\{{ remote.class.name }}Model::class,
                         'column' => Models\{{ remote.class.name }}Model::FIELD_{{ remote.field.remote.name|upper }},
                     ],
 {% endfor %}
