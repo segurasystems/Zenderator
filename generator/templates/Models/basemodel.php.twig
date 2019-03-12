@@ -29,6 +29,12 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     const TYPE_{{ propertyName|upper }} = '{{ data.phpType }}';
 {% endfor %}
 
+    const PRIMARY_KEYS = [
+{% for key in class.primaryKeys %}
+        self::FIELD_{{ key|upper }},
+{% endfor %}
+    ];
+
 {% for propertyName, data in class.properties %}
 {% if data.options is not empty %}
 {% for permittedValue in data.options %}
@@ -87,11 +93,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
 {% endfor %}
     public function getPrimaryKeyFields(): array
     {
-        return [
-{% for key in class.primaryKeys %}
-            self::FIELD_{{ key|upper }},
-{% endfor %}
-        ];
+        return self::PRIMARY_KEYS;
     }
 
     public static function getPropertyMeta()
