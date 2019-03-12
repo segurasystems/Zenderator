@@ -70,7 +70,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
         return $this->{{ propertyName }};
     }
 
-    public function set{{ data.name }}(${{ propertyName }}) : Models\{{ class_name }}Model
+    public function set{{ data.name }}(${{ propertyName }}) : Models\{{ class.name }}Model
     {
         if ($this->{{ propertyName }} !== ${{ propertyName }}) {
             $this->addDirtyKey(self::FIELD_{{ propertyName|upper }});
