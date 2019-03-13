@@ -85,18 +85,18 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% endfor %}
 
 {% if hasUpdate or hasCreate %}
-    public function save(AbstractModel ${{ class.variable }})
+    public function save(AbstractModel ${{ class.variable }}, bool $hydrate = true)
     {
         $pks = ${{ class.variable }}->getPrimaryKeys();
         $pkCount = count($pks);
         $pks = array_filter($pks);
         {% if hasUpdate %}
         if(count($pks) == $pkCount){
-            $this->update(${{ class.variable }});
+            return $this->update(${{ class.variable }}, $hydrate);
         }
         {% endif %}
         {% if hasCreate %}
-        $this->create(${{ class.variable }});
+        return $this->create(${{ class.variable }}, $hydrate);
         {% endif %}
     }
 {% endif %}
