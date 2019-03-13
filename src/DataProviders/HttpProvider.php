@@ -85,7 +85,8 @@ class HttpProvider implements DataProviderInterface
                 $accessLayerData[$class] = [
                     "namespace" => $this->getBaseClassNameSpace(),
                     "name"      => $class,
-                    "methods"   => []
+                    "variable"  => lcfirst($class),
+                    "methods"   => [],
                 ];
             }
             $accessLayerData[$class]["methods"][] = $this->processRawMethod($raw);
@@ -125,6 +126,9 @@ class HttpProvider implements DataProviderInterface
         foreach ($rawModelData as $name => $raw) {
             $raw["namespace"] = $this->getBaseClassNameSpace();
             $raw["name"] = $name;
+            if(empty($raw["variable"])){
+                $raw["variable"] = lcfirst($name);
+            }
             $properties = [];
             foreach ($raw["properties"] as $propName => $property) {
                 $property["name"] = ucfirst($propName);
