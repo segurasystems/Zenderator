@@ -3,7 +3,7 @@
         $options = [];
         $pks = ${{ class.variable }}->getPrimaryKeys();
         $endpoint = $this->replaceUrlElements($endpoint,$pks);
-        $options["body"] = $model->__toDirtyArray();
+        $options["body"] = ${{ class.variable }}->__toDirtyArray();
 
         $response = $this->request(
             "{{ method.method }}",
