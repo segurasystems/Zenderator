@@ -36,6 +36,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      * @return array|null
 {% endif %}
      * @throws Exceptions\SDKException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function {{ method.function }}(
 {% for name, argument in method.arguments %}
