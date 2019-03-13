@@ -4,21 +4,30 @@
             $class = get_class(${{ class.variable }});
             throw new \Exception("Trying to save $class though {{ class.name }}Accesslayer");
         }
+        $data = ${{ class.variable }}->__toDirtyArray();
+{% if methodName == "update" %}
+        if(!empty($data)){
+{% endif %}
+            $endpoint = "{{ method.pattern }}";
+            $options = [];
+            $pks = ${{ class.variable }}->getPrimaryKeys();
+            $endpoint = $this->replaceUrlElements($endpoint,$pks);
+            $options["json"] = $data;
 
-        $endpoint = "{{ method.pattern }}";
-        $options = [];
-        $pks = ${{ class.variable }}->getPrimaryKeys();
-        $endpoint = $this->replaceUrlElements($endpoint,$pks);
-        $options["body"] = json_encode(${{ class.variable }}->__toDirtyArray());
-
-        $response = $this->request(
-            "{{ method.method }}",
-            $endpoint,
-            $options
-        );
+            $response = $this->request(
+                "{{ method.method }}",
+                $endpoint,
+                $options
+            );
 
 {% if method.responseKey %}
-        $data = $response["{{ method.responseKey }}"];
+            $data = $response["{{ method.responseKey }}"];
+{% if methodName == "update" %}
+        } else {
+            $data = ${{ class.variable }}->__toArray();
+        }
+{% endif %}
+
         if($hydrate){
             return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
         } else {

@@ -57,7 +57,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% endif %}
 {% if method.groupedArguments.body %}
 {% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'bodyArgs','args':method.groupedArguments.body} %}
-        $options["body"] = json_encode($bodyArgs);
+        $options["json"] = $bodyArgs;
 {% endif %}
 {% if method.groupedArguments.header %}
 {% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'headerArgs','args':method.groupedArguments.header} %}
