@@ -770,7 +770,7 @@ class Zenderator
         foreach ($generatedPaths as $generatedPath) {
             if (file_exists($generatedPath)) {
                 foreach (new \DirectoryIterator($generatedPath) as $file) {
-                    if (!$file->isDot() && $file->getExtension() == 'php') {
+                    if (!$file->isDot() && $file->getExtension() == 'php' && strpos($file->getFilename(),"Base") === 0) {
                         unlink($file->getRealPath());
                     }
                 }
