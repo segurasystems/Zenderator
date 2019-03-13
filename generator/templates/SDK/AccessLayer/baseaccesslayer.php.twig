@@ -8,14 +8,18 @@ use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
 {% set hasUpdate = false %}
 {% set hasCreate = false %}
-abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
-{
 {% for method in class.methods %}
 {% if method.function == "update" %}
 {% set hasUpdate = true %}
-{% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'update','class':class,'method':method} %}
 {% elseif method.function == "create" %}
 {% set hasCreate = true %}
+{% endif %}
+abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpdate || hasCreate ? "implements DataAccessLayerInterface" : "" }}
+{
+{% for method in class.methods %}
+{% if method.function == "update" %}
+{% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'update','class':class,'method':method} %}
+{% elseif method.function == "create" %}
 {% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'create','class':class,'method':method} %}
 {% else %}
     /**
