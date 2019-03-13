@@ -2,10 +2,6 @@
 {% if argName == "body" and name == "bodyArgs" %}
         ${{ name }} = ${{ argName }};
 {% else %}
-{% if arg.in == "header" %}
-        ${{ name }}["{{ argName }}"] = json_encode(${{ argName }});
-{% else %}
         ${{ name }}["{{ argName }}"] = ${{ argName }};
-{% endif %}
 {% endif %}
 {% endfor %}
