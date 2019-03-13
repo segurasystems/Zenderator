@@ -37,6 +37,8 @@ abstract class Base{{ class.name }}Service
 {% endif %}
 {% endfor %}
 
+    protected $modelClass = Models\{{ class.name }}Model::class;
+
 {% endif %}
     public function __construct(
 {% for related in class.relatedData %}
