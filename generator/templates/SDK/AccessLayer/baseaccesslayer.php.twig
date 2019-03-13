@@ -5,11 +5,18 @@ use Gone\SDK\Common\Abstracts\HttpAccessLayer;
 use Gone\SDK\Common\Exceptions;
 use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
-
+{% set hasUpdate = false %}
+{% set hasCreate = false %}
 abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
 {
-
 {% for method in class.methods %}
+{% if method.function == "update" %}
+{% set hasUpdate = true %}
+{% include "SDK/AccessLayer/_create_update_function.php.twig" with {'methodName':'update','class':class,'method':method} %}
+{% elseif method.function == "create" %}
+{% set hasCreate = true %}
+{% include "SDK/AccessLayer/_create_update_function.php.twig" with {'methodName':'create','class':class,'method':method} %}
+{% else %}
     /**
 {% for name, argument in method.arguments %}
      * @param {{ argument.phpType }} ${{ name }}
@@ -59,11 +66,23 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
         return $response;
 {% endif %}
     }
-
+{% endif %}
 {% endfor %}
 
-/*
-{{ class|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
-*/
-
+{% if hasUpdate or hasCreate %}
+    public function save(Models\{{ class.name }}Model ${{ class.variable }})
+    {
+        $pks = ${{ class.variable }}->getPrimaryKeys();
+        $pkCount = count($pks);
+        $pks = array_filter($pks);
+        {% if hasUpdate %}
+        if(count($pks) == $pkCount){
+            $this->update(${{ class.variable }});
+        }
+        {% endif %}
+        {% if hasCreate %}
+        $this->create(${{ class.variable }});
+        {% endif %}
+    }
+{% endif %}
 }

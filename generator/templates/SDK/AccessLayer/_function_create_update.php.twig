@@ -1,0 +1,20 @@
+    public function {{ methodName }}(Models\{{ class.name }}Model ${{ class.variable }}){
+        $endpoint = "{{ method.pattern }}";
+        $options = [];
+        $pks = ${{ class.variable }}->getPrimaryKeys();
+        $endpoint = $this->replaceUrlElements($endpoint,$pks);
+        $options["body"] = $model->__toDirtyArray();
+
+        $response = $this->request(
+            "{{ method.method }}",
+            $endpoint,
+            $options
+        );
+
+{% if method.responseKey %}
+        $data = $response["{{ method.responseKey }}"];
+        return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+{% else %}
+        return $response;
+{% endif %}
+    }
