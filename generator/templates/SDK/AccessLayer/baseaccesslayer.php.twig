@@ -12,10 +12,10 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
 {% for method in class.methods %}
 {% if method.function == "update" %}
 {% set hasUpdate = true %}
-{% include "SDK/AccessLayer/_create_update_function.php.twig" with {'methodName':'update','class':class,'method':method} %}
+{% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'update','class':class,'method':method} %}
 {% elseif method.function == "create" %}
 {% set hasCreate = true %}
-{% include "SDK/AccessLayer/_create_update_function.php.twig" with {'methodName':'create','class':class,'method':method} %}
+{% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'create','class':class,'method':method} %}
 {% else %}
     /**
 {% for name, argument in method.arguments %}
