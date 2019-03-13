@@ -28,6 +28,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% for name, argument in method.arguments %}
      * @param {{ argument.phpType }} ${{ name }}
 {% endfor %}
+     * @param bool $hydrate
      *
 {% if method.responseKey %}
      * @return Models\{{ method.responseClass }}Model{{ method.returnsArray ? '[]' : '' }}|null
