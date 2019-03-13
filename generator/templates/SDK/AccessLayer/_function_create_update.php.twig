@@ -1,4 +1,4 @@
-    public function {{ methodName }}(Models\{{ class.name }}Model ${{ class.variable }}){
+    public function {{ methodName }}(AbstractModel ${{ class.variable }}){
         $endpoint = "{{ method.pattern }}";
         $options = [];
         $pks = ${{ class.variable }}->getPrimaryKeys();
