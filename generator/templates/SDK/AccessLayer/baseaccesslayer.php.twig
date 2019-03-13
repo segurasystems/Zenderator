@@ -14,7 +14,7 @@ use Gone\SDK\Common\Filters\Filter;
 {% elseif method.function == "create" %}
 {% set hasCreate = true %}
 {% endif %}
-abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpdate || hasCreate ? "implements DataAccessLayerInterface" : "" }}
+abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpdate or hasCreate ? "implements DataAccessLayerInterface" : "" }}
 {
 {% for method in class.methods %}
 {% if method.function == "update" %}
