@@ -9,7 +9,7 @@
         $options = [];
         $pks = ${{ class.variable }}->getPrimaryKeys();
         $endpoint = $this->replaceUrlElements($endpoint,$pks);
-        $options["body"] = ${{ class.variable }}->__toDirtyArray();
+        $options["body"] = json_encode(${{ class.variable }}->__toDirtyArray());
 
         $response = $this->request(
             "{{ method.method }}",
