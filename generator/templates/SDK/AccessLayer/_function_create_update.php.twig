@@ -1,4 +1,10 @@
     public function {{ methodName }}(AbstractModel ${{ class.variable }}){
+
+        if(!(${{ class.variable }} instanceof Models\{{ class.name }}Model){
+            $class = get_class(${{ class.variable }});
+            throw new \Exception("Trying to save $class though {{ class.name }}Accesslayer");
+        }
+
         $endpoint = "{{ method.pattern }}";
         $options = [];
         $pks = ${{ class.variable }}->getPrimaryKeys();
