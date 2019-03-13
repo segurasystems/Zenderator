@@ -39,11 +39,12 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
     public function {{ method.function }}(
 {% for name, argument in method.arguments %}
 {% if argument.required %}
-        {{ argument.phpType }} ${{ name }}{{ loop.last ? '' : ',' }}
+        {{ argument.phpType }} ${{ name }},
 {% else %}
-        {{ argument.phpType }} ${{ name }} = {{ argument.default|json_encode()|raw }}{{ loop.last ? '' : ',' }}
+        {{ argument.phpType }} ${{ name }} = {{ argument.default|json_encode()|raw }},
 {% endif %}
 {% endfor %}
+        bool $hydrate = true
     ){
         $endpoint = "{{ method.pattern }}";
         $options = [];
@@ -68,7 +69,11 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
         );
 {% if method.responseKey %}
         $data = $response["{{ method.responseKey }}"];
-        return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+        if($hydrate){
+            return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+        } else {
+            return $data;
+        }
 {% else %}
         return $response;
 {% endif %}

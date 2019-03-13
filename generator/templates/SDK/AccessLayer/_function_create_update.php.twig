@@ -1,4 +1,4 @@
-    public function {{ methodName }}(AbstractModel ${{ class.variable }}){
+    public function {{ methodName }}(AbstractModel ${{ class.variable }}, bool $hydrate = true){
 
         if(!(${{ class.variable }} instanceof Models\{{ class.name }}Model)){
             $class = get_class(${{ class.variable }});
@@ -19,7 +19,11 @@
 
 {% if method.responseKey %}
         $data = $response["{{ method.responseKey }}"];
-        return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+        if($hydrate){
+            return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+        } else {
+            return $data;
+        }
 {% else %}
         return $response;
 {% endif %}
