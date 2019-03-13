@@ -31,7 +31,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      * @param bool $hydrate
      *
 {% if method.responseKey %}
-     * @return Models\{{ method.responseClass }}Model{{ method.returnsArray ? '[]' : '' }}|null
+     * @return Models\{{ method.responseClass }}Model{{ method.returnsArray ? '[]' : '' }}|array|null
 {% else %}
      * @return array|null
 {% endif %}
