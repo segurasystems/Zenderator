@@ -72,7 +72,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer
 {% endfor %}
 
 {% if hasUpdate or hasCreate %}
-    public function save(Models\{{ class.name }}Model ${{ class.variable }})
+    public function save(AbstractModel ${{ class.variable }})
     {
         $pks = ${{ class.variable }}->getPrimaryKeys();
         $pkCount = count($pks);
