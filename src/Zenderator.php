@@ -213,7 +213,23 @@ class Zenderator
         echo "\n\n";
         echo "In {$exception->getFile()}:{$exception->getLine()}";
         echo "\n\n";
-        echo $exception->getTraceAsString();
+        $trace = array_map(function ($a) {
+            return "{$a["file"]}: {$a["line"]}";
+        }, $exception->getTrace());
+        array_walk($trace, function (&$elem) {
+            $highlightLocations = [
+                '/app/src/',
+                '/app/tests/'
+            ];
+            foreach ($highlightLocations as $highlightLocation) {
+                if (strpos($elem, $highlightLocation) === 0) {
+                    $elem = "*** {$elem}";
+                }
+            }
+        });
+        foreach ($trace as $t) {
+            echo "{$t}\n";
+        }
         echo "\n\n";
         exit(1);
     }
