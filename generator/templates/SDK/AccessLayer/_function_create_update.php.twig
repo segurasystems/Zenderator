@@ -10,7 +10,7 @@
 {% endif %}
             $endpoint = "{{ method.pattern }}";
             $options = [];
-            $pks = ${{ class.variable }}->getPrimaryKeys();
+            $pks = ${{ class.variable }}->getOriginalPrimaryKeys();
             $endpoint = $this->replaceUrlElements($endpoint,$pks);
             $options["json"] = $data;
 
