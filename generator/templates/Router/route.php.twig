@@ -28,7 +28,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-    )
+    ){#
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Get All Fields')
@@ -65,7 +65,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/fields')
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-    )
+    )#}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Create')
