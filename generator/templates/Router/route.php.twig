@@ -31,6 +31,43 @@ $router = \Gone\AppCore\Router\Router::Instance()
     )
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class.name }} Get All Fields')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getFieldsRequest')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('getAllFields')
+                    ->setReturnsArray(true)
+                    ->setArguments([
+                        "fields" => [
+                            "default" => null,
+                            "description" => "Array of fields to return",
+                            "in" => "header",
+                            "required" => true,
+                            "type" => "array",
+                        ],
+                        "filter" => [
+                            "default" => null,
+                            "description" => "Filter object with rules to filter the results by",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => \Gone\SDK\Common\Filters\Filter::class,
+                        ],
+                        "types" => [
+                            "default" => null,
+                            "description" => "A key value array of the field and their appropriate php type",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => "array",
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
+            ->setHttpMethod('GET')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+    )
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Create')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':createRequest')
             ->setSdkProperties(
