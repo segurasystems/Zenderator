@@ -158,7 +158,6 @@ $router = \Gone\AppCore\Router\Router::Instance()
                 ],
             ])
     )
-#}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Update PK')
@@ -189,6 +188,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('PATCH')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
+#}
 {% for related in class.relatedData %}
 {% if loop.first %}
     //Related Data
