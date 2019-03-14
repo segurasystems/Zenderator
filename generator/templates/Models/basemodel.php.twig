@@ -38,7 +38,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
 {% for propertyName, data in class.properties %}
 {% if data.options is not empty %}
 {% for permittedValue in data.options %}
-    const {{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
+    const {{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_',' ':'_'}) }} = '{{ permittedValue }}';
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -53,7 +53,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
 {% endif %}
     const OPTIONS_{{ propertyName|upper }} = [
 {% for permittedValue in data.options %}
-        self::{{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }},
+        self::{{ propertyName|upper }}_{{ permittedValue|upper|replace({'-':'_',' ':'_'}) }},
 {% endfor %}
     ];
 {% endif %}
