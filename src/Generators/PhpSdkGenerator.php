@@ -93,9 +93,9 @@ class PhpSdkGenerator extends BaseGenerator
         foreach ($accessLayerData as $className => $class) {
             print str_pad("   > {$className}",40);
             print " Base";
-            $this->renderToFile(true, "/src/AccessLayer/Base/Base{$className}AccessLayer.php", "SDK/AccessLayer/baseaccesslayer.php.twig", ["class" => $class]);
+            $this->renderToFile(true, "/src/AccessLayers/Base/Base{$className}AccessLayer.php", "SDK/AccessLayers/baseaccesslayer.php.twig", ["class" => $class]);
             print " Main";
-            $this->renderToFile(false, "/src/AccessLayer/{$className}AccessLayer.php", "SDK/AccessLayer/accesslayer.php.twig", ["class" => $class]);
+            $this->renderToFile(false, "/src/AccessLayers/{$className}AccessLayer.php", "SDK/AccessLayers/accesslayer.php.twig", ["class" => $class]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";;
         }
     }
