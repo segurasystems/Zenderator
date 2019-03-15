@@ -85,24 +85,24 @@ class ViewModel extends Entity
             "relatedData" => $this->getRelatedData(),
             "isView"      => true,
             "viewData"    => $this->getViewModelData(),
-            "conditions"  => $this->getConditions(),
+            "conditions"  => $this->createConditionSet($this->getPropertyData(),$this->getPrimaryKeys()),
         ];
     }
 
-    public function getConditions(){
-        $properties = $this->getPropertyData();
+    public function createConditionSet($properties,$primaryKeys){
         $conditions = [];
         foreach ($properties as $propertyName => $property){
             $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
+            $required = !$property["nullable"] && !in_array($propertyName,$primaryKeys);
             $rule =
-                ( $property["nullable"] ? "nullable" : "required" )
+                ( $required ? "required" : "nullable" )
                 . "-" .
                 ( $type ) . ( $type === "enum" ? "-" . implode(".",$property["options"]) : '' )
                 . "-" .
                 ( $property["length"] );
             if(empty($conditions[$rule])){
                 $conditions[$rule] = [
-                    "required" => !$property["nullable"],
+                    "required" => $required,
                     "type" => $type,
                     "length" => $property["length"],
                     "fields" => [],
