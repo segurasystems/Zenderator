@@ -138,9 +138,36 @@ class HttpProvider implements DataProviderInterface
                 $properties[$propName] = $property;
             }
             $raw["properties"] = $properties;
+            $raw["conditions"] = $this->createConditionSet($properties);
             $modelData[$name] = $raw;
         }
         $this->modelData = $modelData;
+    }
+
+    public function createConditionSet($properties){
+        $conditions = [];
+        foreach ($properties as $propertyName => $property){
+            $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
+            $rule =
+                ( $property["nullable"] ? "nullable" : "required" )
+                . "-" .
+                ( $type ) . ( $type === "enum" ? "-" . implode(".",$property["options"]) : '' )
+                . "-" .
+                ( $property["length"] );
+            if(empty($conditions[$rule])){
+                $conditions[$rule] = [
+                    "required" => !$property["nullable"],
+                    "type" => $type,
+                    "length" => $property["length"],
+                    "fields" => [],
+                ];
+                if($type === "enum"){
+                    $conditions[$rule]["options"] = $property["options"];
+                }
+            }
+            $conditions[$rule]["fields"][] = $propertyName;
+        }
+        return array_values($conditions);
     }
 
     private function fetchRawData()
