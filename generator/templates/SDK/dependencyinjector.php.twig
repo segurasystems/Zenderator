@@ -13,8 +13,8 @@ class DependencyInjector
         };
 
 {% for accessLayer in accessLayers|sort %}
-        $container[AccessLayer\{{ accessLayer }}AccessLayer::class] = function(Container $container) {
-            return new AccessLayer\{{ accessLayer }}AccessLayer($container->get(Client::class)->getGuzzle());
+        $container[AccessLayers\{{ accessLayer }}AccessLayer::class] = function(Container $container) {
+            return new AccessLayer\s{{ accessLayer }}AccessLayer($container->get(Client::class)->getGuzzle());
         };
 {% endfor %}
 
