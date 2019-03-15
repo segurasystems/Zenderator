@@ -20,9 +20,9 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {
 {% for method in class.methods %}
 {% if method.function == "update" %}
-{% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'update','class':class,'method':method} %}
+{% include "SDK/AccessLayers/_function_create_update.php.twig" with {'methodName':'update','class':class,'method':method} %}
 {% elseif method.function == "create" %}
-{% include "SDK/AccessLayer/_function_create_update.php.twig" with {'methodName':'create','class':class,'method':method} %}
+{% include "SDK/AccessLayers/_function_create_update.php.twig" with {'methodName':'create','class':class,'method':method} %}
 {% else %}
     /**
 {% for name, argument in method.arguments %}
@@ -52,15 +52,15 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
         $options = [];
 
 {% if method.groupedArguments.query %}
-{% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'queryArgs','args':method.groupedArguments.query} %}
+{% include "SDK/AccessLayers/_method_args.php.twig" with {'name':'queryArgs','args':method.groupedArguments.query} %}
         $endpoint = $this->replaceUrlElements($endpoint,$queryArgs);
 {% endif %}
 {% if method.groupedArguments.body %}
-{% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'bodyArgs','args':method.groupedArguments.body} %}
+{% include "SDK/AccessLayers/_method_args.php.twig" with {'name':'bodyArgs','args':method.groupedArguments.body} %}
         $options["json"] = $bodyArgs;
 {% endif %}
 {% if method.groupedArguments.header %}
-{% include "SDK/AccessLayer/_method_args.php.twig" with {'name':'headerArgs','args':method.groupedArguments.header} %}
+{% include "SDK/AccessLayers/_method_args.php.twig" with {'name':'headerArgs','args':method.groupedArguments.header} %}
         $headerArgs = array_filter($headerArgs);
         array_walk($headerArgs,function(&$value, $key){$value = json_encode($value);});
         $options["headers"] = $headerArgs;
