@@ -1,0 +1,12 @@
+<?php
+namespace {{ class.namespace }}\Validators;
+use {{ class.namespace }}\Validators\Base\Base{{ class.name }}Validator;
+
+class {{ class.name }}Validator extends Base{{ class.name }}Validator
+{
+    public function getRules() {
+        $rules = [];
+
+        return array_merge(parent::getRules(),$rules);
+    }
+}
