@@ -73,6 +73,8 @@ class Zenderator
         APP_ROOT . "/src/Controllers",
         APP_ROOT . "/src/Models/Base",
         APP_ROOT . "/src/Models",
+        APP_ROOT . "/src/Validators",
+        APP_ROOT . "/src/Validators/Base",
         APP_ROOT . "/src/Routes",
         APP_ROOT . "/src/Services/Base",
         APP_ROOT . "/src/Services",
@@ -309,6 +311,24 @@ class Zenderator
         }
         return $columns;
     }
+
+    public function getFilesRelative($dir){
+
+        $dir .= "/";
+        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+
+        $files = array();
+        /** @var SplFileInfo $file */
+        foreach ($rii as $file) {
+            if (!$file->isDir()) {
+                $fullPath = $file->getPathname();
+                $files[] = explode($dir,$fullPath)[1];
+            }
+        }
+        return $files;
+    }
+
+
 
     public function makeZenderator($cleanByDefault = false)
     {
@@ -810,8 +830,6 @@ class Zenderator
             $allModelData[$model->getClassName()] = $renderData;
             // "Model" suite
             $this->makeCoreFilesForModel($model->getClassName(),$renderData);
-
-            $allModelData[$model->getClassName()]["has_soft_delete"] = $model->hasField($this->softDeletedField());
         }
 
         foreach ($views as $view) {
@@ -820,16 +838,7 @@ class Zenderator
             // "Model" suite
             $this->makeCoreFilesForModel($view->getClassName(),$renderData);
 
-            $allModelData[$view->getClassName()]["has_soft_delete"] = $view->hasField($this->softDeletedField());
-
         }
-
-        /*if(!$this->skipTemplate("Routes") && $this->routesSoftDeleted()){
-            $this->renderToFile(true,
-                APP_ROOT . "/src/Routes/Generated/_SoftDeleteRoutes.php",
-                "Router/softDeleteRoutes.php.twig",
-                ["models" => array_values($allModelData),"skip_routes"=>$this->getRoutesToSkip()]);
-        }*/
 
         // "DependencyInjector" suite
         if (!$this->skipTemplate("DependencyInjector")) {
@@ -848,7 +857,26 @@ class Zenderator
     }
 
     public function makeCoreFilesForModel($className, $renderData){
-        echo " > {$className}\n";
+        echo " > {$className}";
+
+        $base = __DIR__ . "/../generator/templates/Classes/";
+        $templateFiles = $this->getFilesRelative($base);
+        foreach ($templateFiles as $templateFile){
+            $parts = explode("/",$templateFile);
+            $type = $parts[0];
+            $base = strtolower($parts[1]) === "base";
+            $fname = explode(".",array_pop($parts));
+            array_pop($fname);
+            $fname = implode(".",$fname);
+            $file = APP_ROOT . "/src/" . implode("/",$parts) . "/";
+            $file .= str_replace("{classname}",$className,$fname);
+            if(!$this->skipTemplate($type) && !$this->skipTemplateForClass($type,$className)){
+                print "{$type}  ";
+                $this->renderToFile($base,$file, "Classes/{$templateFile}",$renderData);
+            }
+        }
+        print "\n";
+        return;
 
         #\Kint::dump($model->getRenderDataset());
         if (!$this->skipTemplate("Models") && !$this->skipModel($className)) {
@@ -880,6 +908,21 @@ class Zenderator
         // "Routes" suite
         if (!$this->skipTemplate("Routes") && !$this->skipRoute($className)) {
             $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$className}Route.php", "Router/route.php.twig", $renderData);
+        }
+    }
+
+    public function skipTemplateForClass($template,$class){
+        switch($template){
+            case "Models":
+                return $this->skipModel($class);
+            case "Services":
+                return $this->skipService($class);
+            case "Controllers":
+                return $this->skipController($class);
+            case "Routes":
+                return $this->skipRoute($class);
+            default:
+                return false;
         }
     }
 

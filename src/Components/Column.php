@@ -224,6 +224,9 @@ class Column extends Entity
      */
     public function getMaxLength()
     {
+        if($this->maxLength === null && $this->getDbType() === "datetime"){
+            return strlen("0000-00-00 00:00:00");
+        }
         return $this->maxLength;
     }
 
@@ -337,6 +340,9 @@ class Column extends Entity
      */
     public function setPermittedValues($permittedValues)
     {
+        if(is_array($permittedValues)) {
+            sort($permittedValues);
+        }
         $this->permittedValues = $permittedValues;
         return $this;
     }
@@ -496,7 +502,7 @@ class Column extends Entity
             "phpType"   => $this->getPhpType(),
             "unique"    => $this->isUnique(),
             "nullable"  => $this->isNullable(),
-            "length"    => $this->getMaxLength(),
+            "length"    => intval($this->getMaxLength()),
             "related"   => $this->getRelatedData(),
             "remote"    => $this->getRemoteData(),
             "className" => $this->getClassName(),

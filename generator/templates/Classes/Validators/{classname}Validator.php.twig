@@ -1,12 +1,19 @@
 <?php
 namespace {{ class.namespace }}\Validators;
+
+use Gone\SDK\Common\Validator\ValidatorRule;
+use Gone\SDK\Common\Validator\ValidatorRuleCollection;
 use {{ class.namespace }}\Validators\Base\Base{{ class.name }}Validator;
 
 class {{ class.name }}Validator extends Base{{ class.name }}Validator
 {
-    public function getRules() {
-        $rules = [];
-
-        return array_merge(parent::getRules(),$rules);
+    public function getRules() : ValidatorRuleCollection {
+        return parent::getRules()
+//          ->addRule(
+//              ValidatorRule::Factory()
+//                  ->setFields(["name","text"])
+//                  ->setRule(Validator::stringType()->length(1,100)
+//          )
+        ;
     }
 }

@@ -85,7 +85,35 @@ class ViewModel extends Entity
             "relatedData" => $this->getRelatedData(),
             "isView"      => true,
             "viewData"    => $this->getViewModelData(),
+            "conditions"  => $this->getConditions(),
         ];
+    }
+
+    public function getConditions(){
+        $properties = $this->getPropertyData();
+        $conditions = [];
+        foreach ($properties as $propertyName => $property){
+            $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
+            $rule =
+                ( $property["nullable"] ? "nullable" : "required" )
+                . "-" .
+                ( $type ) . ( $type === "enum" ? "-" . implode(".",$property["options"]) : '' )
+                . "-" .
+                ( $property["length"] );
+            if(empty($conditions[$rule])){
+                $conditions[$rule] = [
+                    "required" => !$property["nullable"],
+                    "type" => $type,
+                    "length" => $property["length"],
+                    "fields" => [],
+                ];
+                if($type === "enum"){
+                    $conditions[$rule]["options"] = $property["options"];
+                }
+            }
+            $conditions[$rule]["fields"][] = $propertyName;
+        }
+        return array_values($conditions);
     }
 
     public function getRoutePrimaryKeys(){
