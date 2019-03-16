@@ -857,10 +857,11 @@ class Zenderator
     }
 
     public function makeCoreFilesForModel($className, $renderData){
-        echo str_pad(" > {$className} ",30);
+        echo str_pad(" > {$className} ",35);
 
         $base = __DIR__ . "/../generator/templates/Classes/";
         $templateFiles = $this->getFilesRelative($base);
+        $printed = [];
         foreach ($templateFiles as $templateFile){
             $parts = explode("/",$templateFile);
             $type = $parts[0];
@@ -870,11 +871,14 @@ class Zenderator
             $fname = implode(".",$fname);
             $file = APP_ROOT . "/src/" . implode("/",$parts) . "/";
             $file .= str_replace("{classname}",$className,$fname);
-            print str_pad("  | {$type}  ",20);
+            if(!isset($printed[$type])) print str_pad("  | {$type}  ",20);
             if(!$this->skipTemplate($type) && !$this->skipTemplateForClass($type,$className)){
-                print "YES  ";
+                if(!isset($printed[$type])) print "YES  ";
                 $this->renderToFile($base,$file, "Classes/{$templateFile}",$renderData);
-            } else  { print "NO  "; }
+            } else  {
+                if(!isset($printed[$type])) print "NO   ";
+            }
+            $printed[$type] = true;
         }
         print "\n";
         return;
