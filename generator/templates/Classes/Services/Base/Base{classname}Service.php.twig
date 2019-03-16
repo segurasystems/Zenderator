@@ -4,6 +4,7 @@ namespace {{ class.namespace }}\Services\Base;
 
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
+use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\Filters\FilterCondition;
 use \{{ class.namespace }}\AccessLayers;
@@ -11,9 +12,11 @@ use \{{ class.namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
 
+{% set SKIP_ARGS = config.routes.skip_argument %}
+
 {% set HAS_SKIP_ARG = false %}
-{% for arg in routes.skip_argument %}
-{% if arg in class.properties %}
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
 {% set HAS_SKIP_ARG = true %}
 {% endif %}
 {% endfor %}
@@ -75,8 +78,8 @@ abstract class Base{{ class.name }}Service
     }
 
     public function getByPK($pk){
-{% for arg in routes.skip_argument %}
-{% if arg in class.properties %}
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
         $_pk[Models\{{ class.name }}Model::FIELD_{{ arg|upper }}] = $this->get{{ class.properties[arg].name }}();
 {% endif %}
 {% endfor %}
@@ -90,30 +93,28 @@ abstract class Base{{ class.name }}Service
     }
 
 {% if HAS_SKIP_ARG %}
-
-{% for arg in routes.skip_argument %}
-{% if arg in class.properties %}
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
     abstract protected function get{{ class.properties[arg].name }}();
 
 {% endif %}
 {% endfor %}
-
-    public function save(AbstractModel $user)
+    public function save(AbstractModel ${{ class.variable }})
     {
         /** @var Models\{{ class.name }}Model ${{ class.variable }} */
-{% for arg in routes.skip_argument %}
-{% if arg in class.properties %}
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
         ${{ class.variable }}->set{{ class.properties[arg].name }}($this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
-        return parent::save($user);
+        return parent::save(${{ class.variable }});
     }
 
     public function get(Filter $filter)
     {
-{% for arg in routes.skip_argument %}
-{% if arg in class.properties %}
-        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }});
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
         return parent::get($filter);
@@ -121,16 +122,15 @@ abstract class Base{{ class.name }}Service
 
     public function getAll(Filter $filter): array
     {
-{% for arg in routes.skip_argument %}
-{% if arg in class.properties %}
-        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }});
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
         return parent::getAll($filter);
     }
 
 {% endif %}
-
 {% for related in class.relatedData %}
 {% if loop.first %}
     //Related Data
