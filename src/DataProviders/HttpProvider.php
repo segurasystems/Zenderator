@@ -149,17 +149,18 @@ class HttpProvider implements DataProviderInterface
         foreach ($properties as $propertyName => $property){
             $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
             $required = !$property["nullable"] && !in_array($propertyName,$primaryKeys);
+            $length = $property["length"] ?? null;
             $rule =
                 ( $required ? "required" : "nullable" )
                 . "-" .
                 ( $type ) . ( $type === "enum" ? "-" . implode(".",$property["options"]) : '' )
                 . "-" .
-                ( $property["length"] );
+                ( $length );
             if(empty($conditions[$rule])){
                 $conditions[$rule] = [
                     "required" => $required,
                     "type" => $type,
-                    "length" => $property["length"],
+                    "length" => $length,
                     "fields" => [],
                 ];
                 if($type === "enum"){
