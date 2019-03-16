@@ -6,7 +6,7 @@ use Gone\SDK\Common\Validator\ValidatorRule;
 use Gone\SDK\Common\Validator\ValidatorRuleCollection;
 use Respect\Validation\Validator;
 
-class Base{{ class.name }}Validator extends AbstractValidator
+abstract class Base{{ class.name }}Validator extends AbstractValidator
 {
     public function getRules() : ValidatorRuleCollection
     {

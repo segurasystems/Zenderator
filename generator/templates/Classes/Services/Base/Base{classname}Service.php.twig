@@ -11,6 +11,13 @@ use \{{ class.namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
 
+{% set HAS_SKIP_ARG = false %}
+{% for arg in routes.skip_argument %}
+{% if arg in class.properties %}
+{% set HAS_SKIP_ARG = true %}
+{% endif %}
+{% endfor %}
+
 {% include '_overwrite_warning.twig' %}
 
 // @todo: Make all Services implement a ServicesInterface
@@ -68,6 +75,11 @@ abstract class Base{{ class.name }}Service
     }
 
     public function getByPK($pk){
+{% for arg in routes.skip_argument %}
+{% if arg in class.properties %}
+        $_pk[Models\{{ class.name }}Model::FIELD_{{ arg|upper }}] = $this->get{{ class.properties[arg].name }}();
+{% endif %}
+{% endfor %}
         $_pk = [];
         foreach($pk as $property => $value){
             if(in_array($property,Models\{{ class.name }}Model::PRIMARY_KEYS)){
@@ -76,6 +88,48 @@ abstract class Base{{ class.name }}Service
         }
         return parent::getByPK($_pk);
     }
+
+{% if HAS_SKIP_ARG %}
+
+{% for arg in routes.skip_argument %}
+{% if arg in class.properties %}
+    abstract protected function get{{ class.properties[arg].name }}();
+
+{% endif %}
+{% endfor %}
+
+    public function save(AbstractModel $user)
+    {
+        /** @var Models\{{ class.name }}Model ${{ class.variable }} */
+{% for arg in routes.skip_argument %}
+{% if arg in class.properties %}
+        ${{ class.variable }}->set{{ class.properties[arg].name }}($this->get{{ class.properties[arg].name }}());
+{% endif %}
+{% endfor %}
+        return parent::save($user);
+    }
+
+    public function get(Filter $filter)
+    {
+{% for arg in routes.skip_argument %}
+{% if arg in class.properties %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }});
+{% endif %}
+{% endfor %}
+        return parent::get($filter);
+    }
+
+    public function getAll(Filter $filter): array
+    {
+{% for arg in routes.skip_argument %}
+{% if arg in class.properties %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }});
+{% endif %}
+{% endfor %}
+        return parent::getAll($filter);
+    }
+
+{% endif %}
 
 {% for related in class.relatedData %}
 {% if loop.first %}
