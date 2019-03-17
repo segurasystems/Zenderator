@@ -100,7 +100,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
         return self::PRIMARY_KEYS;
     }
 
-    public static function getPropertyMeta()
+    public static function getPropertyMeta(): array
     {
         return [
 {% for propertyName, data in class.properties %}
