@@ -14,8 +14,9 @@ class HttpProvider implements DataProviderInterface
     private $appName;
     private $modelData;
     private $accessLayerData;
+    private $config = [];
 
-    public function __construct(string $baseURI, string $namespace, string $appName)
+    public function __construct(string $baseURI, string $namespace, string $appName, $config = [])
     {
         $this->namespace = $namespace;
         $this->appName = $appName;
@@ -26,6 +27,7 @@ class HttpProvider implements DataProviderInterface
                 'Accept' => 'application/json'
             ]
         ]);
+        $this->config = $config;
     }
 
     public function getBaseClassNameSpace($jsonSafe = false): string
@@ -138,17 +140,17 @@ class HttpProvider implements DataProviderInterface
                 $properties[$propName] = $property;
             }
             $raw["properties"] = $properties;
-            $raw["conditions"] = $this->createConditionSet($properties,$raw["primaryKeys"]);
+            $raw["conditions"] = $this->createConditionSet($properties,$raw);
             $modelData[$name] = $raw;
         }
         $this->modelData = $modelData;
     }
 
-    public function createConditionSet($properties,$primaryKeys){
+    public function createConditionSet($properties,$raw){
         $conditions = [];
         foreach ($properties as $propertyName => $property){
             $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
-            $required = !$property["nullable"] && !in_array($propertyName,$primaryKeys);
+            $required = $this->fieldRequired($propertyName,!$property["nullable"],$raw);
             $length = $property["length"] ?? null;
             $rule =
                 ( $required ? "required" : "nullable" )
@@ -171,6 +173,30 @@ class HttpProvider implements DataProviderInterface
         }
         return array_values($conditions);
     }
+
+    private function fieldRequired($field,$required,$raw){
+        if(in_array($field,$raw["primaryKeys"])){
+            return false;
+        }
+        if(in_array($field,$this->getSkippedArgsConfig())){
+            return false;
+        }
+        return $required;
+    }
+
+    private function getSkippedArgsConfig(){
+        return $this->getRoutesConfig()["skip_argument"] ?? [];
+    }
+
+    private function getRoutesConfig(){
+        return $this->getConfig()["routes"] ?? [];
+    }
+
+    public function getConfig(){
+        return $this->config;
+    }
+
+
 
     private function fetchRawData()
     {
