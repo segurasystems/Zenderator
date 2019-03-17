@@ -179,9 +179,6 @@ class HttpProvider implements DataProviderInterface
         if(in_array($field,$raw["primaryKeys"])){
             return false;
         }
-        if(in_array($field,$this->getSkippedArgsConfig())){
-            return false;
-        }
         return $required;
     }
 
