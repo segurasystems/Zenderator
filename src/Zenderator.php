@@ -865,7 +865,7 @@ class Zenderator
         foreach ($templateFiles as $templateFile){
             $parts = explode("/",$templateFile);
             $type = $parts[0];
-            $base = strtolower($parts[1]) === "base";
+            $base = strtolower($parts[1]) === "base" || strtolower($parts[1]) === "generated";
             $fname = explode(".",array_pop($parts));
             array_pop($fname);
             $fname = implode(".",$fname);
