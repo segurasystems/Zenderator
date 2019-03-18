@@ -51,7 +51,7 @@ abstract class Base{{ class.name }}Service
         AccessLayers\{{ class.name }}AccessLayer ${{ class.variable }}AccessLayer
     )
     {
-{% for variable,foreign in class.relatedData %}
+{% for variable,foreign in class.foreignClasses %}
 {% if foreign != class.name %}
         $this->{{ variable }}AccessLayer = ${{ variable }}AccessLayer;
 {% endif %}
