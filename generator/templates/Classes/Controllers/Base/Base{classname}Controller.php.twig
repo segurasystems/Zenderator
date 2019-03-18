@@ -89,7 +89,7 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
 {% endfor %}
         ];
 
-        $filter = $this->parseFilters($request, $response);
+        $filter = $this->parseFilters($request);
 
         ${{ field.remote.variablePlural }} = $this->getService()->get{{ field.remote.variablePluralUC }}($pks,$filter);
 
