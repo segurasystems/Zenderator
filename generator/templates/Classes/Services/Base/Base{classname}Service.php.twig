@@ -28,50 +28,32 @@ abstract class Base{{ class.name }}Service
     extends AbstractService
 //    implements ServiceInterface
 {
-{% if class.relatedData %}
-    // Related Objects Table Access Layers
-{% for related in class.relatedData %}
-{% if related.class.name != class.name %}
-    /** @var AccessLayers\{{ related.class.name }}AccessLayer */
-    protected ${{ related.class.variable }}AccessLayer;
-{% endif %}
-{% endfor %}
-
-{% endif %}
-{% if class.remoteData %}
-    // Remote Constraints Table Access Layers
-{% for remote in class.remoteData %}
-{% if remote.class.name != class.name %}
-    /** @var AccessLayers\{{ remote.class.name }}AccessLayer */
-    protected ${{ remote.class.variable }}AccessLayer;
-{% endif %}
-{% endfor %}
 
     protected $modelClass = Models\{{ class.name }}Model::class;
 
-{% endif %}
-    public function __construct(
-{% for related in class.relatedData %}
-{% if related.class.name != class.name %}
-        AccessLayers\{{ related.class.name }}AccessLayer ${{ related.class.variable }}AccessLayer,
+{% if class.foreignClasses %}
+    // Remote & Related Objects Table Access Layers
+{% for variable,foreign in class.foreignClasses %}
+{% if foreign != class.name %}
+    /** @var AccessLayers\{{ foreign }}AccessLayer */
+    protected ${{ variable }}AccessLayer;
 {% endif %}
 {% endfor %}
-{% for remote in class.remoteData %}
-{% if remote.class.name != class.name %}
-        AccessLayers\{{ remote.class.name }}AccessLayer ${{ remote.class.variable }}AccessLayer,
+
+{% endif %}
+
+    public function __construct(
+{% for variable,foreign in class.foreignClasses %}
+{% if foreign != class.name %}
+        AccessLayers\{{ foreign }}AccessLayer ${{ variable }}AccessLayer,
 {% endif %}
 {% endfor %}
         AccessLayers\{{ class.name }}AccessLayer ${{ class.variable }}AccessLayer
     )
     {
-{% for related in class.relatedData %}
-{% if related.class.name != class.name %}
-        $this->{{ related.class.variable }}AccessLayer = ${{ related.class.variable }}AccessLayer;
-{% endif %}
-{% endfor %}
-{% for remote in class.remoteData %}
-{% if remote.class.name != class.name %}
-        $this->{{ remote.class.variable }}AccessLayer = ${{ remote.class.variable }}AccessLayer;
+{% for variable,foreign in class.relatedData %}
+{% if foreign != class.name %}
+        $this->{{ variable }}AccessLayer = ${{ variable }}AccessLayer;
 {% endif %}
 {% endfor %}
         parent::__construct(${{ class.variable }}AccessLayer);

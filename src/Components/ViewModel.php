@@ -83,10 +83,29 @@ class ViewModel extends Entity
             'database'    => $this->getDatabase(),
             "remoteData"  => $this->getRemoteData(),
             "relatedData" => $this->getRelatedData(),
+            "foreignClasses" => $this->getForeignClassList(),
             "isView"      => true,
             "viewData"    => $this->getViewModelData(),
             "conditions"  => $this->createConditionSet($this->getPropertyData(),$this->getPrimaryKeys()),
         ];
+    }
+
+    public function getForeignClassList(){
+        $list = [];
+        $relateds = $this->getRelatedData();
+        $remotes = $this->getRemoteData();
+
+        foreach ($relateds as $related){
+            $list[lcfirst($related["class"]["name"])] = $related["class"]["name"];
+        }
+
+        foreach ($remotes as $remote){
+            $list[lcfirst($remote["class"]["name"])] = $remote["class"]["name"];
+        }
+
+        ksort($list);
+
+        return $list;
     }
 
     public function createConditionSet($properties,$primaryKeys){
