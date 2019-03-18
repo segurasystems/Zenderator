@@ -95,7 +95,12 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     }
 
 {% endfor %}
-    public function getPrimaryKeyFields(): array
+    public static function getPublicPrimaryKeyFields(): array
+    {
+        return self::getPrimaryKeyFields();
+    }
+
+    public static function getPrimaryKeyFields(): array
     {
         return self::PRIMARY_KEYS;
     }
