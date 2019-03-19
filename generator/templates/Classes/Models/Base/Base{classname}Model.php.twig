@@ -115,7 +115,7 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     {
         return [
 {% for field,rule in class.cleaningRules %}
-            self::FIELD_{{ field|upper }} => "{{ rule }}",
+            self::FIELD_{{ field|upper }} => self::CLEANRULE_{{ rule|upper }},
 {% endfor %}
         ];
     }
