@@ -110,6 +110,17 @@ abstract class Base{{ class.name }}Model extends AbstractModel
         return self::getPropertyMeta();
     }
 
+{% if class.cleaningRules %}
+    public static function getCleaningRules(): array
+    {
+        return [
+{% for field,rule in class.cleaningRules %}
+            self::FIELD_{{ field|upper }} => "{{ rule }}",
+{% endfor %}
+        ];
+    }
+
+{% endif %}
     public static function getPropertyMeta(): array
     {
         return [
