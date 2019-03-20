@@ -59,26 +59,30 @@ class PhpSdkGenerator extends BaseGenerator
 
     private function generateCoreFiles(){
         $coreFiles = [
-            "AccessLayer",
+            "AccessLayer" => "SDK",
             "Model",
             "Validator",
             "Cleaner",
         ];
-        foreach ($coreFiles as $coreFile){
-            $this->generateCoreFile($coreFile);
+        foreach ($coreFiles as $index=>$coreFile){
+            if(!is_numeric($index)){
+                $this->generateCoreFile($index,$coreFile);
+            } else {
+                $this->generateCoreFile($coreFile);
+            }
         }
     }
 
-    private function generateCoreFile(string $fileType)
+    private function generateCoreFile(string $fileType,$templateFolder = "Classes")
     {
         print "\nGenerating {$fileType}s ...\n";
         $modelData = $this->getDataProvider()->getModelData();
         foreach ($modelData as $className => $class) {
             print str_pad("   > {$className}",40);
             print " Base";
-            $this->renderToFile(true, "/src/{$fileType}s/Base/Base{$className}{$fileType}.php", "Classes/{$fileType}s/Base/Base{classname}{$fileType}.php.twig", ["class" => $class]);
+            $this->renderToFile(true, "/src/{$fileType}s/Base/Base{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/Base/Base{classname}{$fileType}.php.twig", ["class" => $class]);
             print " Main";
-            $this->renderToFile(false, "/src/{$fileType}s/{$className}{$fileType}.php", "Classes/{$fileType}s/{classname}{$fileType}.php.twig", ["class" => $class]);
+            $this->renderToFile(false, "/src/{$fileType}s/{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/{classname}{$fileType}.php.twig", ["class" => $class]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
         }
     }
