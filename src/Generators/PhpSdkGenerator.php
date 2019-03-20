@@ -58,25 +58,17 @@ class PhpSdkGenerator extends BaseGenerator
     }
 
     private function generateCoreFiles(){
-        $coreFiles = [
-            "AccessLayer" => "SDK",
-            "Model",
-            "Validator",
-            "Cleaner",
-        ];
-        foreach ($coreFiles as $index=>$coreFile){
-            if(!is_numeric($index)){
-                $this->generateCoreFile($index,$coreFile);
-            } else {
-                $this->generateCoreFile($coreFile);
-            }
-        }
+        $modelData = $this->getDataProvider()->getModelData();
+        $accessLayerData = $this->getDataProvider()->getAccessLayerData();
+        $this->generateCoreFile($modelData,"Model");
+        $this->generateCoreFile($modelData,"Validator");
+        $this->generateCoreFile($modelData,"Cleaner");
+        $this->generateCoreFile($accessLayerData,"AccessLayer", "SDK");
     }
 
-    private function generateCoreFile(string $fileType,$templateFolder = "Classes")
+    private function generateCoreFile($modelData, string $fileType,$templateFolder = "Classes")
     {
         print "\nGenerating {$fileType}s ...\n";
-        $modelData = $this->getDataProvider()->getModelData();
         foreach ($modelData as $className => $class) {
             print str_pad("   > {$className}",40);
             print " Base";
