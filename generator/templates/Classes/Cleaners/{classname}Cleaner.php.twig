@@ -1,0 +1,15 @@
+<?php
+namespace {{ class.namespace }}\Cleaners;
+use {{ class.namespace }}\Cleaners\Base\Base{{ class.name }}Cleaner;
+
+class {{ class.name }}Cleaner extends Base{{ class.name }}Cleaner
+{
+    public function getRules() {
+        $rules = parent::getRules();
+        //$rules[] = [
+        //    self::CLEANER_FIELDS => [ExampleModel::FIELD_EXAMPLE1,ExampleModel::FIELD_EXAMPLE2],
+        //    self::CLEANER_RULES => [self::RULE_TRIM],
+        //];
+        return $rules;
+    }
+}

@@ -1,0 +1,16 @@
+<?php
+namespace {{ class.namespace }}\Cleaners\Base;
+
+use Gone\SDK\Common\Cleaner\AbstractCleaner;
+
+/**
+ * Class Base{{ class.name }}Cleaner
+ *
+ * @package {{ class.namespace }}\Cleaners\Base
+ */
+abstract class Base{{ class.name }}Cleaner extends AbstractCleaner
+{
+    public function getRules() {
+        return [];
+    }
+}
