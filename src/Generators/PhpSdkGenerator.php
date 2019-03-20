@@ -13,9 +13,7 @@ class PhpSdkGenerator extends BaseGenerator
 
     public function generate()
     {
-        $this->generateAccessLayers();
-        $this->generateValidators();
-        $this->generateModels();
+        $this->generateCoreFiles();
         //$this->generateTests($packName, $routeRenderData);
         $this->generateBaseFiles();
 
@@ -59,44 +57,29 @@ class PhpSdkGenerator extends BaseGenerator
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
     }
 
-    private function generateModels()
+    private function generateCoreFiles(){
+        $coreFiles = [
+            "AccessLayer",
+            "Model",
+            "Validator",
+            "Cleaner",
+        ];
+        foreach ($coreFiles as $coreFile){
+            $this->generateCoreFile($coreFile);
+        }
+    }
+
+    private function generateCoreFile(string $fileType)
     {
-        print "\nGenerating Models ...\n";
+        print "\nGenerating {$fileType}s ...\n";
         $modelData = $this->getDataProvider()->getModelData();
         foreach ($modelData as $className => $class) {
             print str_pad("   > {$className}",40);
             print " Base";
-            $this->renderToFile(true, "/src/Models/Base/Base{$className}Model.php", "Classes/Models/Base/Base{classname}Model.php.twig", ["class" => $class]);
+            $this->renderToFile(true, "/src/{$fileType}s/Base/Base{$className}{$fileType}.php", "Classes/{$fileType}s/Base/Base{classname}{$fileType}.php.twig", ["class" => $class]);
             print " Main";
-            $this->renderToFile(false, "/src/Models/{$className}Model.php", "Classes/Models/{classname}Model.php.twig", ["class" => $class]);
+            $this->renderToFile(false, "/src/{$fileType}s/{$className}{$fileType}.php", "Classes/{$fileType}s/{classname}{$fileType}.php.twig", ["class" => $class]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-        }
-    }
-
-    private function generateValidators(){
-        print "\nGenerating Validators ...\n";
-        $modelData = $this->getDataProvider()->getModelData();
-        foreach ($modelData as $className => $class) {
-            print str_pad("   > {$className}",40);
-            print " Base";
-            $this->renderToFile(true, "/src/Validators/Base/Base{$className}Validator.php", "Classes/Validators/Base/Base{classname}Validator.php.twig", ["class" => $class]);
-            print " Main";
-            $this->renderToFile(false, "/src/Validators/{$className}Validator.php", "Classes/Validators/{classname}Validator.php.twig", ["class" => $class]);
-            echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-        }
-    }
-
-    private function generateAccessLayers()
-    {
-        print "\nGenerating AccessLayers ...\n";
-        $accessLayerData = $this->getDataProvider()->getAccessLayerData();
-        foreach ($accessLayerData as $className => $class) {
-            print str_pad("   > {$className}",40);
-            print " Base";
-            $this->renderToFile(true, "/src/AccessLayers/Base/Base{$className}AccessLayer.php", "SDK/AccessLayers/baseaccesslayer.php.twig", ["class" => $class]);
-            print " Main";
-            $this->renderToFile(false, "/src/AccessLayers/{$className}AccessLayer.php", "SDK/AccessLayers/accesslayer.php.twig", ["class" => $class]);
-            echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";;
         }
     }
 
