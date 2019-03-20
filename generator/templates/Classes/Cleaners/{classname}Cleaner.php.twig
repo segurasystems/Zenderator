@@ -4,7 +4,7 @@ use {{ class.namespace }}\Cleaners\Base\Base{{ class.name }}Cleaner;
 
 class {{ class.name }}Cleaner extends Base{{ class.name }}Cleaner
 {
-    public function getRules() {
+    public function getRules() : array {
         $rules = parent::getRules();
         //$rules[] = [
         //    self::CLEANER_FIELDS => [ExampleModel::FIELD_EXAMPLE1,ExampleModel::FIELD_EXAMPLE2],
