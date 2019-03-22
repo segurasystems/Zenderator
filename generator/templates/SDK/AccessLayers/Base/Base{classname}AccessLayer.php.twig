@@ -115,12 +115,11 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
         Filter $filter = null,
         bool $hydrate = true
     ) {
-        $count = true;
         $endpoint = "{{ method.pattern }}";
         $options = [];
 
         $headerArgs["filter"] = $filter;
-        $headerArgs["count"] = $count;
+        $headerArgs["count"] = true;
         $headerArgs = array_filter($headerArgs);
         array_walk($headerArgs, function (&$value, $key) {
             $value = json_encode($value);
