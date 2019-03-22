@@ -130,7 +130,7 @@ abstract class Base{{ class.name }}Service
 {% endif %}
 {% endfor %}
         if(empty($type)){
-            $type = constant("Models\{{ class.name }}Model::FIELD_" . strtoupper($field));
+            $type = constant("\{{ class.namespace }}\Models\{{ class.name }}Model::FIELD_" . strtoupper($field));
         }
         return parent::getAllField($field, $filter, $type);
     }
@@ -144,7 +144,7 @@ abstract class Base{{ class.name }}Service
 {% endfor %}
         foreach ($fields as $field){
             if(empty($types[$field])){
-                $types[$field] = constant("Models\{{ class.name }}Model::FIELD_" . strtoupper($field));
+                $types[$field] = constant("\{{ class.namespace }}\Models\{{ class.name }}Model::FIELD_" . strtoupper($field));
             }
         }
         return parent::getAllFields($fields, $filter, $types);
