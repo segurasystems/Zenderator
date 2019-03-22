@@ -109,7 +109,7 @@ abstract class Base{{ class.name }}Service
         $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
-        return parent::get($filter);
+        return parent::count($filter);
     }
 
     public function getAll(Filter $filter): array
