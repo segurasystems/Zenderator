@@ -40,14 +40,22 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      */
     public function {{ method.function }}(
 {% for name, argument in method.arguments %}
+{% if argument.editable %}
 {% if argument.required %}
         {{ argument.phpType }} ${{ name }},
 {% else %}
         {{ argument.phpType }} ${{ name }} = {{ argument.default|json_encode()|raw }},
 {% endif %}
+{% endif %}
 {% endfor %}
         bool $hydrate = true
     ){
+
+{% for name, argument in method.arguments %}
+{% if not argument.editable %}
+        ${{ name }} = {{ argument.default|json_encode()|raw }};
+{% endif %}
+{% endfor %}
         $endpoint = "{{ method.pattern }}";
         $options = [];
 

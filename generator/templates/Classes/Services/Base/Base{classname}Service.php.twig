@@ -102,6 +102,16 @@ abstract class Base{{ class.name }}Service
         return parent::get($filter);
     }
 
+    public function count(Filter $filter = null) : int
+    {
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
+{% endif %}
+{% endfor %}
+        return parent::get($filter);
+    }
+
     public function getAll(Filter $filter): array
     {
 {% for arg in SKIP_ARGS %}

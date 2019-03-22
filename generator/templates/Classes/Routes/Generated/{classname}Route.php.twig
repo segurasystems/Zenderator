@@ -36,6 +36,38 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+    )->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class.name }} Count')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getAllRequest')
+            ->setSdkProperties(
+                $baseSKDData
+                    ->setFunction('count')
+                    ->setReturnsArray(false)
+                    ->setHydratable(false)
+                    ->setArguments([
+                        "filter" => [
+                            "default" => null,
+                            "description" => "Filter object with rules to filter the list results by",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => \Gone\SDK\Common\Filters\Filter::class,
+                        ],
+                        "count" => [
+                            "default" => true,
+                            "description" => "flag to return the count",
+                            "in" => "header",
+                            "required" => true,
+                            "type" => "array",
+                            "cancelHydrate" => false,
+                            "editable" => false,
+                        ],
+                    ])
+            )
+            ->setRouterPattern('/v1/{{ class.plural|lower }}')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
+            ->setHttpMethod('GET')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     ){#
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
