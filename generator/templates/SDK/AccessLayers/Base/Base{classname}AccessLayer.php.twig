@@ -26,7 +26,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% else %}
     /**
 {% for name, argument in method.arguments %}
-     * @param {{ argument.phpType }} ${{ name }}
+     * @param {{ argument.phpType }} ${{ name }} {{ argument.description }}
 {% endfor %}
      * @param bool $hydrate
      *
