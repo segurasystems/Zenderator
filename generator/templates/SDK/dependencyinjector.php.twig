@@ -1,19 +1,19 @@
 <?php
 namespace {{ classNamespace }};
 
-use Slim\Container;
+use Psr\Container\ContainerInterface;
 
 class DependencyInjector
 {
-    public static function Setup(Container $container,$config = []) {
+    public static function Setup(ContainerInterface $container,$config = []) {
 
-        $container[Client::class] = function(Container $container) use ($config) {
+        $container[Client::class] = function(ContainerInterface $container) use ($config) {
             $client = new Client($config["baseUrl"] ?? Client::DEFAULT_BASE_URL,$config["extraHeaders"] ?? []);
             return $client;
         };
 
 {% for accessLayer in accessLayers|sort %}
-        $container[AccessLayers\{{ accessLayer }}AccessLayer::class] = function(Container $container) {
+        $container[AccessLayers\{{ accessLayer }}AccessLayer::class] = function(ContainerInterface $container) {
             return new AccessLayers\{{ accessLayer }}AccessLayer($container->get(Client::class)->getGuzzle());
         };
 {% endfor %}
