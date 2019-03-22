@@ -122,6 +122,34 @@ abstract class Base{{ class.name }}Service
         return parent::getAll($filter);
     }
 
+    public function getAllField(string $field, Filter $filter = null, string $type = null)
+    {
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
+{% endif %}
+{% endfor %}
+        if(empty($type)){
+            $type = constant("Models\{{ class.name }}Model::FIELD_" . strtoupper($field));
+        }
+        return parent::getAllField($field, $filter, $type);
+    }
+
+    public function getAllFields(array $fields, Filter $filter = null, array $types = [])
+    {
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        $filter->addWhere(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
+{% endif %}
+{% endfor %}
+        foreach ($fields as $field){
+            if(empty($types[$field])){
+                $types[$field] = constant("Models\{{ class.name }}Model::FIELD_" . strtoupper($field));
+            }
+        }
+        return parent::getAllFields($fields, $filter, $types);
+    }
+
 {% endif %}
 {% for related in class.relatedData %}
 {% if loop.first %}
