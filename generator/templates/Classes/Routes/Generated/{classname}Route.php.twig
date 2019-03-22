@@ -22,6 +22,14 @@ $router = \Gone\AppCore\Router\Router::Instance()
                             "required" => false,
                             "type" => \Gone\SDK\Common\Filters\Filter::class,
                         ],
+                        "fields" => [
+                            "default" => null,
+                            "description" => "Array of fields you want returned",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => \Gone\SDK\Common\Filters\Filter::class,
+                            "cancelHydrate" => true,
+                        ],
                     ])
             )
             ->setRouterPattern('/v1/{{ class.plural|lower }}')
