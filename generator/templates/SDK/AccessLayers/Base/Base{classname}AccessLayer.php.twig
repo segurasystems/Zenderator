@@ -73,7 +73,13 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
         );
 {% if method.responseKey %}
         $data = $response["{{ method.responseKey }}"];
-        if($hydrate){
+        if($hydrate
+{% for name, argument in method.arguments %}
+{% if argument.cancelHydrate %}
+        && ${{ name }} === null
+{% endif %}
+{% endfor %}
+){
             return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
         } else {
             return $data;
