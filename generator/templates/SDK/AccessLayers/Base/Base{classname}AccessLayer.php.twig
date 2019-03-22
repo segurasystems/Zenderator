@@ -100,6 +100,43 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
     }
 {% endif %}
 
+{% if method.function == "getAll" %}
+
+    /**
+     * @param Filter $filter Filter object with rules to filter the list results by
+     * @param bool $hydrate
+     *
+     * @throws Exceptions\SDKException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return Models\UserModel|array|null
+     */
+    public function count(
+        Filter $filter = null,
+        bool $hydrate = true
+    ) {
+        $count = true;
+        $endpoint = "{{ method.pattern }}";
+        $options = [];
+
+        $headerArgs["filter"] = $filter;
+        $headerArgs["count"] = $count;
+        $headerArgs = array_filter($headerArgs);
+        array_walk($headerArgs, function (&$value, $key) {
+            $value = json_encode($value);
+        });
+        $options["headers"] = $headerArgs;
+
+        $response = $this->request(
+            "GET",
+            $endpoint,
+            $options
+        );
+        $data = $response["{{ method.responseKey }}"];
+        return $data;
+    }
+
+{% endif %}
 {% endfor %}
 
 {% if hasUpdate or hasCreate %}
