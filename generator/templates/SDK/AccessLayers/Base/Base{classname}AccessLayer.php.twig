@@ -104,16 +104,14 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 
     /**
      * @param Filter $filter Filter object with rules to filter the list results by
-     * @param bool $hydrate
      *
      * @throws Exceptions\SDKException
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
-     * @return Models\UserModel|array|null
+     * @return int
      */
     public function count(
-        Filter $filter = null,
-        bool $hydrate = true
+        Filter $filter = null
     ) {
         $endpoint = "{{ method.pattern }}";
         $options = [];
