@@ -15,7 +15,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                     ->setFunction('getAll')
                     ->setReturnsArray(true)
                     ->setArguments([
-                        "filter" => [
+                        "query" => [
                             "default" => null,
                             "description" => "Filter object with rules to filter the list results by",
                             "in" => "header",
@@ -53,7 +53,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                             "required" => true,
                             "type" => "array",
                         ],
-                        "filter" => [
+                        "query" => [
                             "default" => null,
                             "description" => "Filter object with rules to filter the results by",
                             "in" => "header",
@@ -291,7 +291,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
                             "type" => "{{ class.properties[key].phpType }}",
                         ],
 {% endfor %}
-                        "filter" => [
+                        "query" => [
                             "default" => null,
                             "description" => "Filter object with rules to filter the list results by",
                             "in" => "header",

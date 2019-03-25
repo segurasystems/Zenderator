@@ -107,6 +107,9 @@ class HttpProvider implements DataProviderInterface
             if ($argument["type"] == "Gone\\SDK\\Common\\Filters\\Filter") {
                 $argument["type"] = "Filter";
             }
+            if ($argument["type"] == "Gone\\SDK\\Common\\QueryBuilder\\Query") {
+                $argument["type"] = "Query";
+            }
             $phpType = $argument["type"];
             $phpType = preg_match("/\[\]$/", $phpType) ? "array" : $phpType;
             if ($phpType === "password") {

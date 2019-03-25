@@ -7,6 +7,7 @@ use Gone\SDK\Common\Interfaces\DataAccessLayerInterface;
 use Gone\SDK\Common\Exceptions;
 use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
+use Gone\SDK\Common\QueryBuilder\Query;
 {% set hasUpdate = false %}
 {% set hasCreate = false %}
 {% for method in class.methods %}
@@ -111,12 +112,12 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      * @return int
      */
     public function count(
-        Filter $filter = null
+        Query $filter = null
     ) {
         $endpoint = "{{ method.pattern }}";
         $options = [];
 
-        $headerArgs["filter"] = $filter;
+        $headerArgs["query"] = $filter;
         $headerArgs["count"] = true;
         $headerArgs = array_filter($headerArgs);
         array_walk($headerArgs, function (&$value, $key) {
