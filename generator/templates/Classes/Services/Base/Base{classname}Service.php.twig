@@ -5,6 +5,7 @@ namespace {{ class.namespace }}\Services\Base;
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
 use Gone\SDK\Common\Abstracts\AbstractModel;
+use Gone\SDK\Common\QueryBuilder\ConditionGroup;
 use Gone\SDK\Common\QueryBuilder\Condition;
 use Gone\SDK\Common\QueryBuilder\Query;
 use \{{ class.namespace }}\AccessLayers;
@@ -94,49 +95,53 @@ abstract class Base{{ class.name }}Service
 
     public function get(Query $filter)
     {
+        $conditions = [];
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
-        $filter->getCondition()->addCondition(
-            new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}())
-        );
+        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
+        $conditions[] = $filter->getCondition();
+        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
         return parent::get($filter);
     }
 
     public function count(Query $filter = null) : int
     {
+        $conditions = [];
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
-        $filter->getCondition()->addCondition(
-            new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}())
-        );
+        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
+        $conditions[] = $filter->getCondition();
+        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
         return parent::count($filter);
     }
 
     public function getAll(Query $filter): array
     {
+        $conditions = [];
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
-        $filter->getCondition()->addCondition(
-            new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}())
-        );
+        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
+        $conditions[] = $filter->getCondition();
+        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
         return parent::getAll($filter);
     }
 
     public function getAllField(string $field, Query $filter = null, string $type = null)
     {
+        $conditions = [];
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
-        $filter->getCondition()->addCondition(
-            new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}())
-        );
+        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
+        $conditions[] = $filter->getCondition();
+        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
         if(empty($type)){
             $type = constant("\{{ class.namespace }}\Models\{{ class.name }}Model::TYPE_" . strtoupper($field));
         }
@@ -145,13 +150,14 @@ abstract class Base{{ class.name }}Service
 
     public function getAllFields(array $fields, Query $filter = null, array $types = [])
     {
+        $conditions = [];
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
-        $filter->getCondition()->addCondition(
-            new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}())
-        );
+        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
+        $conditions[] = $filter->getCondition();
+        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
         foreach ($fields as $field){
             if(empty($types[$field])){
                 $types[$field] = constant("\{{ class.namespace }}\Models\{{ class.name }}Model::TYPE_" . strtoupper($field));
