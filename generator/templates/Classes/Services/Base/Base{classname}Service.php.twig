@@ -213,7 +213,11 @@ abstract class Base{{ class.name }}Service
 {% for key in class.primaryKeys %}
         $conditions[] = new Condition(
                 Models\{{ class.name }}Model::FIELD_{{ key|upper }},
+{% if key in SKIP_ARGS %}
+                $this->get{{ key }}(),
+{% else %}
                 $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}],
+{% endif %}
                 Condition::EQUAL,
                 Models\{{ class.name }}Model::TABLE_NAME
             );
