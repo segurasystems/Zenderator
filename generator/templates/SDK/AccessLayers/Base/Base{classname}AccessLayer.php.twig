@@ -58,9 +58,12 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% endfor %}
         bool $hydrate = true
     ){
-
+{% set queryObj = "Query" %}
 {% for name, argument in method.arguments %}
 {% if not argument.editable %}
+{% if name == "filter" %}
+{% set queryObj = "Filter" %}
+{% endif %}
         ${{ name }} = {{ argument.default|json_encode()|raw }};
 {% endif %}
 {% endfor %}
@@ -109,7 +112,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% if method.function == "getAll" %}
 
     /**
-     * @param Query $filter Filter object with rules to filter the list results by
+     * @param {{ queryObj }} $filter {{ queryObj }} object with rules to filter the list results by
      *
      * @throws Exceptions\SDKException
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -117,12 +120,12 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
      * @return int
      */
     public function count(
-        Query $filter = null
+        {{ queryObj }} $filter = null
     ) {
         $endpoint = "{{ method.pattern }}";
         $options = [];
 
-        $headerArgs["query"] = $filter;
+        $headerArgs["{{ queryObj }}"] = $filter;
         $headerArgs["count"] = true;
         $headerArgs = array_filter($headerArgs);
         array_walk($headerArgs, function (&$value, $key) {
