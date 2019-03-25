@@ -202,23 +202,24 @@ abstract class Base{{ class.name }}Service
     //Remote Data
 {% endif %}
 {% for field in remote.fields %}
-    public function get{{ field.remote.variablePluralUC }}($pks, Filter $filter)
+    public function get{{ field.remote.variablePluralUC }}($pks, Query $filter)
     {
         $filter
-            ->addJoin(
-                Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }},
-                Models\{{ class.name }}Model::TABLE_NAME,
-                Models\{{ remote.class.name }}Model::FIELD_{{ field.remote.name|upper }},
-                Models\{{ remote.class.name }}Model::TABLE_NAME
-            )
+            ->join(
+                [Models\{{ class.name }}Model::TABLE_NAME, Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }}],
+                [Models\{{ remote.class.name }}Model::TABLE_NAME, Models\{{ remote.class.name }}Model::FIELD_{{ field.remote.name|upper }}]
+            );
+        $conditions = [];
 {% for key in class.primaryKeys %}
-            ->addWhere(
+        $conditions[] = new Condition(
                 Models\{{ class.name }}Model::FIELD_{{ key|upper }},
                 $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}],
-                FilterCondition::CONDITION_EQUAL,
+                Condition::EQUAL,
                 Models\{{ class.name }}Model::TABLE_NAME
-            ){{ loop.last ? ';' : '' }}
+            );
 {% endfor %}
+        $conditions[] = $filter->getCondition();
+        $filter->setCondition(new ConditionGroup(ConditionGroup::AND, $conditions));
         return $this->{{ remote.class.variable }}AccessLayer->getAll($filter);
     }
 
