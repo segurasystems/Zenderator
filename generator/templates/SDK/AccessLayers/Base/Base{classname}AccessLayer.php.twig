@@ -8,16 +8,20 @@ use Gone\SDK\Common\Exceptions;
 use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\QueryBuilder\Query;
+{% set interface = "DataAccessLayerInterface" %}
 {% set hasUpdate = false %}
 {% set hasCreate = false %}
 {% for method in class.methods %}
+{% if "filter" in method.arguments|keys %}
+{% set interface = "PublicAccessLayerInterface" %}
+{% endif %}
 {% if method.function == "update" %}
 {% set hasUpdate = true %}
 {% elseif method.function == "create" %}
 {% set hasCreate = true %}
 {% endif %}
 {% endfor %}
-abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpdate or hasCreate ? "implements DataAccessLayerInterface" : "" }}
+abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if hasUpdate and hasCreate %}implements {{ interface }}{% endif %}
 {
 {% for method in class.methods %}
 {% if method.function == "update" %}
