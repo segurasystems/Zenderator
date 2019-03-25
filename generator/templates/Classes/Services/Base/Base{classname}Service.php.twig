@@ -224,7 +224,7 @@ abstract class Base{{ class.name }}Service
 {% endfor %}
         $conditions[] = $filter->getCondition();
         $filter->setCondition(new ConditionGroup(ConditionGroup::AND, $conditions));
-        return $this->{{ remote.class.name }}AccessLayer->getAll($filter);
+        return $this->{{ remote.class.nameLC }}AccessLayer->getAll($filter);
     }
 
 {% endfor %}

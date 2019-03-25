@@ -435,6 +435,7 @@ class Column extends Entity
             $data[] = [
                 "class" => [
                     "name"           => $relatedObject->getRemoteClass(),
+                    "nameLC"         => lcfirst($relatedObject->getRemoteClass()),
                     "plural"         => Inflect::pluralize($relatedObject->getRemoteClass()),
                     "variable"       => lcfirst($relatedObject->getRemoteClass()),
                     "variablePlural" => lcfirst(Inflect::pluralize($relatedObject->getRemoteClass())),
@@ -469,6 +470,7 @@ class Column extends Entity
             $data[] = [
                 "class" => [
                     "name"           => $remoteObject->getLocalClass(),
+                    "nameLC"         => lcfirst($remoteObject->getLocalClass()),
                     "plural"         => Inflect::pluralize($remoteObject->getLocalClass()),
                     "variable"       => lcfirst($variable),
                     "variablePlural" => lcfirst(Inflect::pluralize($variable)),
