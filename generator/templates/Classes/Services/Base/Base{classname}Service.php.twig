@@ -169,21 +169,21 @@ abstract class Base{{ class.name }}Service
     public function get{{ field.related.variableUC }}($pks)
     {
         return $this->{{ related.class.variable }}AccessLayer->get(
-            Filter::Factory(Models\{{ related.class.name }}Model::TABLE_NAME)
-                ->addJoin(
-                    Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }},
-                    Models\{{ class.name }}Model::TABLE_NAME,
-                    Models\{{ related.class.name }}Model::FIELD_{{ field.related.name|upper }},
-                    Models\{{ related.class.name }}Model::TABLE_NAME
+            Query::Factory(Models\{{ related.class.name }}Model::TABLE_NAME)
+                ->join(
+                    [Models\{{ class.name }}Model::TABLE_NAME,Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }}],
+                    [Models\{{ related.class.name }}Model::TABLE_NAME,Models\{{ related.class.name }}Model::FIELD_{{ field.related.name|upper }}]
                 )
+                ->where([
 {% for key in class.primaryKeys %}
-                ->addWhere(
-                    Models\{{ class.name }}Model::FIELD_{{ key|upper }},
-                    $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}],
-                    FilterCondition::CONDITION_EQUAL,
-                    Models\{{ class.name }}Model::TABLE_NAME
-                )
+                    [
+                        Condition::EQUAL,
+                        Models\{{ class.name }}Model::FIELD_{{ key|upper }},
+                        $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}],
+                        Models\{{ class.name }}Model::TABLE_NAME
+                    ],
 {% endfor %}
+                ])
         );
     }
 
