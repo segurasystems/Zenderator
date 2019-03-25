@@ -47,7 +47,11 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function {{ method.function }}(
+{% set queryObj = "Query" %}
 {% for name, argument in method.arguments %}
+{% if name == "filter" %}
+{% set queryObj = "Filter" %}
+{% endif %}
 {% if argument.editable %}
 {% if argument.required %}
         {{ argument.phpType }} ${{ name }},
@@ -58,12 +62,8 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% endfor %}
         bool $hydrate = true
     ){
-{% set queryObj = "Query" %}
 {% for name, argument in method.arguments %}
 {% if not argument.editable %}
-{% if name == "filter" %}
-{% set queryObj = "Filter" %}
-{% endif %}
         ${{ name }} = {{ argument.default|json_encode()|raw }};
 {% endif %}
 {% endfor %}
