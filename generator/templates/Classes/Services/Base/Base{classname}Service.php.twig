@@ -174,7 +174,7 @@ abstract class Base{{ class.name }}Service
 {% for field in related.fields %}
     public function get{{ field.related.variableUC }}($pks)
     {
-        return $this->{{ related.class.variable }}AccessLayer->get(
+        return $this->{{ related.class.nameLC }}AccessLayer->get(
             Query::Factory(Models\{{ related.class.name }}Model::TABLE_NAME)
                 ->join(
                     [Models\{{ class.name }}Model::TABLE_NAME,Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }}],
