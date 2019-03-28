@@ -133,11 +133,9 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "required" => false,
                             "type" => \Gone\SDK\Common\QueryBuilder\Query::class,
                         ],
-                    ])
-            )->__toArray(),
+                    ])->__toArray(),
 {% endfor %}
 {% endfor %}
 ]];
-;
 
 
