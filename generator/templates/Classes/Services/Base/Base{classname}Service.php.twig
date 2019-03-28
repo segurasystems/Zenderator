@@ -119,7 +119,7 @@ abstract class Base{{ class.name }}Service
         return parent::count($filter);
     }
 
-    public function getAll(Query $filter): array
+    public function getAll(Query $filter = null): array
     {
         $conditions = [];
 {% for arg in SKIP_ARGS %}
