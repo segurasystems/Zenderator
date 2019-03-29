@@ -92,6 +92,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
         );
 {% if method.responseKey %}
         $data = $response["{{ method.responseKey }}"];
+{% if method.hydratable %}
         if($hydrate
 {% for name, argument in method.arguments %}
 {% if argument.cancelHydrate %}
@@ -103,6 +104,9 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
         } else {
             return $data;
         }
+{% else %}
+            return $data;
+{% endif %}
 {% else %}
         return $response;
 {% endif %}
