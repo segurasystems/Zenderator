@@ -4,19 +4,25 @@ namespace {{ class.namespace }}\AccessLayers\Base;
 use Gone\SDK\Common\Abstracts\AbstractModel;
 use Gone\SDK\Common\Abstracts\HttpAccessLayer;
 use Gone\SDK\Common\Interfaces\DataAccessLayerInterface;
+use Gone\SDK\Common\Interfaces\PublicAccessLayerInterface;
 use Gone\SDK\Common\Exceptions;
 use {{ class.namespace }}\Models;
 use Gone\SDK\Common\Filters\Filter;
+use Gone\SDK\Common\QueryBuilder\Query;
+{% set interface = "DataAccessLayerInterface" %}
 {% set hasUpdate = false %}
 {% set hasCreate = false %}
 {% for method in class.methods %}
+{% if "filter" in method.arguments|keys %}
+{% set interface = "PublicAccessLayerInterface" %}
+{% endif %}
 {% if method.function == "update" %}
 {% set hasUpdate = true %}
 {% elseif method.function == "create" %}
 {% set hasCreate = true %}
 {% endif %}
 {% endfor %}
-abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpdate or hasCreate ? "implements DataAccessLayerInterface" : "" }}
+abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if hasUpdate and hasCreate %}implements {{ interface }}{% endif %}
 {
 {% for method in class.methods %}
 {% if method.function == "update" %}
@@ -42,9 +48,13 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      */
 {% set hasQuery = false %}
     public function {{ method.function }}(
+{% set queryObj = "Query" %}
 {% for name, argument in method.arguments %}
 {% if argument.phpType == "Query" %}
 {% set hasQuery = true %}
+{% endif %}
+{% if name == "filter" %}
+{% set queryObj = "Filter" %}
 {% endif %}
 {% if argument.editable %}
 {% if argument.required %}
@@ -56,7 +66,6 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% endfor %}
         bool $hydrate = true
     ){
-
 {% for name, argument in method.arguments %}
 {% if not argument.editable %}
         ${{ name }} = {{ argument.default|json_encode()|raw }};
@@ -87,6 +96,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
         );
 {% if method.responseKey %}
         $data = $response["{{ method.responseKey }}"];
+{% if method.hydratable %}
         if($hydrate
 {% for name, argument in method.arguments %}
 {% if argument.cancelHydrate %}
@@ -102,6 +112,9 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
             return $data;
         }
 {% else %}
+            return $data;
+{% endif %}
+{% else %}
         return $response;
 {% endif %}
     }
@@ -110,7 +123,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% if method.function == "getAll" %}
 
     /**
-     * @param Filter $filter Filter object with rules to filter the list results by
+     * @param {{ queryObj }} $filter {{ queryObj }} object with rules to filter the list results by
      *
      * @throws Exceptions\SDKException
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -118,12 +131,12 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      * @return int
      */
     public function count(
-        Filter $filter = null
+        {{ queryObj }} $filter = null
     ) {
         $endpoint = "{{ method.pattern }}";
         $options = [];
 
-        $headerArgs["filter"] = $filter;
+        $headerArgs["{{ queryObj }}"] = $filter;
         $headerArgs["count"] = true;
         $headerArgs = array_filter($headerArgs);
         array_walk($headerArgs, function (&$value, $key) {

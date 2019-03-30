@@ -1,0 +1,141 @@
+<?php
+
+$baseSKDData = \Gone\AppCore\Router\RouteSDKProperties::Factory()
+                    ->setResponseClass(\{{ class.namespace }}\Models\{{ class.name }}Model::class)
+                    ->setClass(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR);
+
+// Router proper begins
+return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
+        "getAll" => $baseSKDData
+                    ->setFunction('getAll')
+                    ->setReturnsArray(true)
+                    ->setArguments([
+                        "query" => [
+                            "default" => null,
+                            "description" => "Query object with rules to filter the list results by",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => \Gone\SDK\Common\QueryBuilder\Query::class,
+                        ],
+                        "fields" => [
+                            "default" => null,
+                            "description" => "Array of fields you want returned",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => "array",
+                            "cancelHydrate" => true,
+                        ],
+                    ])->__toArray(),
+    "create" => $baseSKDData
+                    ->setFunction('create')
+                    ->setReturnsArray(false)
+                    ->setArguments([
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "required" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                        ],
+                    ])->__toArray(),
+    "createBulk" => $baseSKDData
+                    ->setFunction('createBulk')
+                    ->setReturnsArray(true)
+                    ->setArguments([
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "required" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[][]",
+                        ],
+                    ])->__toArray(),
+    "update" => $baseSKDData
+                    ->setFunction('update')
+                    ->setReturnsArray(false)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "required" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use to create the model",
+                            "in" => "body",
+                            "required" => true,
+                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                        ],
+                    ])->__toArray(),
+    "get" => $baseSKDData
+                    ->setFunction('get')
+                    ->setReturnsArray(false)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "required" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                    ])->__toArray(),
+{% for related in class.relatedData %}
+{% if loop.first %}
+    //Related Data
+{% endif %}
+{% for field in related.fields %}
+    "get{{ field.related.variableUC }}" => $baseSKDData
+                    ->setFunction('get{{ field.related.variableUC }}')
+                    ->setResponseClass(\{{ class.namespace }}\Models\{{ related.class.name }}Model::class)
+                    ->setReturnsArray(false)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "required" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                    ])->__toArray(),
+{% endfor %}
+{% endfor %}
+{% for remote in class.remoteData %}
+{% if loop.first %}
+    //Remote Data
+{% endif %}
+{% for field in remote.fields %}
+    "get{{ field.remote.variablePluralUC }}" => $baseSKDData
+                    ->setFunction('get{{ field.remote.variablePluralUC }}')
+                    ->setReturnsArray(true)
+                    ->setResponseClass(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::class)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "required" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                        "query" => [
+                            "default" => null,
+                            "description" => "Query object with rules to filter the list results by",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => \Gone\SDK\Common\QueryBuilder\Query::class,
+                        ],
+                    ])->__toArray(),
+{% endfor %}
+{% endfor %}
+]];
+
+
