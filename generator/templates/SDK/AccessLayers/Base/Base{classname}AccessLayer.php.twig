@@ -40,8 +40,12 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
      * @throws Exceptions\SDKException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
+{% set hasQuery = false %}
     public function {{ method.function }}(
 {% for name, argument in method.arguments %}
+{% if argument.phpType == "Query" %}
+{% set hasQuery = true %}
+{% endif %}
 {% if argument.editable %}
 {% if argument.required %}
         {{ argument.phpType }} ${{ name }},
@@ -87,6 +91,9 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {{ hasUpd
 {% for name, argument in method.arguments %}
 {% if argument.cancelHydrate %}
         && ${{ name }} === null
+{% endif %}
+{% if hasQuery %}
+        && empty($query->getColumns())
 {% endif %}
 {% endfor %}
 ){
