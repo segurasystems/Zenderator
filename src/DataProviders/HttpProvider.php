@@ -164,6 +164,7 @@ class HttpProvider implements DataProviderInterface
                 ( $length );
             if(empty($conditions[$rule])){
                 $conditions[$rule] = [
+                    "key" => $rule,
                     "required" => $required,
                     "type" => $type,
                     "length" => $length,
