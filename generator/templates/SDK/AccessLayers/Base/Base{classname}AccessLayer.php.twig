@@ -112,7 +112,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% endif %}
 {% endfor %}
 {% if hasQuery %}
-        && $columnsPresent
+        && !$columnsPresent
 {% endif %}
 ){
             return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
