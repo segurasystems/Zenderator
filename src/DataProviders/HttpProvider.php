@@ -164,7 +164,6 @@ class HttpProvider implements DataProviderInterface
                 ( $length );
             if(empty($conditions[$rule])){
                 $conditions[$rule] = [
-                    "key" => $rule,
                     "required" => $required,
                     "type" => $type,
                     "length" => $length,
@@ -173,6 +172,9 @@ class HttpProvider implements DataProviderInterface
                 if($type === "enum"){
                     $conditions[$rule]["options"] = $property["options"];
                 }
+            }
+            foreach ($conditions as $key => $condition){
+                $conditions[$key]["key"] = trim(implode("-",$condition["fields"]) . "-" . $key,"- ");
             }
             $conditions[$rule]["fields"][] = $propertyName;
         }
