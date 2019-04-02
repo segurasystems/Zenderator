@@ -94,6 +94,14 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
             $endpoint,
             $options
         );
+
+{% if hasQuery %}
+        $columnsPresent = false;
+        if(!empty($query)){
+            $columnsPresent = !empty($query->getColumns());
+        }
+{% endif %}
+
 {% if method.responseKey %}
         $data = $response["{{ method.responseKey }}"];
 {% if method.hydratable %}
@@ -104,7 +112,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% endif %}
 {% endfor %}
 {% if hasQuery %}
-        && empty($query->getColumns())
+        && $columnsPresent
 {% endif %}
 ){
             return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
