@@ -138,7 +138,12 @@ class HttpProvider implements DataProviderInterface
             foreach ($raw["properties"] as $propName => $property) {
                 if(in_array($propName,$this->getSkippedArgsConfig()))continue;
                 $property["name"] = ucfirst($propName);
-                $property["phpType"] = Column::convertColumnType($property["type"]);
+                $phpType = Column::convertColumnType($property["type"]);
+                if($phpType === null){
+                    $phpType = $property["type"];
+                    $property["type"] = null;
+                }
+                $property["phpType"] = $phpType;
                 $property["remote"] = $this->setupRemoteProperties($property["remote"] ?? []);
                 $property["related"] = $this->setupRelatedProperties($property["related"] ?? []);
                 $properties[$propName] = $property;
