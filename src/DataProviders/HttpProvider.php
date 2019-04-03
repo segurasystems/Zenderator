@@ -142,6 +142,9 @@ class HttpProvider implements DataProviderInterface
                 if($phpType === null){
                     $phpType = $property["type"];
                     $property["type"] = null;
+                    if($phpType !== "array"){
+                        $phpType = $this->getBaseClassNameSpace() . "\\Models\\" . $phpType;
+                    }
                 }
                 $property["phpType"] = $phpType;
                 $property["remote"] = $this->setupRemoteProperties($property["remote"] ?? []);
