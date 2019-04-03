@@ -143,7 +143,7 @@ class HttpProvider implements DataProviderInterface
                     $phpType = $property["type"];
                     $property["type"] = null;
                     if($phpType !== "array"){
-                        $phpType = $this->getBaseClassNameSpace() . "\\Models\\" . $phpType;
+                        $phpType = "\\" . $this->getBaseClassNameSpace() . "\\Models\\" . $phpType;
                     }
                 }
                 $property["phpType"] = $phpType;
