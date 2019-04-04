@@ -16,10 +16,15 @@
         {
             "type": "vcs",
             "url":  "git@github.com:segurasystems/libCommon.git"
+        },
+        {
+            "type": "vcs",
+            "url":  "git@github.com:segurasystems/lib{{ appName }}Models.git"
         }
     ],
     "require": {
         "gone.io/libcommon": "dev-master",
+        "segura/lib{{ appName|lower }}models": "dev-master",
         "psr/container": "^1.0"
     },
     "require-dev": {
