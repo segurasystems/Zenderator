@@ -204,6 +204,13 @@ class Zenderator
         return $this;
     }
 
+    private function addCleanPath($path){
+        $path = APP_ROOT ."/" . $path;
+        if(!in_array($path,$this->pathsToPSR2)){
+            $this->pathsToPSR2[] = $path;
+        }
+    }
+
     public function exception_handler($exception)
     {
         // UHOH exception handler
@@ -885,6 +892,11 @@ class Zenderator
         return $this;
     }
 
+    public function getConfigModuleCustomLocation($type){
+        $type = $this->getConfig()[strtolower($type)] ?? [];
+        return $type["location"] ?? null;
+    }
+
     public function makeCoreFilesForModel($className, $renderData)
     {
         echo str_pad(" > {$className} ", 35);
@@ -899,7 +911,13 @@ class Zenderator
             $fname = explode(".", array_pop($parts));
             array_pop($fname);
             $fname = implode(".", $fname);
+            $customPath = $this->getConfigModuleCustomLocation($type);
             $file = APP_ROOT . "/src/" . implode("/", $parts) . "/";
+            if(!empty($customPath)){
+                $this->addCleanPath($customPath);
+                $this->addCleanPath($customPath . "/Base");
+                $file = APP_ROOT . "/" . $customPath . "/" . implode("/",array_slice($parts,1)) . "/";
+            }
             $file .= str_replace("{classname}", $className, $fname);
             if (!isset($printed[$type])) {
                 print str_pad("  | {$type}  ", 20);
