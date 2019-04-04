@@ -30,6 +30,7 @@ class PhpSdkGenerator extends BaseGenerator
             "classNamespace" => $this->getDataProvider()->getBaseClassNameSpace(),
             "classNamespaceJSONSAFE" => $this->getDataProvider()->getBaseClassNameSpace(true),
             "releaseTime" => date("Y-m-d H:i:s"),
+            "config" => $this->zenderator->getConfig()["sdk"] ?? [],
         ];
         echo "\n";
         echo str_pad("Generating Dependency Injector:", 50);

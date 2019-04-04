@@ -16,15 +16,27 @@
         {
             "type": "vcs",
             "url":  "git@github.com:segurasystems/libCommon.git"
-        },
-        {
-            "type": "vcs",
-            "url":  "git@github.com:segurasystems/lib{{ appName }}Models.git"
         }
+{% if config.dependencies %}
+{% if config.dependencies.repos %}
+{% for repo in config.dependencies.repos %}
+        ,{
+            "type": "vcs",
+            "url":  "{{ repo }}"
+        }
+{% endfor %}
+{% endif %}
+{% endif %}
     ],
     "require": {
+{% if config.dependencies %}
+{% if config.dependencies.packages %}
+{% for package, version in config.dependencies.packages %}
+        "{{ package }}": "{{ version }}",
+{% endfor %}
+{% endif %}
+{% endif %}
         "gone.io/libcommon": "dev-master",
-        "segura/lib{{ appName|lower }}models": "dev-master",
         "psr/container": "^1.0"
     },
     "require-dev": {
