@@ -6,7 +6,6 @@ use Gone\SDK\Common\Abstracts\HttpAccessLayer;
 use Gone\SDK\Common\Interfaces\DataAccessLayerInterface;
 use Gone\SDK\Common\Interfaces\PublicAccessLayerInterface;
 use Gone\SDK\Common\Exceptions;
-use {{ class.namespaceNONSDK }}\Models;
 use Gone\SDK\Common\Filters\Filter;
 use Gone\SDK\Common\QueryBuilder\Query;
 {% set interface = "DataAccessLayerInterface" %}
@@ -25,6 +24,9 @@ use Gone\SDK\Common\QueryBuilder\Query;
 abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if hasUpdate and hasCreate %}implements {{ interface }}{% endif %}
 {
 {% for method in class.methods %}
+{#/*
+{{ method|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+*/#}
 {% if method.function == "update" %}
 {% include "SDK/AccessLayers/Base/_function_create_update.php.twig" with {'methodName':'update','class':class,'method':method} %}
 {% elseif method.function == "create" %}
@@ -38,12 +40,13 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% endfor %}
      * @param bool $hydrate
      *
-{% if method.responseKey %}
-     * @return Models\{{ method.responseClass }}Model{{ method.returnsArray ? '[]' : '' }}|array|null
+{% if method.responseClass %}
+     * @return \{{ method.responseClass }}{{ method.returnsArray ? '[]' : '' }}|array|null
 {% else %}
      * @return array|null
 {% endif %}
      * @throws Exceptions\SDKException
+     * @throws Exceptions\SDKFailResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
 {% set hasQuery = false %}
@@ -85,7 +88,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% if method.groupedArguments.header %}
 {% include "SDK/AccessLayers/Base/_method_args.php.twig" with {'name':'headerArgs','args':method.groupedArguments.header} %}
         $headerArgs = array_filter($headerArgs);
-        array_walk($headerArgs,function(&$value, $key){$value = json_encode($value);});
+        array_walk($headerArgs,function(&$value){$value = json_encode($value);});
         $options["headers"] = $headerArgs;
 {% endif %}
 
@@ -115,7 +118,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
         && !$columnsPresent
 {% endif %}
 ){
-            return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+            return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(\{{ method.responseClass }}::class,$data);
         } else {
             return $data;
         }
@@ -134,6 +137,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
      * @param {{ queryObj }} $filter {{ queryObj }} object with rules to filter the list results by
      *
      * @throws Exceptions\SDKException
+     * @throws Exceptions\SDKFailResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return int
@@ -147,7 +151,7 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
         $headerArgs["{{ queryObj }}"] = $filter;
         $headerArgs["count"] = true;
         $headerArgs = array_filter($headerArgs);
-        array_walk($headerArgs, function (&$value, $key) {
+        array_walk($headerArgs, function (&$value) {
             $value = json_encode($value);
         });
         $options["headers"] = $headerArgs;
@@ -165,6 +169,17 @@ abstract class Base{{ class.name }}AccessLayer extends HttpAccessLayer {% if has
 {% endfor %}
 
 {% if hasUpdate or hasCreate %}
+    /**
+     * @param AbstractModel ${{ class.variable }}
+     * @param bool $hydrate
+     *
+     * @throws Exceptions\SDKException
+     * @throws Exceptions\SDKFailResponse
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return \{{ method.responseClass }}|array|null
+     */
     public function save(AbstractModel ${{ class.variable }}, bool $hydrate = true)
     {
         $pks = ${{ class.variable }}->getPrimaryKeys();

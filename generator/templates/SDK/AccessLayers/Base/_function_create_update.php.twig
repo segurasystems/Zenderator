@@ -1,8 +1,20 @@
+
+    /**
+     * @param AbstractModel ${{ class.variable }}
+     * @param bool $hydrate
+     *
+     * @throws Exceptions\SDKException
+     * @throws Exceptions\SDKFailResponse
+     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return \{{ method.responseClass }}|array|null
+     */
     public function {{ methodName }}(AbstractModel ${{ class.variable }}, bool $hydrate = true){
 
-        if(!(${{ class.variable }} instanceof Models\{{ class.name }}Model)){
+        if(!(${{ class.variable }} instanceof \{{ method.responseClass }})){
             $class = get_class(${{ class.variable }});
-            throw new \Exception("Trying to save $class though {{ class.name }}Accesslayer");
+            throw new \Exception("Trying to save $class though {{ class.name }}AccessLayer");
         }
         $data = ${{ class.variable }}->__toDirtyArray();
 {% if methodName == "update" %}
@@ -29,7 +41,7 @@
 {% endif %}
 
         if($hydrate){
-            return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(Models\{{ method.responseClass }}Model::class,$data);
+            return $this->hydrate{{ method.returnsArray ? 'Many' : '' }}(\{{ method.responseClass }}::class,$data);
         } else {
             return $data;
         }
