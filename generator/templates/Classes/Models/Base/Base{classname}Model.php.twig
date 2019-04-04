@@ -148,6 +148,9 @@ abstract class Base{{ class.name }}Model extends AbstractModel
 {% endfor %}
                 ],
 {% endif %}
+{% if data.structure %}
+                'structure' => "{{ data.structure|json_encode|raw }}",
+{% endif %}
             ],
 {% endfor %}
         ];

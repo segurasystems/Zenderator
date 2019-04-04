@@ -403,11 +403,19 @@ class Model extends Entity
 
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
+            $type = reset($typeFragments);
+            $structure = null;
+            $field = $column->getName();
+            $customStruct = $this->getZenderator()->getModelFieldCustomStructure($this->getClassName(),$field);
+            if(!empty($customStruct)){
+                $type = $customStruct["type"] ?? $type;
+                $structure = $customStruct["properties"] ?? null;
+            }
             $oColumn = Column::Factory($this->getZenderator())
                 ->setClassName($this->getClassName())
                 ->setModel($this)
-                ->setField($column->getName())
-                ->setDbType(reset($typeFragments))
+                ->setField($field)
+                ->setDbType($type,$structure)
                 ->setPermittedValues($column->getErrata('permitted_values'))
                 ->setMaxDecimalPlaces($column->getNumericScale())
                 ->setIsUnsigned($column->getNumericUnsigned())

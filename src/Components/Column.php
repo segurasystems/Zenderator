@@ -14,7 +14,6 @@ class Column extends Entity
     protected $className;
     protected $field;
     protected $dbType;
-    protected $phpType;
     protected $maxLength;
     protected $isUnsigned = false;
     protected $maxFieldLength;
@@ -24,6 +23,7 @@ class Column extends Entity
     protected $isAutoIncrement = false;
     protected $isUnique = false;
     protected $isNullable = true;
+    protected $structure = null;
     /** @var RelatedModel[] */
     protected $relatedObjects = [];
     /** @var RelatedModel[] */
@@ -137,18 +137,11 @@ class Column extends Entity
      */
     public function getPhpType()
     {
-        return $this->phpType;
-    }
-
-    /**
-     * @param mixed $phpType
-     *
-     * @return Column
-     */
-    public function setPhpType($phpType)
-    {
-        $this->phpType = $phpType;
-        return $this;
+        $type = self::ConvertColumnType($this->getDbType());
+        if (empty($type)) {
+            throw new DBTypeNotTranslatedException("Type not translated: {$this->getDbType()}");
+        }
+        return $type;
     }
 
     public function getPropertyName()
@@ -271,19 +264,17 @@ class Column extends Entity
     /**
      * @param mixed $dbType
      *
-     * @throws DBTypeNotTranslatedException
-     *
      * @return Column
      */
-    public function setDbType($dbType)
+    public function setDbType($dbType, $structure = null)
     {
         $this->dbType = $dbType;
-        $type = self::ConvertColumnType($this->getDbType());
-        if (empty($type)) {
-            throw new DBTypeNotTranslatedException("Type not translated: {$this->getDbType()}");
-        }
-        $this->setPhpType($type);
+        $this->structure = $structure;
         return $this;
+    }
+
+    public function getStructure(){
+        return $this->structure;
     }
 
     public static function convertColumnType($dbType)
@@ -508,6 +499,7 @@ class Column extends Entity
             "related"   => $this->getRelatedData(),
             "remote"    => $this->getRemoteData(),
             "className" => $this->getClassName(),
+            "structure" => $this->getStructure(),
         ];
 
         return $data;

@@ -1,4 +1,5 @@
 <?php
+
 namespace Zenderator;
 
 use Camel\CaseTransformer;
@@ -66,58 +67,60 @@ class Zenderator
 
     private $waitForKeypressEnabled = true;
 
-    private $pathsToPSR2 = [
-        APP_ROOT . "/src/AccessLayers/Base",
-        APP_ROOT . "/src/AccessLayers",
-        APP_ROOT . "/src/Controllers/Base",
-        APP_ROOT . "/src/Controllers",
-        APP_ROOT . "/src/Models/Base",
-        APP_ROOT . "/src/Models",
-        APP_ROOT . "/src/Validators",
-        APP_ROOT . "/src/Validators/Base",
-        APP_ROOT . "/src/Routes",
-        APP_ROOT . "/src/Services/Base",
-        APP_ROOT . "/src/Services",
-        APP_ROOT . "/src/*.php",
-        APP_ROOT . "/tests/Api/Generated",
-        APP_ROOT . "/tests/Models/Generated",
-        APP_ROOT . "/public/index.php",
-        APP_ROOT . "/vendor/segura/appcore",
-        APP_ROOT . "/vendor/segura/zenderator",
-    ];
-    private $phpCsFixerRules = [
-        '@PSR2' => true,
-        'braces' => true,
-        'class_definition' => true,
-        'elseif'=> true,
-        'function_declaration'=> true,
-        'array_indentation'=> true,
-        'blank_line_after_namespace'=> true,
-        'lowercase_constants'=> true,
-        'lowercase_keywords'=> true,
-        'method_argument_space'=> true,
-        'no_trailing_whitespace_in_comment'=> true,
-        'no_closing_tag'=> true,
-        'no_php4_constructor'=> true,
-        'single_line_after_imports'=> true,
-        'switch_case_semicolon_to_colon'=> true,
-        'switch_case_space'=> true,
-        'visibility_required'=> true,
-        'no_unused_imports'=> true,
-        'no_useless_else'=> true,
-        'no_useless_return'=> true,
-        'no_whitespace_before_comma_in_array'=> true,
-        'ordered_imports'=> true,
-        'ordered_class_elements'=> true,
-        'array_syntax' => ['syntax' => 'short'],
-        'phpdoc_order'=> true,
-        'phpdoc_trim'=> true,
-        'phpdoc_scalar'=> true,
-        'phpdoc_separation'=> true,
-    ];
+    private $pathsToPSR2
+        = [
+            APP_ROOT . "/src/AccessLayers/Base",
+            APP_ROOT . "/src/AccessLayers",
+            APP_ROOT . "/src/Controllers/Base",
+            APP_ROOT . "/src/Controllers",
+            APP_ROOT . "/src/Models/Base",
+            APP_ROOT . "/src/Models",
+            APP_ROOT . "/src/Validators",
+            APP_ROOT . "/src/Validators/Base",
+            APP_ROOT . "/src/Routes",
+            APP_ROOT . "/src/Services/Base",
+            APP_ROOT . "/src/Services",
+            APP_ROOT . "/src/*.php",
+            APP_ROOT . "/tests/Api/Generated",
+            APP_ROOT . "/tests/Models/Generated",
+            APP_ROOT . "/public/index.php",
+            APP_ROOT . "/vendor/segura/appcore",
+            APP_ROOT . "/vendor/segura/zenderator",
+        ];
+    private $phpCsFixerRules
+        = [
+            '@PSR2'                               => true,
+            'braces'                              => true,
+            'class_definition'                    => true,
+            'elseif'                              => true,
+            'function_declaration'                => true,
+            'array_indentation'                   => true,
+            'blank_line_after_namespace'          => true,
+            'lowercase_constants'                 => true,
+            'lowercase_keywords'                  => true,
+            'method_argument_space'               => true,
+            'no_trailing_whitespace_in_comment'   => true,
+            'no_closing_tag'                      => true,
+            'no_php4_constructor'                 => true,
+            'single_line_after_imports'           => true,
+            'switch_case_semicolon_to_colon'      => true,
+            'switch_case_space'                   => true,
+            'visibility_required'                 => true,
+            'no_unused_imports'                   => true,
+            'no_useless_else'                     => true,
+            'no_useless_return'                   => true,
+            'no_whitespace_before_comma_in_array' => true,
+            'ordered_imports'                     => true,
+            'ordered_class_elements'              => true,
+            'array_syntax'                        => ['syntax' => 'short'],
+            'phpdoc_order'                        => true,
+            'phpdoc_trim'                         => true,
+            'phpdoc_scalar'                       => true,
+            'phpdoc_separation'                   => true,
+        ];
 
     private $defaultEnvironment = [];
-    private $defaultHeaders     = [];
+    private $defaultHeaders = [];
 
     private $coverageReport;
 
@@ -149,12 +152,12 @@ class Zenderator
 
         $this->pathsToPSR2 = array_merge($this->pathsToPSR2, $customPathsToPSR2);
 
-        $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
-        $namespaces      = array_keys((array)$this->composer->autoload->{'psr-4'});
+        $this->composer = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
+        $namespaces = array_keys((array)$this->composer->autoload->{'psr-4'});
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
-        $this->twig   = new \Twig_Environment($this->loader, ['debug' => true]);
+        $this->twig = new \Twig_Environment($this->loader, ['debug' => true]);
         $this->twig->addExtension(new \Twig_Extension_Debug());
         $this->twig->addExtension(new TransformExtension());
         $this->twig->addExtension(new InflectionExtension());
@@ -171,13 +174,13 @@ class Zenderator
             $this->ignoredTables = $this->config['database']['skip_tables'];
         }
 
-        $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+        $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
         $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-        $this->transCamel2Studly  = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
-        $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
-        $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
-        $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $this->transSnake2Camel = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+        $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+        $this->transCamel2Snake = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         // Decide if we're gonna use class prefixes. You don't want to do this if you have a single DB,
         // or you'll get classes called DefaultThing instead of just Thing.
@@ -193,7 +196,7 @@ class Zenderator
 
         if ($databaseConfigs instanceof DbConfig) {
             foreach ($databaseConfigs->__toArray() as $dbName => $databaseConfig) {
-                $this->adapters[$dbName]  = new \Gone\AppCore\Adapter($databaseConfig);
+                $this->adapters[$dbName] = new \Gone\AppCore\Adapter($databaseConfig);
                 $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
                 $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
             }
@@ -248,7 +251,7 @@ class Zenderator
         self::$useClassPrefixes = false;
     }
 
-    public static function isUsingClassPrefixes() : bool
+    public static function isUsingClassPrefixes(): bool
     {
         return self::$useClassPrefixes;
     }
@@ -302,8 +305,8 @@ class Zenderator
 
     public static function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
-        $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
-        $query   = $adapter->query($sql);
+        $sql = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
+        $query = $adapter->query($sql);
         $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
@@ -312,7 +315,8 @@ class Zenderator
         return $columns;
     }
 
-    public function getFilesRelative($dir){
+    public function getFilesRelative($dir)
+    {
 
         $dir .= "/";
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
@@ -322,19 +326,18 @@ class Zenderator
         foreach ($rii as $file) {
             if (!$file->isDir()) {
                 $fullPath = $file->getPathname();
-                $files[] = explode($dir,$fullPath)[1];
+                $files[] = explode($dir, $fullPath)[1];
             }
         }
         return $files;
     }
 
 
-
     public function makeZenderator($cleanByDefault = false)
     {
-        list($models,$views) = $this->makeModelSchemas();
+        list($models, $views) = $this->makeModelSchemas();
         $this->removeCoreGeneratedFiles();
-        $this->makeCoreFiles($models,$views);
+        $this->makeCoreFiles($models, $views);
         if ($cleanByDefault) {
             $this->cleanCode();
         }
@@ -384,24 +387,23 @@ class Zenderator
 
     public function runTests(
         bool $withCoverage = false,
-        bool$haltOnError = false,
+        bool $haltOnError = false,
         string $testSuite = '',
         bool $debug = false
-    ) : int {
+    ): int {
         echo "Running phpunit... \n";
 
         if ($withCoverage && file_exists(APP_ROOT . "/build/clover.xml")) {
             $previousCoverageReport = require(APP_ROOT . "/build/coverage_report.php");
-            $previousCoverage = floatval((100/$previousCoverageReport->getReport()->getNumExecutableLines()) * $previousCoverageReport->getReport()->getNumExecutedLines());
+            $previousCoverage = floatval((100 / $previousCoverageReport->getReport()->getNumExecutableLines()) * $previousCoverageReport->getReport()->getNumExecutedLines());
         }
 
         $phpunitCommand = "" .
             "./vendor/bin/phpunit " .
             ($withCoverage ? "--coverage-php=build/coverage_report.php --coverage-text" : "--no-coverage") . " " .
-            ($haltOnError  ? "--stop-on-failure --stop-on-error --stop-on-warning" : "") . " " .
+            ($haltOnError ? "--stop-on-failure --stop-on-error --stop-on-warning" : "") . " " .
             ($testSuite ? "--testsuite={$testSuite}" : "") . " " .
-            ($debug ? "--debug" : "")
-        ;
+            ($debug ? "--debug" : "");
         echo " > {$phpunitCommand}\n\n";
         $startTime = microtime(true);
         passthru($phpunitCommand, $returnCode);
@@ -410,7 +412,7 @@ class Zenderator
         if ($withCoverage) {
             /** @var CodeCoverage $coverageReport */
             $coverageReport = require(APP_ROOT . "/build/coverage_report.php");
-            $coverage = floatval((100/$coverageReport->getReport()->getNumExecutableLines()) * $coverageReport->getReport()->getNumExecutedLines());
+            $coverage = floatval((100 / $coverageReport->getReport()->getNumExecutableLines()) * $coverageReport->getReport()->getNumExecutedLines());
 
             printf(
                 "\nComplete in %s seconds. ",
@@ -442,7 +444,7 @@ class Zenderator
     {
         $composerJson = json_decode(file_get_contents(APP_ROOT . "/composer.json"), true);
         $dependencies = array_merge($composerJson['require'], $composerJson['require-dev']);
-        $toUpdate     = [];
+        $toUpdate = [];
         foreach ($dependencies as $dependency => $version) {
             if (substr($dependency, 0, strlen("segura/")) == "segura/") {
                 $toUpdate[] = $dependency;
@@ -459,21 +461,39 @@ class Zenderator
         return $this;
     }
 
-    public function getConfig(){
+    public function getModelFieldCustomStructure($class, $field)
+    {
+        return $this->getSpecificModelPropertiesConfig($class)[$field] ?? [];
+    }
+
+    public function getSpecificModelPropertiesConfig($class){
+        return $this->getSpecificModelConfig($class)["properties"] ?? [];
+    }
+
+    public function getSpecificModelConfig($class)
+    {
+        return $this->getModelsConfig()[$class] ?? [];
+    }
+
+    public function getConfig()
+    {
         return $this->config;
     }
 
-    public function getRoutesConfig(){
+    public function getRoutesConfig()
+    {
         return $this->getConfig()["routes"] ?? [];
     }
 
-    public function getRouteIgnoreKeys(){
+    public function getRouteIgnoreKeys()
+    {
         return $this->getRoutesConfig()["skip_argument"] ?? [];
     }
 
-    public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false){
+    public function makeSwagger($outputPath = APP_ROOT, $remoteApiUri = false)
+    {
         $routes = $this->getRoutes($remoteApiUri);
-        $swaggerGenerator = new SwaggerGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE, APP_NAME));
+        $swaggerGenerator = new SwaggerGenerator($this, $outputPath, new HttpProvider($remoteApiUri, APP_NAMESPACE, APP_NAME));
         $swaggerGenerator->generate();
         return $this;
     }
@@ -482,7 +502,7 @@ class Zenderator
     {
         $routes = $this->getRoutes($remoteApiUri);
 
-        $phpGenerator = new PhpSdkGenerator($this,$outputPath, new HttpProvider($remoteApiUri,APP_NAMESPACE, APP_NAME));
+        $phpGenerator = new PhpSdkGenerator($this, $outputPath, new HttpProvider($remoteApiUri, APP_NAMESPACE, APP_NAME));
         $phpGenerator->generate();
 
         $this->removePHPVCRCassettes($outputPath);
@@ -507,7 +527,7 @@ class Zenderator
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $data     = curl_exec($ch);
+        $data = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($httpcode >= 200 && $httpcode < 300) {
@@ -624,17 +644,19 @@ class Zenderator
             ->cleanCodePHPCSFixer([$sdkOutputPath])
             //->runSDKTests($sdkOutputPath)
             //->sendSDKToGit($sdkOutputPath)
-        ;
+            ;
     }
 
-    public function runSwaggerifier($outputPath = false, $remoteApiUri = false){
+    public function runSwaggerifier($outputPath = false, $remoteApiUri = false)
+    {
         if (!$outputPath) {
             $outputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
             if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['path'])) {
                 $outputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
             }
         }
-        echo "TODO : swagger\n";return $this;
+        echo "TODO : swagger\n";
+        return $this;
         return $this->makeSwagger($outputPath, $remoteApiUri);
     }
 
@@ -653,7 +675,7 @@ class Zenderator
     /**
      * @return Model[]
      */
-    private function makeModelSchemas() : array
+    private function makeModelSchemas(): array
     {
         /** @var Model[] $models */
         $models = [];
@@ -687,8 +709,8 @@ class Zenderator
 
                 /** @var ViewObject[] $views */
                 $dbViews = $this->metadatas[$dbName]->getViews();
-                foreach ($dbViews as $view){
-                    if(!$this->useViewAsModel($view->getName())){
+                foreach ($dbViews as $view) {
+                    if (!$this->useViewAsModel($view->getName())) {
                         continue;
                     }
                     $oView = Components\ViewModel::Factory($this)
@@ -699,17 +721,17 @@ class Zenderator
                         ->setConfig($this->getViewModelConfig($view->getName()));
 
                     /**
-                     * @var  string $modelName
+                     * @var  string           $modelName
                      * @var  Components\Model $oModel
                      */
-                    foreach ($allModels as $modelName => $oModel){
-                        if(!in_array($modelName,$this->viewModelSubModels($view->getName()))){
+                    foreach ($allModels as $modelName => $oModel) {
+                        if (!in_array($modelName, $this->viewModelSubModels($view->getName()))) {
                             continue;
                         }
                         $oView->addBaseModel($oModel);
                     }
 
-                    
+
                     $views[$oView->getClassName()] = $oView;
                 }
             }
@@ -718,7 +740,7 @@ class Zenderator
         // Scan for remote relations
         //\Kint::dump(array_keys($models));
         foreach ($allModels as $oModel) {
-            $oModel->scanForRemoteRelations($allModels,array_diff($this->ignoredTables,$this->viewModelClassNames()));
+            $oModel->scanForRemoteRelations($allModels, array_diff($this->ignoredTables, $this->viewModelClassNames()));
         }
 
         // Check for Conflicts.
@@ -747,46 +769,53 @@ class Zenderator
         #}
 
         // Finally return some models.
-        return [$models,$views];
+        return [$models, $views];
     }
 
-    public function viewTableRemaps(){
+    public function viewTableRemaps()
+    {
         $remaps = [];
-        foreach ($this->getViewModelConfigs() as $name=>$config){
+        foreach ($this->getViewModelConfigs() as $name => $config) {
             $remap = $config["name"];
-            foreach ($this->viewModelSubModelData($name) as $sub => $data){
+            foreach ($this->viewModelSubModelData($name) as $sub => $data) {
                 $remaps[$sub] = $remap;
             }
         }
         return $remaps;
     }
 
-    public function viewModelClassNames(){
+    public function viewModelClassNames()
+    {
         $names = [];
-        foreach ($this->getViewModelConfigs() as $name=>$config){
+        foreach ($this->getViewModelConfigs() as $name => $config) {
             $names[] = $config["name"];
         }
         return $names;
     }
 
-    public function viewModelSubModels($name){
+    public function viewModelSubModels($name)
+    {
         $submodels = $this->viewModelSubModelData($name);
         return empty($submodels) ? [] : array_keys($submodels);
     }
 
-    public function viewModelSubModelData($name){
+    public function viewModelSubModelData($name)
+    {
         return $this->getViewModelConfig($name)["sub_models"] ?? [];
     }
 
-    public function useViewAsModel($name){
+    public function useViewAsModel($name)
+    {
         return !empty($this->getViewModelConfig($name));
     }
 
-    public function getViewModelConfig($name){
+    public function getViewModelConfig($name)
+    {
         return $this->getViewModelConfigs()[$name] ?? [];
     }
 
-    public function getViewModelConfigs(){
+    public function getViewModelConfigs()
+    {
         return $this->getConfig()["views_as_models"] ?? [];
     }
 
@@ -806,7 +835,7 @@ class Zenderator
         foreach ($generatedPaths as $generatedPath) {
             if (file_exists($generatedPath)) {
                 foreach (new \DirectoryIterator($generatedPath) as $file) {
-                    if (!$file->isDot() && $file->getExtension() == 'php' && strpos($file->getFilename(),"Base") === 0) {
+                    if (!$file->isDot() && $file->getExtension() == 'php' && strpos($file->getFilename(), "Base") === 0) {
                         unlink($file->getRealPath());
                     }
                 }
@@ -829,14 +858,14 @@ class Zenderator
             $renderData = $model->getRenderDataset();
             $allModelData[$model->getClassName()] = $renderData;
             // "Model" suite
-            $this->makeCoreFilesForModel($model->getClassName(),$renderData);
+            $this->makeCoreFilesForModel($model->getClassName(), $renderData);
         }
 
         foreach ($views as $view) {
             $renderData = $view->getRenderDataset();
             $allModelData[$view->getClassName()] = $renderData;
             // "Model" suite
-            $this->makeCoreFilesForModel($view->getClassName(),$renderData);
+            $this->makeCoreFilesForModel($view->getClassName(), $renderData);
 
         }
 
@@ -847,36 +876,43 @@ class Zenderator
                 APP_ROOT . "/src/AppContainer.php",
                 "DependencyInjector/appcontainer.php.twig",
                 [
-                    "config" => $this->getConfig(),
+                    "config"          => $this->getConfig(),
                     "skipControllers" => $this->getControllersToSkip(),
-                    "models" => array_merge($models,$views),
+                    "models"          => array_merge($models, $views),
                 ]
             );
         }
         return $this;
     }
 
-    public function makeCoreFilesForModel($className, $renderData){
-        echo str_pad(" > {$className} ",35);
+    public function makeCoreFilesForModel($className, $renderData)
+    {
+        echo str_pad(" > {$className} ", 35);
 
         $base = __DIR__ . "/../generator/templates/Classes/";
         $templateFiles = $this->getFilesRelative($base);
         $printed = [];
-        foreach ($templateFiles as $templateFile){
-            $parts = explode("/",$templateFile);
+        foreach ($templateFiles as $templateFile) {
+            $parts = explode("/", $templateFile);
             $type = $parts[0];
             $base = strtolower($parts[1]) === "base" || strtolower($parts[1]) === "generated";
-            $fname = explode(".",array_pop($parts));
+            $fname = explode(".", array_pop($parts));
             array_pop($fname);
-            $fname = implode(".",$fname);
-            $file = APP_ROOT . "/src/" . implode("/",$parts) . "/";
-            $file .= str_replace("{classname}",$className,$fname);
-            if(!isset($printed[$type])) print str_pad("  | {$type}  ",20);
-            if(!$this->skipTemplate($type) && !$this->skipTemplateForClass($type,$className)){
-                if(!isset($printed[$type])) print "YES  ";
-                $this->renderToFile($base,$file, "Classes/{$templateFile}",$renderData);
-            } else  {
-                if(!isset($printed[$type])) print "NO   ";
+            $fname = implode(".", $fname);
+            $file = APP_ROOT . "/src/" . implode("/", $parts) . "/";
+            $file .= str_replace("{classname}", $className, $fname);
+            if (!isset($printed[$type])) {
+                print str_pad("  | {$type}  ", 20);
+            }
+            if (!$this->skipTemplate($type) && !$this->skipTemplateForClass($type, $className)) {
+                if (!isset($printed[$type])) {
+                    print "YES  ";
+                }
+                $this->renderToFile($base, $file, "Classes/{$templateFile}", $renderData);
+            } else {
+                if (!isset($printed[$type])) {
+                    print "NO   ";
+                }
             }
             $printed[$type] = true;
         }
@@ -916,8 +952,9 @@ class Zenderator
         }
     }
 
-    public function skipTemplateForClass($template,$class){
-        switch($template){
+    public function skipTemplateForClass($template, $class)
+    {
+        switch ($template) {
             case "Models":
             case "AccessLayers":
                 return $this->skipModel($class);
@@ -932,63 +969,78 @@ class Zenderator
         }
     }
 
-    private function routesSoftDeleted(){
+    private function routesSoftDeleted()
+    {
         return $this->getRoutesConfig()["soft_deleted"] ?? false;
     }
 
-    private function softDeletedField(){
+    private function softDeletedField()
+    {
         return $this->getModelsConfig()["soft_deleted_field"] ?? null;
     }
 
-    private function skipTemplate(string $template): bool{
-        return !in_array($template,$this->getTemplateConfig());
+    private function skipTemplate(string $template): bool
+    {
+        return !in_array($template, $this->getTemplateConfig());
     }
 
-    private function getTemplateConfig(){
+    private function getTemplateConfig()
+    {
         return $this->config["templates"] ?? [];
     }
 
-    private function skipRoute($name){
-        return in_array($name,$this->getRoutesToSkip());
+    private function skipRoute($name)
+    {
+        return in_array($name, $this->getRoutesToSkip());
     }
 
-    public function getRoutesToSkip(){
+    public function getRoutesToSkip()
+    {
         return $this->getRoutesConfig()["skip"] ?? [];
     }
 
-    private function skipController($name){
-        return in_array($name,$this->getControllersToSkip());
+    private function skipController($name)
+    {
+        return in_array($name, $this->getControllersToSkip());
     }
 
-    private function getControllersConfig(){
+    private function getControllersConfig()
+    {
         return $this->config["controllers"] ?? [];
     }
 
-    private function getControllersToSkip(){
+    private function getControllersToSkip()
+    {
         return $this->getControllersConfig()["skip"] ?? [];
     }
 
-    private function skipModel($name){
-        return in_array($name,$this->getModelsToSkip());
+    private function skipModel($name)
+    {
+        return in_array($name, $this->getModelsToSkip());
     }
 
-    private function getModelsConfig(){
+    private function getModelsConfig()
+    {
         return $this->config["models"] ?? [];
     }
 
-    private function getModelsToSkip(){
+    private function getModelsToSkip()
+    {
         return $this->getModelsConfig()["skip"] ?? [];
     }
 
-    private function skipService($name){
-        return in_array($name,$this->getServicesToSkip());
+    private function skipService($name)
+    {
+        return in_array($name, $this->getServicesToSkip());
     }
 
-    private function getServicesConfig(){
+    private function getServicesConfig()
+    {
         return $this->config["services"] ?? [];
     }
 
-    private function getServicesToSkip(){
+    private function getServicesToSkip()
+    {
         return $this->getServicesConfig()["skip"] ?? [];
     }
 
@@ -1023,7 +1075,7 @@ class Zenderator
     private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
     {
         ob_start();
-        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --allow-risky=yes --cache-file=/tmp/php_cs_fixer.cache --rules='" . json_encode($phpCsFixerRules) . "' {$pathToPSR2}" ;
+        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --allow-risky=yes --cache-file=/tmp/php_cs_fixer.cache --rules='" . json_encode($phpCsFixerRules) . "' {$pathToPSR2}";
         echo " > {$pathToPSR2} ... ";
         $begin = microtime(true);
         //echo $command."\n\n";
@@ -1043,13 +1095,13 @@ class Zenderator
             $client = new Client([
                 'base_uri' => $remoteApiUri,
                 'timeout'  => 30.0,
-                'headers' => [
+                'headers'  => [
                     'Accept' => 'application/json'
                 ]
             ]);
             try {
                 $result = $client->get("/v1")->getBody()->getContents();
-            } catch (\Exception $e){
+            } catch (\Exception $e) {
                 var_dump(get_class($e));
                 die();
             }
@@ -1078,11 +1130,11 @@ class Zenderator
     private function makeRequest(string $method, string $path, $post = null, $isJsonRequest = true)
     {
         /**
-         * @var \Slim\App           $app
+         * @var \Slim\App         $app
          * @var \Gone\AppCore\App $applicationInstance
          */
         $applicationInstance = App::Instance();
-        $calledClass         = get_called_class();
+        $calledClass = get_called_class();
 
         if (defined("$calledClass")) {
             $modelName = $calledClass::MODEL_NAME;
@@ -1114,13 +1166,13 @@ class Zenderator
             'REQUEST_METHOD' => $method,
         ]);
 
-        $env     = Environment::mock($envArray);
-        $uri     = Uri::createFromEnvironment($env);
+        $env = Environment::mock($envArray);
+        $uri = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies      = [];
+        $cookies = [];
         $serverParams = $env->all();
-        $body         = new RequestBody();
+        $body = new RequestBody();
         if (!is_array($post) && $post != null) {
             $body->write($post);
             $body->rewind();
