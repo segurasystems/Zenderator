@@ -78,15 +78,28 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     // Getters and Setters
 {% for propertyName, data in class.properties %}
     /**
-    * @return {{ data.phpType }}|null
+    * @return {{ data.type == "json" ? "array" : data.phpType }}|null
     */
     public function get{{ data.name }}()
     {
+{% if data.type == "json" %}
+        return json_decode($this->{{ propertyName }},true);
+{% else %}
         return $this->{{ propertyName }};
+{% endif %}
     }
 
     public function set{{ data.name }}(${{ propertyName }}) : Models\{{ class.name }}Model
     {
+{% if data.phpType == "int" %}
+        ${{ propertyName }} = intval(${{ propertyName }});
+{% elseif data.phpType == "float" %}
+        ${{ propertyName }} = floatval(${{ propertyName }});
+{% elseif data.type == "json" %}
+        if(!is_string(${{ propertyName }})){
+            ${{ propertyName }} = json_encode(${{ propertyName }});
+        }
+{% endif %}
         if ($this->{{ propertyName }} !== ${{ propertyName }}) {
             $this->addDirtyKey(self::FIELD_{{ propertyName|upper }});
             $this->{{ propertyName }} = ${{ propertyName }};

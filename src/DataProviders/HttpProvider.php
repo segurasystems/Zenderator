@@ -138,7 +138,11 @@ class HttpProvider implements DataProviderInterface
             foreach ($raw["properties"] as $propName => $property) {
                 if(in_array($propName,$this->getSkippedArgsConfig()))continue;
                 $property["name"] = ucfirst($propName);
-                $phpType = Column::convertColumnType($property["type"]);
+                if(!empty($property["structure"])){
+                    $property["structure"] = json_decode($property["structure"],true);
+                }
+                $type = $property["type"];
+                $phpType = Column::convertColumnType($type);
                 if($phpType === null){
                     $phpType = $property["type"];
                     $property["type"] = null;
