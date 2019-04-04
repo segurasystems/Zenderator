@@ -39,6 +39,14 @@ class HttpProvider implements DataProviderInterface
             $this->getAppName();
     }
 
+    public function getBaseClassNameSpaceNONSDK($jsonSafe = false): string
+    {
+        return $this->getNamespace() .
+            ($jsonSafe ? "\\" : "") .
+            ($jsonSafe ? "\\" : "") .
+            $this->getAppName();
+    }
+
     /**
      * @return string
      */
@@ -130,6 +138,7 @@ class HttpProvider implements DataProviderInterface
         $modelData = [];
         foreach ($rawModelData as $name => $raw) {
             $raw["namespace"] = $this->getBaseClassNameSpace();
+            $raw["namespaceNONSDK"] = $this->getBaseClassNameSpaceNONSDK();
             $raw["name"] = $name;
             if(empty($raw["variable"])){
                 $raw["variable"] = lcfirst($name);
