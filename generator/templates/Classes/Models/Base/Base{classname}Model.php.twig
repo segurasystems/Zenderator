@@ -99,13 +99,17 @@ abstract class Base{{ class.name }}Model extends AbstractModel
 
     public function set{{ data.name }}(${{ propertyName }}) : Models\{{ class.name }}Model
     {
+{% if data.phpType == "int" or data.phpType == "float" or data.type == "json" %}
+        if(${{ propertyName }} !== null){
 {% if data.phpType == "int" %}
-        ${{ propertyName }} = intval(${{ propertyName }});
+            ${{ propertyName }} = intval(${{ propertyName }});
 {% elseif data.phpType == "float" %}
-        ${{ propertyName }} = floatval(${{ propertyName }});
+            ${{ propertyName }} = floatval(${{ propertyName }});
 {% elseif data.type == "json" %}
-        if(!is_string(${{ propertyName }})){
-            ${{ propertyName }} = json_encode(${{ propertyName }});
+            if(!is_string(${{ propertyName }})){
+                ${{ propertyName }} = json_encode(${{ propertyName }});
+            }
+{% endif %}
         }
 {% endif %}
         if ($this->{{ propertyName }} !== ${{ propertyName }}) {
