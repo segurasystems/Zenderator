@@ -78,7 +78,11 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     // Getters and Setters
 {% for propertyName, data in class.properties %}
     /**
-    * @return {{ data.type == "json" ? "array" : data.phpType }}|null
+{% if data.type == "json"  %}
+    * @param bool $decode
+    *
+{% endif %}
+    * @return {{ data.type == "json" ? "array|string" : data.phpType }}|null
     */
     public function get{{ data.name }}({{ data.type == "json" ? "bool $decode = false" : "" }})
     {
