@@ -20,17 +20,27 @@ class PhpSdkGenerator extends BaseGenerator
         return $this;
     }
 
+    private function getSDKConfig()
+    {
+        return $this->zenderator->getConfig()["sdk"] ?? [];
+    }
+
+    private function getDesiredSDKTemplates()
+    {
+        return $this->getSDKConfig()["templates"] ?? [];
+    }
+
     private function generateBaseFiles()
     {
         $renderData = [
-            "accessLayers" => array_keys($this->getDataProvider()->getAccessLayerData()),
-            "defaultUrl" => strtolower("http://" . $this->getDataProvider()->getAppName() . ".segurasystems.test"),
-            "namespace" => $this->getDataProvider()->getNameSpace(),
-            "appName" => $this->getDataProvider()->getAppName(),
-            "classNamespace" => $this->getDataProvider()->getBaseClassNameSpace(),
+            "accessLayers"           => array_keys($this->getDataProvider()->getAccessLayerData()),
+            "defaultUrl"             => strtolower("http://" . $this->getDataProvider()->getAppName() . ".segurasystems.test"),
+            "namespace"              => $this->getDataProvider()->getNameSpace(),
+            "appName"                => $this->getDataProvider()->getAppName(),
+            "classNamespace"         => $this->getDataProvider()->getBaseClassNameSpace(),
             "classNamespaceJSONSAFE" => $this->getDataProvider()->getBaseClassNameSpace(true),
-            "releaseTime" => date("Y-m-d H:i:s"),
-            "config" => $this->zenderator->getConfig()["sdk"] ?? [],
+            "releaseTime"            => date("Y-m-d H:i:s"),
+            "config"                 => $this->getSDKConfig(),
         ];
         echo "\n";
         echo str_pad("Generating Dependency Injector:", 50);
@@ -58,20 +68,25 @@ class PhpSdkGenerator extends BaseGenerator
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
     }
 
-    private function generateCoreFiles(){
+    private function generateCoreFiles()
+    {
         $modelData = $this->getDataProvider()->getModelData();
         $accessLayerData = $this->getDataProvider()->getAccessLayerData();
         //$this->generateCoreFile($modelData,"Model");
-        $this->generateCoreFile($modelData,"Validator");
-        $this->generateCoreFile($modelData,"Cleaner");
-        $this->generateCoreFile($accessLayerData,"AccessLayer", "SDK");
+        $this->generateCoreFile($modelData, "Validator");
+        $this->generateCoreFile($modelData, "Cleaner");
+        $this->generateCoreFile($accessLayerData, "AccessLayer", "SDK");
     }
 
-    private function generateCoreFile($modelData, string $fileType,$templateFolder = "Classes")
+    private function generateCoreFile($modelData, string $fileType, $templateFolder = "Classes")
     {
+        if (!in_array("{$fileType}s", $this->getDesiredSDKTemplates())) {
+            return;
+        }
+
         print "\nGenerating {$fileType}s ...\n";
         foreach ($modelData as $className => $class) {
-            print str_pad("   > {$className}",40);
+            print str_pad("   > {$className}", 40);
             print " Base";
             $this->renderToFile(true, "/src/{$fileType}s/Base/Base{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/Base/Base{classname}{$fileType}.php.twig", ["class" => $class]);
             print " Main";
