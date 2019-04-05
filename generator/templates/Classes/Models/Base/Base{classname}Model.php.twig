@@ -80,10 +80,14 @@ abstract class Base{{ class.name }}Model extends AbstractModel
     /**
     * @return {{ data.type == "json" ? "array" : data.phpType }}|null
     */
-    public function get{{ data.name }}()
+    public function get{{ data.name }}({{ data.type == "json" ? "bool $decode = false" : "" }})
     {
 {% if data.type == "json" %}
-        return json_decode($this->{{ propertyName }},true);
+        if($decode){
+            return json_decode($this->{{ propertyName }},true);
+        } else {
+            return $this->{{ propertyName }};
+        }
 {% else %}
         return $this->{{ propertyName }};
 {% endif %}
