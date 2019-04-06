@@ -70,11 +70,11 @@ class PhpSdkGenerator extends BaseGenerator
 
     private function generateCoreFiles()
     {
-        $modelData = $this->getDataProvider()->getModelData();
+//        $modelData = $this->getDataProvider()->getModelData();
         $accessLayerData = $this->getDataProvider()->getAccessLayerData();
-        //$this->generateCoreFile($modelData,"Model");
-        $this->generateCoreFile($modelData, "Validator");
-        $this->generateCoreFile($modelData, "Cleaner");
+//        $this->generateCoreFile($modelData,"Model");
+//        $this->generateCoreFile($modelData, "Validator");
+//        $this->generateCoreFile($modelData, "Cleaner");
         $this->generateCoreFile($accessLayerData, "AccessLayer", "SDK");
     }
 
