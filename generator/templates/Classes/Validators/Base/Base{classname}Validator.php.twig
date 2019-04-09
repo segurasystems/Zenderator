@@ -20,10 +20,12 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
 
     public function __construct(
 {% for var, class in class.relatedClasses %}
-    AccessLayers\{{ class }}AccessLayer ${{ var }}AccessLayer{{ loop.last ? '' : ',' }}
+        AccessLayers\{{ class }}AccessLayer ${{ var }}AccessLayer{{ loop.last ? '' : ',' }}
 {% endfor %}
     ){
-
+{% for var, class in class.relatedClasses %}
+        $this->{{ var }}AccessLayer = ${{ var }}AccessLayer;
+{% endfor %}
     }
 {% endif %}
 
