@@ -1,7 +1,11 @@
 <?php
 namespace {{ class.namespace }}\Cleaners\Base;
 
+{% if sdk %}
 use Gone\SDK\Common\Cleaner\AbstractCleaner;
+{% else %}
+use Gone\AppCore\Abstracts\Cleaner as AbstractCleaner;
+{% endif %}
 
 /**
  * Class Base{{ class.name }}Cleaner

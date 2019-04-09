@@ -77,6 +77,8 @@ class Zenderator
             APP_ROOT . "/src/Models",
             APP_ROOT . "/src/Validators",
             APP_ROOT . "/src/Validators/Base",
+            APP_ROOT . "/src/Cleaners",
+            APP_ROOT . "/src/Cleaners/Base",
             APP_ROOT . "/src/Routes",
             APP_ROOT . "/src/Services/Base",
             APP_ROOT . "/src/Services",
