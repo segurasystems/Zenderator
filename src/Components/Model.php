@@ -532,7 +532,7 @@ class Model extends Entity
             }
             $conditions[$rule]["fields"][] = $propertyName;
             if(!empty($property["related"])){
-                var_dump("RELATED RELATED");
+                ~\Kint::dump($property["related"]);
             }
         }
         foreach ($conditions as $key => $condition){
