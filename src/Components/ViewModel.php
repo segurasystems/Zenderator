@@ -132,6 +132,9 @@ class ViewModel extends Entity
             }
             $conditions[$rule]["fields"][] = $propertyName;
         }
+        foreach ($conditions as $key => $condition){
+            $conditions[$key]["key"] = trim(implode("-",$condition["fields"]) . "-" . $key,"- ");
+        }
         return array_values($conditions);
     }
 
