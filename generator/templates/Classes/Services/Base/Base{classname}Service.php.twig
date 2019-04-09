@@ -10,6 +10,14 @@ use Gone\SDK\Common\QueryBuilder\Condition;
 use Gone\SDK\Common\QueryBuilder\Query;
 use \{{ class.namespace }}\AccessLayers;
 use \{{ class.namespace }}\Models;
+{% if "Validators" in config.templates %}
+{% set validators = true %}
+use \{{ class.namespace }}\Validators;
+{% endif %}
+{% if "Cleaners" in config.templates %}
+{% set cleaners = true %}
+use \{{ class.namespace }}\Cleaners;
+{% endif %}
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
 
@@ -54,6 +62,12 @@ abstract class Base{{ class.name }}Service
 {% endif %}
 {% endfor %}
         AccessLayers\{{ class.name }}AccessLayer ${{ class.variable }}AccessLayer
+{% if validators %}
+        ,Validators\{{ class.name }}Validator ${{ class.variable }}Validator
+{% endif %}
+{% if cleaners %}
+        ,Cleaners\{{ class.name }}Cleaner ${{ class.variable }}Cleaner
+{% endif %}
     )
     {
 {% for variable,foreign in class.foreignClasses %}
@@ -61,7 +75,13 @@ abstract class Base{{ class.name }}Service
         $this->{{ variable }}AccessLayer = ${{ variable }}AccessLayer;
 {% endif %}
 {% endfor %}
-        parent::__construct(${{ class.variable }}AccessLayer);
+{% if not validators %}
+        ${{ class.variable }}Validator = null;
+{% endif %}
+{% if not cleaners %}
+        ${{ class.variable }}Cleaner = null;
+{% endif %}
+        parent::__construct(${{ class.variable }}AccessLayer,${{ class.variable }}Validator,${{ class.variable }}Cleaner);
     }
 
     public function getByPK($pk){
