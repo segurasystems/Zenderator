@@ -1,12 +1,13 @@
 <?php
 
-$baseSKDData = \Gone\AppCore\Router\RouteSDKProperties::Factory()
-                    ->setResponseClass(\{{ class.namespace }}\Models\{{ class.name }}Model::class)
-                    ->setClass(\{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR);
+use Gone\AppCore\Router\RouteSDKProperties;
+use {{ class.namespace }}\Models;
 
 // Router proper begins
 return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
-        "getAll" => $baseSKDData
+        "getAll" => RouteSDKProperties::Factory()
+                    ->setResponseClass(Models\{{ class.name }}Model::class)
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('getAll')
                     ->setReturnsArray(true)
                     ->setArguments([
@@ -15,7 +16,7 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "description" => "Query object with rules to filter the list results by",
                             "in" => "header",
                             "required" => false,
-                            "type" => \Gone\SDK\Common\QueryBuilder\Query::class,
+                            "type" => \Gone\AppCore\QueryBuilder\Query::class,
                         ],
                         "fields" => [
                             "default" => null,
@@ -26,19 +27,22 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "cancelHydrate" => true,
                         ],
                     ])->__toArray(),
-    "create" => $baseSKDData
+    "create" => RouteSDKProperties::Factory()
+                    ->setResponseClass(Models\{{ class.name }}Model::class)
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('create')
-                    ->setReturnsArray(false)
                     ->setArguments([
                         "body" => [
                             "default" => null,
                             "description" => "Array of data to use tor create the model",
                             "in" => "body",
                             "required" => true,
-                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
                         ],
                     ])->__toArray(),
-    "createBulk" => $baseSKDData
+{#    "createBulk" => RouteSDKProperties::Factory()
+                    ->setResponseClass(Models\{{ class.name }}Model::class)
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('createBulk')
                     ->setReturnsArray(true)
                     ->setArguments([
@@ -49,10 +53,11 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "required" => true,
                             "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[][]",
                         ],
-                    ])->__toArray(),
-    "update" => $baseSKDData
+                    ])->__toArray(),#}
+    "update" => RouteSDKProperties::Factory()
+                    ->setResponseClass(Models\{{ class.name }}Model::class)
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('update')
-                    ->setReturnsArray(false)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
@@ -68,12 +73,13 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "description" => "Array of data to use to create the model",
                             "in" => "body",
                             "required" => true,
-                            "type" => \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
                         ],
                     ])->__toArray(),
-    "get" => $baseSKDData
+    "get" => RouteSDKProperties::Factory()
+                    ->setResponseClass(Models\{{ class.name }}Model::class)
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('get')
-                    ->setReturnsArray(false)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
@@ -85,15 +91,31 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                         ],
 {% endfor %}
                     ])->__toArray(),
+
+{% if "Validtors" in config.templates %}
+    "validate" => RouteSDKProperties::Factory()
+                    ->setResponseKey("Validation")
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setFunction("validate")
+                    ->setArguments([
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "required" => true,
+                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                        ]
+                    )->__toArray(),
+{% endif %}
 {% for related in class.relatedData %}
 {% if loop.first %}
     //Related Data
 {% endif %}
 {% for field in related.fields %}
-    "get{{ field.related.variableUC }}" => $baseSKDData
+    "get{{ field.related.variableUC }}" => RouteSDKProperties::Factory()
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('get{{ field.related.variableUC }}')
-                    ->setResponseClass(\{{ class.namespace }}\Models\{{ related.class.name }}Model::class)
-                    ->setReturnsArray(false)
+                    ->setResponseClass(Models\{{ related.class.name }}Model::class)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
@@ -112,10 +134,11 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
     //Remote Data
 {% endif %}
 {% for field in remote.fields %}
-    "get{{ field.remote.variablePluralUC }}" => $baseSKDData
+    "get{{ field.remote.variablePluralUC }}" => RouteSDKProperties::Factory()
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('get{{ field.remote.variablePluralUC }}')
                     ->setReturnsArray(true)
-                    ->setResponseClass(\{{ class.namespace }}\Models\{{ remote.class.name }}Model::class)
+                    ->setResponseClass(Models\{{ remote.class.name }}Model::class)
                     ->setArguments([
 {% for key in class.routePKs %}
                         "{{ key }}" => [
@@ -131,7 +154,7 @@ return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "description" => "Query object with rules to filter the list results by",
                             "in" => "header",
                             "required" => false,
-                            "type" => \Gone\SDK\Common\QueryBuilder\Query::class,
+                            "type" => \Gone\AppCore\QueryBuilder\Query::class,
                         ],
                     ])->__toArray(),
 {% endfor %}

@@ -22,7 +22,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('PUT')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
-    ->addRoute(
+{#    ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Create Bulk')
             ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':createBulkRequest')
@@ -31,7 +31,7 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/bulk')
             ->setHttpMethod('PUT')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-    )
+    )#}
     ->addRoute(
         \Gone\AppCore\Router\Route::Factory()
             ->setName('{{ class.name }} Update')
@@ -52,6 +52,18 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
+{% if "Validtors" in config.templates %}
+    ->addRoute(
+        \Gone\AppCore\Router\Route::Factory()
+            ->setName('{{ class.name }} Validate')
+            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':Validate Request')
+            ->setSdkRef($sdkClass,'validate')
+            ->setRouterPattern('/v1/{{ class.plural|lower }}/validate')
+            ->setHttpEndpoint('/v1/{{ class.plural|lower }}/validate')
+            ->setHttpMethod('GET')
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
+    )
+{% endif %}
 {% for related in class.relatedData %}
 {% if loop.first %}
     //Related Data
