@@ -11,6 +11,18 @@ use Respect\Validation\Validator;
 
 abstract class Base{{ class.name }}Validator extends AbstractValidator
 {
+{% if not class.relatedClasses is empty %}
+
+{% for var, class in class.relatedClasses %}
+    /** @var AccessLayers\{{ class }}AccessLayer */
+    private ${{ var }}AccessLayer;
+{% endfor %}
+
+    public function __construct(){
+
+    }
+{% endif %}
+
     public function getRules() : ValidatorRuleCollection
     {
         return ValidatorRuleCollection::Factory()
