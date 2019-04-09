@@ -18,7 +18,11 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
     private ${{ var }}AccessLayer;
 {% endfor %}
 
-    public function __construct(){
+    public function __construct(
+{% for var, class in class.relatedClasses %}
+    AccessLayers\{{ class }}AccessLayer ${{ var }}AccessLayer{{ loop.last ? '' : ',' }}
+{% endfor %}
+    ){
 
     }
 {% endif %}
