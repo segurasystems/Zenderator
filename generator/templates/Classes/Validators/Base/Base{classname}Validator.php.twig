@@ -1,16 +1,12 @@
 <?php
 namespace {{ class.namespace }}\Validators\Base;
 
-{% if sdk %}
-use Gone\SDK\Common\Validator\AbstractValidator;
-use Gone\SDK\Common\Validator\ValidatorRule;
-use Gone\SDK\Common\Validator\ValidatorRuleCollection;
-{% else %}
 use Gone\AppCore\Validator\AbstractValidator;
 use Gone\AppCore\Validator\ValidatorRule;
 use Gone\AppCore\Validator\ValidatorRuleCollection;
 use Gone\AppCore\Validator\Rules\ForeignKeyRule;
-{% endif %}
+use {{ class.namespace }}\AccessLayers;
+use {{ class.namespace }}\Models;
 use Respect\Validation\Validator;
 
 abstract class Base{{ class.name }}Validator extends AbstractValidator
