@@ -135,6 +135,22 @@ class ViewModel extends Entity
         foreach ($conditions as $key => $condition){
             $conditions[$key]["key"] = trim(implode("-",$condition["fields"]) . "-" . $key,"- ");
         }
+        foreach ($properties as $propertyName => $property) {
+            if (!empty($property["related"])) {
+                foreach ($property["related"] as $related) {
+                    $localField = $related["field"]["local"]["name"];
+                    $foreignField = $related["field"]["related"]["name"];
+                    $foreignClass = $related["class"]["name"];
+                    $conditions["{$propertyName}-related-{$foreignClass}-{$foreignField}"] = [
+                        "type"    => "foreignKey",
+                        "local"   => $localField,
+                        "foreign" => $foreignField,
+                        "class"   => $foreignClass,
+                        "key"     => "{$propertyName}-related-{$foreignClass}-{$foreignField}",
+                    ];
+                }
+            }
+        }
         return array_values($conditions);
     }
 
