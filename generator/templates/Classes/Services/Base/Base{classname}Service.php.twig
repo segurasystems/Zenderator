@@ -24,6 +24,10 @@ use Zend\Db\Sql\Select;
 
 {% include '_overwrite_warning.twig' %}
 
+/*
+{{ config|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+*/
+
 // @todo: Make all Services implement a ServicesInterface
 abstract class Base{{ class.name }}Service
     extends AbstractService
