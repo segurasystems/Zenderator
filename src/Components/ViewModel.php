@@ -143,6 +143,7 @@ class ViewModel extends Entity
                     $foreignClass = $related["class"]["name"];
                     $conditions["{$propertyName}-related-{$foreignClass}-{$foreignField}"] = [
                         "type"    => "foreignKey",
+                        "fields"  => [$propertyName],
                         "local"   => $localField,
                         "foreign" => $foreignField,
                         "class"   => $foreignClass,
