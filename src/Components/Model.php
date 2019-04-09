@@ -406,8 +406,8 @@ class Model extends Entity
             $type = reset($typeFragments);
             $structure = null;
             $field = $column->getName();
-            $customStruct = $this->getZenderator()->getModelFieldCustomStructure($this->getClassName(),$field);
-            if(!empty($customStruct)){
+            $customStruct = $this->getZenderator()->getModelFieldCustomStructure($this->getClassName(), $field);
+            if (!empty($customStruct)) {
                 $type = $customStruct["type"] ?? $type;
                 $structure = $customStruct["properties"] ?? null;
             }
@@ -415,7 +415,7 @@ class Model extends Entity
                 ->setClassName($this->getClassName())
                 ->setModel($this)
                 ->setField($field)
-                ->setDbType($type,$structure)
+                ->setDbType($type, $structure)
                 ->setPermittedValues($column->getErrata('permitted_values'))
                 ->setMaxDecimalPlaces($column->getNumericScale())
                 ->setIsUnsigned($column->getNumericUnsigned())
@@ -464,8 +464,8 @@ class Model extends Entity
     public function getRenderDataset()
     {
         return [
-            'class' => $this->getClassData(),
-            'config' => $this->getZenderator()->getConfig(),
+            'class'       => $this->getClassData(),
+            'config'      => $this->getZenderator()->getConfig(),
             'skip_routes' => $this->getZenderator()->getRoutesToSkip(),
         ];
     }
@@ -473,68 +473,85 @@ class Model extends Entity
     public function getClassData()
     {
         return [
-            "namespace"   => $this->getNamespace(),
-            "name"        => $this->getClassName(),
-            "variable"    => lcfirst($this->getClassName()),
-            "singular"    => $this->getClassName(),
-            "plural"      => Inflect::pluralize($this->getClassName()),
-            "table"       => $this->getTable(),
-            "properties"  => $this->getPropertyData(),
-            "primaryKeys" => $this->getPrimaryKeys(),
-            'routePKs'    => $this->getRoutePrimaryKeys(),
-            "database"    => $this->getDatabase(),
-            "remoteData"  => $this->getRemoteData(),
-            "relatedData" => $this->getRelatedData(),
+            "namespace"      => $this->getNamespace(),
+            "name"           => $this->getClassName(),
+            "variable"       => lcfirst($this->getClassName()),
+            "singular"       => $this->getClassName(),
+            "plural"         => Inflect::pluralize($this->getClassName()),
+            "table"          => $this->getTable(),
+            "properties"     => $this->getPropertyData(),
+            "primaryKeys"    => $this->getPrimaryKeys(),
+            'routePKs'       => $this->getRoutePrimaryKeys(),
+            "database"       => $this->getDatabase(),
+            "remoteData"     => $this->getRemoteData(),
+            "relatedData"    => $this->getRelatedData(),
             "foreignClasses" => $this->getForeignClassList(),
-            "conditions"  => $this->createConditionSet($this->getPropertyData(),$this->getPrimaryKeys()),
+            "relatedClasses" => $this->getRelatedClassList(),
+            "conditions"     => $this->createConditionSet($this->getPropertyData(), $this->getPrimaryKeys()),
         ];
     }
 
-    public function getForeignClassList(){
-        $list = [];
-        $relateds = $this->getRelatedData();
-        $remotes = $this->getRemoteData();
-
-        foreach ($relateds as $related){
-            $list[lcfirst($related["class"]["name"])] = $related["class"]["name"];
+    public function getForeignClassList()
+    {
+        $list = $this->getRelatedClassList();
+        $remotes = $this->getRemoteClassList();
+        foreach ($remotes as $key => $class) {
+            $list[$key] = $class;
         }
-
-        foreach ($remotes as $remote){
-            $list[lcfirst($remote["class"]["name"])] = $remote["class"]["name"];
-        }
-
         ksort($list);
-
         return $list;
     }
 
-    public function createConditionSet($properties,$primaryKeys){
+    public function getRelatedClassList()
+    {
+        $list = [];
+        $relateds = $this->getRelatedData();
+        foreach ($relateds as $related) {
+            $list[lcfirst($related["class"]["name"])] = $related["class"]["name"];
+        }
+        ksort($list);
+        return $list;
+    }
+
+    public function getRemoteClassList()
+    {
+        $list = [];
+        $remotes = $this->getRemoteData();
+        foreach ($remotes as $remote) {
+            $list[lcfirst($remote["class"]["name"])] = $remote["class"]["name"];
+        }
+        ksort($list);
+        return $list;
+    }
+
+    public function createConditionSet($properties, $primaryKeys)
+    {
         $conditions = [];
-        foreach ($properties as $propertyName => $property){
+        foreach ($properties as $propertyName => $property) {
             $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
-            $isPrimary = in_array($propertyName,$primaryKeys);
+            $isPrimary = in_array($propertyName, $primaryKeys);
             $required = !$property["nullable"] && !$isPrimary;
-            $rule =
-                ( $required ? "required" : "nullable" )
+            $rule
+                = ($required ? "required" : "nullable")
                 . "-" .
-                ( $type ) . ( $type === "enum" ? "-" . implode(".",$property["options"]) : '' )
+                ($type) . ($type === "enum" ? "-" . implode(".", $property["options"]) : '')
                 . "-" .
-                ( $property["length"] );
-            if(empty($conditions[$rule])){
+                ($property["length"]);
+            if (empty($conditions[$rule])) {
                 $conditions[$rule] = [
                     "required" => $required,
-                    "type" => $type,
-                    "length" => $property["length"],
-                    "fields" => [],
+                    "type"     => $type,
+                    "length"   => $property["length"],
+                    "fields"   => [],
                 ];
-                if($type === "enum"){
+                if ($type === "enum") {
                     $conditions[$rule]["options"] = $property["options"];
                 }
             }
             $conditions[$rule]["fields"][] = $propertyName;
         }
-        foreach ($conditions as $key => $condition){
-            $conditions[$key]["key"] = trim(implode("-",$condition["fields"]) . "-" . $key,"- ");
+        foreach ($conditions as $key => $condition) {
+            $conditions[$key]["key"] = trim(implode("-", $condition["fields"]) . "-" . $key, "- ");
         }
         foreach ($properties as $propertyName => $property) {
             if (!empty($property["related"])) {
@@ -542,13 +559,15 @@ class Model extends Entity
                     $localField = $related["field"]["local"]["name"];
                     $foreignField = $related["field"]["related"]["name"];
                     $foreignClass = $related["class"]["name"];
+                    $foreignVariable = $related["class"]["variable"];
                     $conditions["{$propertyName}-related-{$foreignClass}-{$foreignField}"] = [
-                        "type"    => "foreignKey",
-                        "fields"  => [$propertyName],
-                        "local"   => $localField,
-                        "foreign" => $foreignField,
-                        "class"   => $foreignClass,
-                        "key"     => "{$propertyName}-related-{$foreignClass}-{$foreignField}",
+                        "type"     => "foreignKey",
+                        "fields"   => [$propertyName],
+                        "local"    => $localField,
+                        "foreign"  => $foreignField,
+                        "class"    => $foreignClass,
+                        "variable" => $foreignVariable,
+                        "key"      => "{$propertyName}-related-{$foreignClass}-{$foreignField}",
                     ];
                 }
             }
@@ -556,9 +575,10 @@ class Model extends Entity
         return array_values($conditions);
     }
 
-    public function getRoutePrimaryKeys(){
+    public function getRoutePrimaryKeys()
+    {
         $keys = $this->getPrimaryKeys();
-        return array_diff($keys,$this->getZenderator()->getRouteIgnoreKeys());
+        return array_diff($keys, $this->getZenderator()->getRouteIgnoreKeys());
     }
 
     public function getRemoteData()
