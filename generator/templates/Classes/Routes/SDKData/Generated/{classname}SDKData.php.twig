@@ -2,6 +2,7 @@
 
 use Gone\AppCore\Router\RouteSDKProperties;
 use {{ class.namespace }}\Models;
+use Gone\AppCore\QueryBuilder\Query;
 
 // Router proper begins
 return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
@@ -16,7 +17,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "description" => "Query object with rules to filter the list results by",
                             "in" => "header",
                             "required" => false,
-                            "type" => \Gone\AppCore\QueryBuilder\Query::class,
+                            "type" => Query::class,
                         ],
                         "fields" => [
                             "default" => null,
@@ -154,7 +155,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "description" => "Query object with rules to filter the list results by",
                             "in" => "header",
                             "required" => false,
-                            "type" => \Gone\AppCore\QueryBuilder\Query::class,
+                            "type" => Query::class,
                         ],
                     ])->__toArray(),
 {% endfor %}
