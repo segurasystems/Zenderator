@@ -166,7 +166,7 @@ class ViewModel extends Entity
                         "foreign"  => $foreignField,
                         "class"    => $foreignClass,
                         "variable" => $foreignVariable,
-                        "key"      => "{$propertyName}-related-{$foreignClass}-{$foreignField}",
+                        "key"      => "{$propertyName}-foreignKey",
                     ];
                 }
             }
