@@ -8,6 +8,7 @@ use Gone\AppCore\Validator\Rules\ForeignKeyRule;
 use {{ class.namespace }}\AccessLayers;
 use {{ class.namespace }}\Models;
 use Respect\Validation\Validator;
+use Exception;
 
 abstract class Base{{ class.name }}Validator extends AbstractValidator
 {
@@ -29,6 +30,10 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
     }
 {% endif %}
 
+    /**
+     * @return ValidatorRuleCollection
+     * @throws Exception
+     */
     public function getRules() : ValidatorRuleCollection
     {
         return ValidatorRuleCollection::Factory()
