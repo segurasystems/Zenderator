@@ -531,6 +531,9 @@ class Model extends Entity
                 }
             }
             $conditions[$rule]["fields"][] = $propertyName;
+            if(!empty($property["related"])){
+                var_dump("RELATED RELATED");
+            }
         }
         foreach ($conditions as $key => $condition){
             $conditions[$key]["key"] = trim(implode("-",$condition["fields"]) . "-" . $key,"- ");
