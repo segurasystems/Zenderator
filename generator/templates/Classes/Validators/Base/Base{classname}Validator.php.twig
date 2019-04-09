@@ -1,9 +1,15 @@
 <?php
 namespace {{ class.namespace }}\Validators\Base;
 
+{% if sdk %}
 use Gone\SDK\Common\Validator\AbstractValidator;
 use Gone\SDK\Common\Validator\ValidatorRule;
 use Gone\SDK\Common\Validator\ValidatorRuleCollection;
+{% else %}
+use Gone\AppCore\Validator\AbstractValidator;
+use Gone\AppCore\Validator\ValidatorRule;
+use Gone\AppCore\Validator\ValidatorRuleCollection;
+{% endif %}
 use Respect\Validation\Validator;
 
 abstract class Base{{ class.name }}Validator extends AbstractValidator
