@@ -4,7 +4,7 @@ use Gone\AppCore\Router\RouteSDKProperties;
 use {{ class.namespace }}\Models;
 
 // Router proper begins
-return [ \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR => [
+return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
         "getAll" => RouteSDKProperties::Factory()
                     ->setResponseClass(Models\{{ class.name }}Model::class)
                     ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
