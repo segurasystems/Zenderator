@@ -1,11 +1,16 @@
 <?php
+
+use {{ class.namespace }}\Controllers\{{ class.name }}Controller;
+use Gone\AppCore\Router\Route;
+use Gone\AppCore\Router\Router;
+
 $sdkClass = \{{ class.namespace }}\Models\{{ class.name }}Model::NAME_SINGULAR;
 // Router proper begins
-$router = \Gone\AppCore\Router\Router::Instance()
+$router = Router::Instance()
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Get All')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getAllRequest')
+            ->setCallback({{ class.name }}Controller::class . ':getAllRequest')
             ->setSdkRef($sdkClass,'getAll')
             ->setRouterPattern('/v1/{{ class.plural|lower }}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
@@ -13,9 +18,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Create')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':createRequest')
+            ->setCallback({{ class.name }}Controller::class . ':createRequest')
             ->setSdkRef($sdkClass,'create')
             ->setRouterPattern('/v1/{{ class.plural|lower }}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}')
@@ -23,9 +28,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
 {#    ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Create Bulk')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':createBulkRequest')
+            ->setCallback({{ class.name }}Controller::class . ':createBulkRequest')
             ->setSdkRef($sdkClass,'createBulk')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/bulk')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/bulk')
@@ -33,9 +38,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )#}
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Update')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':updateRequest')
+            ->setCallback({{ class.name }}Controller::class . ':updateRequest')
             ->setSdkRef($sdkClass,'update')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ ':[0-9]+}' }}{{ loop.last ? '' : '/' }}{% endfor %}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}')
@@ -43,9 +48,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Get')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':getRequest')
+            ->setCallback({{ class.name }}Controller::class . ':getRequest')
             ->setSdkRef($sdkClass,'get')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ ':[0-9]+}' }}{{ loop.last ? '' : '/' }}{% endfor %}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}')
@@ -54,9 +59,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
     )
 {% if "Validtors" in config.templates %}
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Validate')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':Validate Request')
+            ->setCallback({{ class.name }}Controller::class . ':Validate Request')
             ->setSdkRef($sdkClass,'validate')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/validate')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/validate')
@@ -70,9 +75,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% endif %}
 {% for field in related.fields %}
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Get {{ field.related.variableUC }} Model')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':{{ field.related.variable }}Request')
+            ->setCallback({{ class.name }}Controller::class . ':{{ field.related.variable }}Request')
             ->setSdkRef($sdkClass,'get{{ field.related.variableUC }}')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ ':[0-9]+}' }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.related.variable }}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.related.variable }}')
@@ -87,9 +92,9 @@ $router = \Gone\AppCore\Router\Router::Instance()
 {% endif %}
 {% for field in remote.fields %}
     ->addRoute(
-        \Gone\AppCore\Router\Route::Factory()
+        Route::Factory()
             ->setName('{{ class.name }} Get {{ field.remote.variableUC }} Model')
-            ->setCallback(\{{ class.namespace }}\Controllers\{{ class.name }}Controller::class . ':{{ field.remote.variablePlural }}Request')
+            ->setCallback({{ class.name }}Controller::class . ':{{ field.remote.variablePlural }}Request')
             ->setSdkRef($sdkClass,'get{{ field.remote.variablePluralUC }}')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ ':[0-9]+}' }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}')
