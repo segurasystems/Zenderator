@@ -5,9 +5,9 @@ namespace {{ class.namespace }}\Services\Base;
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
 use Gone\SDK\Common\Abstracts\AbstractModel;
-use Gone\SDK\Common\QueryBuilder\ConditionGroup;
-use Gone\SDK\Common\QueryBuilder\Condition;
-use Gone\SDK\Common\QueryBuilder\Query;
+use Gone\AppCore\QueryBuilder\ConditionGroup;
+use Gone\AppCore\QueryBuilder\Condition;
+use Gone\AppCore\QueryBuilder\Query;
 use \{{ class.namespace }}\AccessLayers;
 use \{{ class.namespace }}\Models;
 {% if "Validators" in config.templates %}
