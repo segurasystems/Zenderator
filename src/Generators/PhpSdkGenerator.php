@@ -88,9 +88,9 @@ class PhpSdkGenerator extends BaseGenerator
         foreach ($modelData as $className => $class) {
             print str_pad("   > {$className}", 40);
             print " Base";
-            $this->renderToFile(true, "/src/{$fileType}s/Base/Base{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/Base/Base{classname}{$fileType}.php.twig", ["class" => $class]);
+            $this->renderToFile(true, "/src/{$fileType}s/Base/Base{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/Base/Base{classname}{$fileType}.php.twig", ["sdk"=>true,"class" => $class]);
             print " Main";
-            $this->renderToFile(false, "/src/{$fileType}s/{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/{classname}{$fileType}.php.twig", ["class" => $class]);
+            $this->renderToFile(false, "/src/{$fileType}s/{$className}{$fileType}.php", "{$templateFolder}/{$fileType}s/{classname}{$fileType}.php.twig", ["sdk"=>true,"class" => $class]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
         }
     }

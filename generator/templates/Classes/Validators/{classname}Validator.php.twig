@@ -1,8 +1,13 @@
 <?php
 namespace {{ class.namespace }}\Validators;
 
+{% if sdk %}
 use Gone\SDK\Common\Validator\ValidatorRule;
 use Gone\SDK\Common\Validator\ValidatorRuleCollection;
+{% else %}
+use Gone\AppCore\Validator\ValidatorRule;
+use Gone\AppCore\Validator\ValidatorRuleCollection;
+{% endif %}
 use {{ class.namespace }}\Validators\Base\Base{{ class.name }}Validator;
 
 class {{ class.name }}Validator extends Base{{ class.name }}Validator
