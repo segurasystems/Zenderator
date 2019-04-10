@@ -218,8 +218,10 @@ class Model extends Entity
             if ($zendConstraint->getType() == "UNIQUE") {
                 //if ($this->getClassName() == 'PermissionGroup') {
                 foreach ($this->columns as $column) {
-                    foreach ($zendConstraint->getColumns() as $affectedColumn) {
-                        if ($column->getPropertyName() == $affectedColumn) {
+                    $constraintColumns = $zendConstraint->getColumns();
+                    if(count($constraintColumns) == 1){
+                        $constraintColumn = $constraintColumns[0];
+                        if ($column->getPropertyName() == $constraintColumn) {
                             $column->setIsUnique(true);
                         }
                     }
