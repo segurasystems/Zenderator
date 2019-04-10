@@ -554,6 +554,7 @@ class Model extends Entity
             $conditions[$key]["key"] = trim(implode("-", $condition["fields"]) . "-" . $key, "- ");
         }
         foreach ($properties as $propertyName => $property) {
+            $isPrimary = in_array($propertyName, $primaryKeys);
             if (!empty($property["related"])) {
                 foreach ($property["related"] as $related) {
                     $localField = $related["field"]["local"]["name"];
@@ -570,6 +571,12 @@ class Model extends Entity
                         "key"      => "{$propertyName}-foreignKey",
                     ];
                 }
+            }
+            if($property["unique"]){
+                $conditions["{$propertyName}-unique"] = [
+                    "type" => "unique",
+                    "key" => "{$propertyName}-unique",
+                ];
             }
         }
         return array_values($conditions);
