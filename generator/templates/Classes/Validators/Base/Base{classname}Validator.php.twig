@@ -12,23 +12,30 @@ use Exception;
 
 abstract class Base{{ class.name }}Validator extends AbstractValidator
 {
-{% if not class.relatedClasses is empty %}
-
-{% for var, class in class.relatedClasses %}
-    /** @var AccessLayers\{{ class }}AccessLayer */
+    /** @var AccessLayers\{{ class.name }}AccessLayer;
+    private ${{ class.variable }}AccessLayer;
+{% for var, className in class.relatedClasses %}
+{% if not className == class.name  %}
+    /** @var AccessLayers\{{ className }}AccessLayer */
     private ${{ var }}AccessLayer;
+{% endif %}
 {% endfor %}
 
     public function __construct(
-{% for var, class in class.relatedClasses %}
-        AccessLayers\{{ class }}AccessLayer ${{ var }}AccessLayer{{ loop.last ? '' : ',' }}
+        AccessLayers\{{ class.name }}AccessLayer ${{ class.variable }}AccessLayer
+{% for var, className in class.relatedClasses %}
+{% if not className == class.name  %}
+        ,AccessLayers\{{ className }}AccessLayer ${{ var }}AccessLayer
+{% endif %}
 {% endfor %}
     ){
-{% for var, class in class.relatedClasses %}
+        $this->{{ class.variable }}AccessLayer = ${{ class.variable }}AccessLayer;
+{% for var, className in class.relatedClasses %}
+{% if not className == class.name  %}
         $this->{{ var }}AccessLayer = ${{ var }}AccessLayer;
+{% endif %}
 {% endfor %}
     }
-{% endif %}
 
     /**
      * @return ValidatorRuleCollection
@@ -47,7 +54,7 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
                     ->setRule(new ForeignKeyRule($this->{{ condition.variable }}AccessLayer,Models\{{ condition.class }}Model::FIELD_{{ condition.foreign|upper }}))
                     ->setScenarios([AbstractValidator::SCENARIO_DEFAULT,"{{ condition.key }}"])
 {% elseif condition.type == "unique" %}
-                    ->setRule(new ForeignKeyRule())
+                    ->setRule(new UniqueFieldRule($this->{{ class.variable }}AccessLayer,Models\{{ class.name }}Model::PRIMARY_KEYS))
 {% else %}
                     ->setRule({{ condition.required ? '' : 'Validator::optional(' }}{% if condition.type == "string" %}Validator::stringType()->length({{ condition.required ? '1' : '0' }}, {{ condition.length is defined ? condition.length : 'null' }}){% elseif condition.type == "int" or condition.type == "float" %}Validator::{{ condition.type }}Type(){% if condition.min is defined %}->min({{ condition.min }}){% endif %}{% if condition.max is defined %}->min({{ condition.max }}){% endif %}{% elseif condition.type == "enum" %}Validator::in({{ condition.options|json_encode()|raw }}){% endif %}{{ condition.required ? "" : ")" }})
 {% if not condition.required %}

@@ -224,6 +224,8 @@ class Model extends Entity
                         if ($column->getPropertyName() == $constraintColumn) {
                             $column->setIsUnique(true);
                         }
+                    } else {
+
                     }
                 }
                 //}
