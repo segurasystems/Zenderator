@@ -572,8 +572,9 @@ class Model extends Entity
                     ];
                 }
             }
-            if($property["unique"]){
+            if($property["unique"] && !$isPrimary){
                 $conditions["{$propertyName}-unique"] = [
+                    "fields" => [$propertyName],
                     "type" => "unique",
                     "key" => "{$propertyName}-unique",
                 ];
