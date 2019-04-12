@@ -113,6 +113,17 @@ abstract class Base{{ class.name }}Service
         return parent::save(${{ class.variable }});
     }
 
+    public function validate(AbstractModel ${{ class.variable }}, string $scenario = AbstractValidator::SCENARIO_DEFAULT)
+    {
+        /** @var Models\{{ class.name }}Model ${{ class.variable }} */
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        ${{ class.variable }}->set{{ class.properties[arg].name }}($this->get{{ class.properties[arg].name }}());
+{% endif %}
+{% endfor %}
+        return parent::validate(${{ class.variable }}, $scenario);
+    }
+
     public function get(Query $filter)
     {
         $conditions = [];
