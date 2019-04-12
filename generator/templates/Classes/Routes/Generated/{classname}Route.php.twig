@@ -57,7 +57,7 @@ $router = Router::Instance()
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
-{% if "Validtors" in config.templates %}
+{% if "Validators" in config.templates %}
     ->addRoute(
         Route::Factory()
             ->setName('{{ class.name }} Validate')
