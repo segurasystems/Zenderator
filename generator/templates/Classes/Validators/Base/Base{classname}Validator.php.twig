@@ -3,7 +3,7 @@ namespace {{ class.namespace }}\Validators\Base;
 
 use Gone\AppCore\Validator\AbstractValidator;
 use Gone\AppCore\Validator\ValidatorRule;
-use Gone\AppCore\Validator\UniqueFieldRule;
+use Gone\AppCore\Validator\Rules\UniqueFieldRule;
 use Gone\AppCore\Validator\ValidatorRuleCollection;
 use Gone\AppCore\Validator\Rules\ForeignKeyRule;
 use {{ class.namespace }}\AccessLayers;
@@ -13,10 +13,10 @@ use Exception;
 
 abstract class Base{{ class.name }}Validator extends AbstractValidator
 {
-    /** @var AccessLayers\{{ class.name }}AccessLayer;
+    /** @var AccessLayers\{{ class.name }}AccessLayer */
     private ${{ class.variable }}AccessLayer;
 {% for var, className in class.relatedClasses %}
-{% if not className == class.name  %}
+{% if className != class.name  %}
     /** @var AccessLayers\{{ className }}AccessLayer */
     private ${{ var }}AccessLayer;
 {% endif %}
@@ -25,14 +25,14 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
     public function __construct(
         AccessLayers\{{ class.name }}AccessLayer ${{ class.variable }}AccessLayer
 {% for var, className in class.relatedClasses %}
-{% if not className == class.name  %}
+{% if className != class.name  %}
         ,AccessLayers\{{ className }}AccessLayer ${{ var }}AccessLayer
 {% endif %}
 {% endfor %}
     ){
         $this->{{ class.variable }}AccessLayer = ${{ class.variable }}AccessLayer;
 {% for var, className in class.relatedClasses %}
-{% if not className == class.name  %}
+{% if className != class.name  %}
         $this->{{ var }}AccessLayer = ${{ var }}AccessLayer;
 {% endif %}
 {% endfor %}
