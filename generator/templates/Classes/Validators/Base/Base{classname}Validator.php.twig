@@ -52,10 +52,10 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
                 ValidatorRule::Factory()
                     ->setFields({{ condition.fields|json_encode()|raw }})
 {% if condition.type == "foreignKey" %}
-                    ->setRule(new ForeignKeyRule($this->{{ condition.variable }}AccessLayer,Models\{{ condition.class }}Model::FIELD_{{ condition.foreign|upper }}))
+                    ->setRule(new ForeignKey($this->{{ condition.variable }}AccessLayer,Models\{{ condition.class }}Model::FIELD_{{ condition.foreign|upper }}))
                     ->setScenarios([AbstractValidator::SCENARIO_DEFAULT,"{{ condition.key }}"])
 {% elseif condition.type == "unique" %}
-                    ->setRule(new UniqueFieldRule($this->{{ class.variable }}AccessLayer,Models\{{ class.name }}Model::PRIMARY_KEYS))
+                    ->setRule(new UniqueField($this->{{ class.variable }}AccessLayer,Models\{{ class.name }}Model::PRIMARY_KEYS))
 {% else %}
                     ->setRule({{ condition.required ? '' : 'Validator::optional(' }}{% if condition.type == "string" %}Validator::stringType()->length({{ condition.required ? '1' : '0' }}, {{ condition.length is defined ? condition.length : 'null' }}){% elseif condition.type == "int" or condition.type == "float" %}Validator::{{ condition.type }}Type(){% if condition.min is defined %}->min({{ condition.min }}){% endif %}{% if condition.max is defined %}->min({{ condition.max }}){% endif %}{% elseif condition.type == "enum" %}Validator::in({{ condition.options|json_encode()|raw }}){% endif %}{{ condition.required ? "" : ")" }})
 {% if not condition.required %}
