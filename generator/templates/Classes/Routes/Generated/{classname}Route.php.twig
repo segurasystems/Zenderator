@@ -65,7 +65,7 @@ $router = Router::Instance()
             ->setSdkRef({{ class.name }}Model::NAME_SINGULAR,'validate')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/validate')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/validate')
-            ->setHttpMethod('GET')
+            ->setHttpMethod('POST')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
 {% endif %}
