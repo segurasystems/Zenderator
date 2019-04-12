@@ -61,7 +61,7 @@ $router = Router::Instance()
     ->addRoute(
         Route::Factory()
             ->setName('{{ class.name }} Validate')
-            ->setCallback({{ class.name }}Controller::class . ':Validate Request')
+            ->setCallback({{ class.name }}Controller::class . ':validateRequest')
             ->setSdkRef({{ class.name }}Model::NAME_SINGULAR,'validate')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/validate')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/validate')
