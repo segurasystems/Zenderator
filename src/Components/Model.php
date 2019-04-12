@@ -219,7 +219,7 @@ class Model extends Entity
                 //if ($this->getClassName() == 'PermissionGroup') {
                 foreach ($this->columns as $column) {
                     $constraintColumns = $zendConstraint->getColumns();
-                    if(count($constraintColumns) == 1){
+                    if (count($constraintColumns) == 1) {
                         $constraintColumn = $constraintColumns[0];
                         if ($column->getPropertyName() == $constraintColumn) {
                             $column->setIsUnique(true);
@@ -559,6 +559,7 @@ class Model extends Entity
         }
         foreach ($properties as $propertyName => $property) {
             $isPrimary = in_array($propertyName, $primaryKeys);
+            $required = !$property["nullable"] && !$isPrimary;
             if (!empty($property["related"])) {
                 foreach ($property["related"] as $related) {
                     $localField = $related["field"]["local"]["name"];
@@ -573,14 +574,16 @@ class Model extends Entity
                         "class"    => $foreignClass,
                         "variable" => $foreignVariable,
                         "key"      => "{$propertyName}-foreignKey",
+                        "required" => $required,
                     ];
                 }
             }
-            if($property["unique"] && !$isPrimary){
+            if ($property["unique"] && !$isPrimary) {
                 $conditions["{$propertyName}-unique"] = [
-                    "type" => "unique",
-                    "fields" => [$propertyName],
-                    "key" => "{$propertyName}-unique",
+                    "type"     => "unique",
+                    "fields"   => [$propertyName],
+                    "key"      => "{$propertyName}-unique",
+                    "required" => $required,
                 ];
             }
         }

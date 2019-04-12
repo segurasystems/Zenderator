@@ -129,7 +129,8 @@ class ViewModel extends Entity
         $conditions = [];
         foreach ($properties as $propertyName => $property) {
             $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
-            $required = !$property["nullable"] && !in_array($propertyName, $primaryKeys);
+            $isPrimary = in_array($propertyName, $primaryKeys);
+            $required = !$property["nullable"] && !$isPrimary;
             $rule
                 = ($required ? "required" : "nullable")
                 . "-" .
@@ -154,6 +155,7 @@ class ViewModel extends Entity
         }
         foreach ($properties as $propertyName => $property) {
             $isPrimary = in_array($propertyName, $primaryKeys);
+            $required = !$property["nullable"] && !$isPrimary;
             if (!empty($property["related"])) {
                 foreach ($property["related"] as $related) {
                     $localField = $related["field"]["local"]["name"];
@@ -168,14 +170,16 @@ class ViewModel extends Entity
                         "class"    => $foreignClass,
                         "variable" => $foreignVariable,
                         "key"      => "{$propertyName}-foreignKey",
+                        "required" => $required,
                     ];
                 }
             }
-            if($property["unique"] && !$isPrimary){
+            if ($property["unique"] && !$isPrimary) {
                 $conditions["{$propertyName}-unique"] = [
-                    "type" => "unique",
-                    "fields" => [$propertyName],
-                    "key" => "{$propertyName}-unique",
+                    "type"     => "unique",
+                    "fields"   => [$propertyName],
+                    "key"      => "{$propertyName}-unique",
+                    "required" => $required,
                 ];
             }
         }

@@ -52,7 +52,7 @@ abstract class Base{{ class.name }}Validator extends AbstractValidator
                 ValidatorRule::Factory()
                     ->setFields({{ condition.fields|json_encode()|raw }})
 {% if condition.type == "foreignKey" %}
-                    ->setRule(new ForeignKey($this->{{ condition.variable }}AccessLayer,Models\{{ condition.class }}Model::FIELD_{{ condition.foreign|upper }}))
+                    ->setRule({{ condition.required ? '' : 'Validator::optional(' }}new ForeignKey($this->{{ condition.variable }}AccessLayer,Models\{{ condition.class }}Model::FIELD_{{ condition.foreign|upper }}){{ condition.required ? '' : ')' }})
                     ->setScenarios([AbstractValidator::SCENARIO_DEFAULT,"{{ condition.key }}"])
 {% elseif condition.type == "unique" %}
                     ->setRule(new UniqueField($this->{{ class.variable }}AccessLayer,Models\{{ class.name }}Model::PRIMARY_KEYS))
