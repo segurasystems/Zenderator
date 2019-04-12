@@ -171,9 +171,10 @@ class ViewModel extends Entity
                     ];
                 }
             }
-            if($property["unique"]){
+            if($property["unique"] && !$isPrimary){
                 $conditions["{$propertyName}-unique"] = [
                     "type" => "unique",
+                    "fields" => [$propertyName],
                     "key" => "{$propertyName}-unique",
                 ];
             }
