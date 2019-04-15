@@ -14,8 +14,8 @@
 /*
 {{ arg|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 */
-        ${{ name }} = ${{ argName }}{{ suffix }};
+        ${{ name }} = ${{ argName }}{{ suffix|raw }};
 {% else %}
-        ${{ name }}["{{ argName }}"] = ${{ argName }}{{ suffix }};
+        ${{ name }}["{{ argName }}"] = ${{ argName }}{{ suffix|raw }};
 {% endif %}
 {% endfor %}
