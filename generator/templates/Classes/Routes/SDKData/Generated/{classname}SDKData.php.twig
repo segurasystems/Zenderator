@@ -39,13 +39,25 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "in" => "body",
                             "required" => true,
                             "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                            "subType" => \Gone\SDK\Common\Abstracts\AbstractModel::class,
+                            "format" => "full",
                         ],
                     ])->__toArray(),
+{% if "Validtors" in config.templates %}
     "validate" => RouteSDKProperties::Factory()
                     ->setResponseClass(Models\{{ class.name }}Model::class)
                     ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
                     ->setFunction('validate')
                     ->setArguments([
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "required" => true,
+                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                            "subType" => \Gone\SDK\Common\Abstracts\AbstractModel::class,
+                            "format" => "full",
+                        ],
                         "scenario" => [
                             "default" => null,
                             "description" => "Array of scenarios to use",
@@ -53,14 +65,8 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "required" => false,
                             "type" => "[]",
                         ],
-                        "body" => [
-                            "default" => null,
-                            "description" => "Array of data to use tor create the model",
-                            "in" => "body",
-                            "required" => true,
-                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
-                        ],
                     ])->__toArray(),
+{% endif %}
 {#    "createBulk" => RouteSDKProperties::Factory()
                     ->setResponseClass(Models\{{ class.name }}Model::class)
                     ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
@@ -95,6 +101,8 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "in" => "body",
                             "required" => true,
                             "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                            "subType" => \Gone\SDK\Common\Abstracts\AbstractModel::class,
+                            "format" => "diff",
                         ],
                     ])->__toArray(),
     "get" => RouteSDKProperties::Factory()
@@ -112,22 +120,6 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                         ],
 {% endfor %}
                     ])->__toArray(),
-
-{% if "Validtors" in config.templates %}
-    "validate" => RouteSDKProperties::Factory()
-                    ->setResponseKey("Validation")
-                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
-                    ->setFunction("validate")
-                    ->setArguments([
-                        "body" => [
-                            "default" => null,
-                            "description" => "Array of data to use tor create the model",
-                            "in" => "body",
-                            "required" => true,
-                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
-                        ]
-                    )->__toArray(),
-{% endif %}
 {% for related in class.relatedData %}
 {% if loop.first %}
     //Related Data
