@@ -121,6 +121,14 @@ class HttpProvider implements DataProviderInterface
             if ($argument["type"] == "Gone\\AppCore\\QueryBuilder\\Query") {
                 $argument["type"] = "Query";
             }
+            if (!empty($argument["subType"])) {
+                if ($argument["subType"] == "Gone\\SDK\\Common\\Abstracts\\AbstractModel") {
+                    $argument["type"] = "AbstractModel";
+                }
+            }
+            if(empty($argument["format"])){
+                $argument["format"] = null;
+            }
             $phpType = $argument["type"];
             $phpType = preg_match("/\[\]$/", $phpType) ? "array" : $phpType;
             if ($phpType === "password") {
@@ -143,22 +151,24 @@ class HttpProvider implements DataProviderInterface
             $raw["namespace"] = $this->getBaseClassNameSpace();
             $raw["namespaceNONSDK"] = $this->getBaseClassNameSpaceNONSDK();
             $raw["name"] = $name;
-            if(empty($raw["variable"])){
+            if (empty($raw["variable"])) {
                 $raw["variable"] = lcfirst($name);
             }
             $properties = [];
             foreach ($raw["properties"] as $propName => $property) {
-                if(in_array($propName,$this->getSkippedArgsConfig()))continue;
+                if (in_array($propName, $this->getSkippedArgsConfig())) {
+                    continue;
+                }
                 $property["name"] = ucfirst($propName);
-                if(!empty($property["structure"])){
-                    $property["structure"] = json_decode($property["structure"],true);
+                if (!empty($property["structure"])) {
+                    $property["structure"] = json_decode($property["structure"], true);
                 }
                 $type = $property["type"];
                 $phpType = Column::convertColumnType($type);
-                if($phpType === null){
+                if ($phpType === null) {
                     $phpType = $property["type"];
                     $property["type"] = null;
-                    if($phpType !== "array"){
+                    if ($phpType !== "array") {
                         $phpType = "\\" . $this->getBaseClassNameSpace() . "\\Models\\" . $phpType;
                     }
                 }
@@ -168,62 +178,66 @@ class HttpProvider implements DataProviderInterface
                 $properties[$propName] = $property;
             }
             $raw["properties"] = $properties;
-            $raw["conditions"] = $this->createConditionSet($properties,$raw);
+            $raw["conditions"] = $this->createConditionSet($properties, $raw);
             $modelData[$name] = $raw;
         }
         $this->modelData = $modelData;
     }
 
-    public function createConditionSet($properties,$raw){
+    public function createConditionSet($properties, $raw)
+    {
         $conditions = [];
-        foreach ($properties as $propertyName => $property){
+        foreach ($properties as $propertyName => $property) {
             $type = $property["type"] === "enum" ? "enum" : $property["phpType"];
-            $required = $this->fieldRequired($propertyName,!$property["nullable"],$raw);
+            $required = $this->fieldRequired($propertyName, !$property["nullable"], $raw);
             $length = $property["length"] ?? null;
-            $rule =
-                ( $required ? "required" : "nullable" )
+            $rule
+                = ($required ? "required" : "nullable")
                 . "-" .
-                ( $type ) . ( $type === "enum" ? "-" . implode(".",$property["options"]) : '' )
+                ($type) . ($type === "enum" ? "-" . implode(".", $property["options"]) : '')
                 . "-" .
-                ( $length );
-            if(empty($conditions[$rule])){
+                ($length);
+            if (empty($conditions[$rule])) {
                 $conditions[$rule] = [
                     "required" => $required,
-                    "type" => $type,
-                    "length" => $length,
-                    "fields" => [],
+                    "type"     => $type,
+                    "length"   => $length,
+                    "fields"   => [],
                 ];
-                if($type === "enum"){
+                if ($type === "enum") {
                     $conditions[$rule]["options"] = $property["options"];
                 }
             }
             $conditions[$rule]["fields"][] = $propertyName;
         }
-        foreach ($conditions as $key => $condition){
-            $conditions[$key]["key"] = trim(implode("-",$condition["fields"]) . "-" . $key,"- ");
+        foreach ($conditions as $key => $condition) {
+            $conditions[$key]["key"] = trim(implode("-", $condition["fields"]) . "-" . $key, "- ");
         }
         return array_values($conditions);
     }
 
-    private function fieldRequired($field,$required,$raw){
-        if(in_array($field,$raw["primaryKeys"])){
+    private function fieldRequired($field, $required, $raw)
+    {
+        if (in_array($field, $raw["primaryKeys"])) {
             return false;
         }
         return $required;
     }
 
-    private function getSkippedArgsConfig(){
+    private function getSkippedArgsConfig()
+    {
         return $this->getRoutesConfig()["skip_argument"] ?? [];
     }
 
-    private function getRoutesConfig(){
+    private function getRoutesConfig()
+    {
         return $this->getConfig()["routes"] ?? [];
     }
 
-    public function getConfig(){
+    public function getConfig()
+    {
         return $this->config;
     }
-
 
 
     private function fetchRawData()

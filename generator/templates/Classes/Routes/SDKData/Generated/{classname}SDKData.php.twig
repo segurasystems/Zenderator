@@ -3,6 +3,7 @@
 use Gone\AppCore\Router\RouteSDKProperties;
 use {{ class.namespace }}\Models;
 use Gone\AppCore\QueryBuilder\Query;
+use Gone\SDK\Common\Abstracts\AbstractModel;
 
 // Router proper begins
 return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
@@ -39,7 +40,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "in" => "body",
                             "required" => true,
                             "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
-                            "subType" => \Gone\SDK\Common\Abstracts\AbstractModel::class,
+                            "subType" => AbstractModel::class,
                             "format" => "full",
                         ],
                     ])->__toArray(),
@@ -55,7 +56,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "in" => "body",
                             "required" => true,
                             "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
-                            "subType" => \Gone\SDK\Common\Abstracts\AbstractModel::class,
+                            "subType" => AbstractModel::class,
                             "format" => "full",
                         ],
                         "scenario" => [
@@ -101,7 +102,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "in" => "body",
                             "required" => true,
                             "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
-                            "subType" => \Gone\SDK\Common\Abstracts\AbstractModel::class,
+                            "subType" => AbstractModel::class,
                             "format" => "diff",
                         ],
                     ])->__toArray(),
