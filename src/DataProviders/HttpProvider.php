@@ -112,24 +112,25 @@ class HttpProvider implements DataProviderInterface
         $arguments = [];
         $defaults = [];
         foreach ($_arguments as $name => $argument) {
+            $argument["subType"] = $argument["type"];
             if ($argument["type"] == "Gone\\SDK\\Common\\Filters\\Filter") {
-                $argument["type"] = "Filter";
+                $argument["subType"] = "Filter";
             }
             if ($argument["type"] == "Gone\\SDK\\Common\\QueryBuilder\\Query") {
-                $argument["type"] = "Query";
+                $argument["subType"] = "Query";
             }
             if ($argument["type"] == "Gone\\AppCore\\QueryBuilder\\Query") {
-                $argument["type"] = "Query";
+                $argument["subType"] = "Query";
             }
             if (!empty($argument["subType"])) {
                 if ($argument["subType"] == "Gone\\SDK\\Common\\Abstracts\\AbstractModel") {
-                    $argument["type"] = "AbstractModel";
+                    $argument["subType"] = "AbstractModel";
                 }
             }
             if(empty($argument["format"])){
                 $argument["format"] = null;
             }
-            $phpType = $argument["type"];
+            $phpType = $argument["subType"];
             $phpType = preg_match("/\[\]$/", $phpType) ? "array" : $phpType;
             if ($phpType === "password") {
                 $phpType = "string";
