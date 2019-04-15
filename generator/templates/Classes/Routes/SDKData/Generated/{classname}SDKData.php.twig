@@ -43,7 +43,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "format" => "full",
                         ],
                     ])->__toArray(),
-{% if "Validtors" in config.templates %}
+{% if "Validators" in config.templates %}
     "validate" => RouteSDKProperties::Factory()
                     ->setResponseClass(Models\{{ class.name }}Model::class)
                     ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
