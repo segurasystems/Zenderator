@@ -41,6 +41,26 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
                         ],
                     ])->__toArray(),
+    "validate" => RouteSDKProperties::Factory()
+                    ->setResponseClass(Models\{{ class.name }}Model::class)
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setFunction('validate')
+                    ->setArguments([
+                        "scenario" => [
+                            "default" => null,
+                            "description" => "Array of scenarios to use",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => "[]",
+                        ],
+                        "body" => [
+                            "default" => null,
+                            "description" => "Array of data to use tor create the model",
+                            "in" => "body",
+                            "required" => true,
+                            "type" => Models\{{ class.name }}Model::NAME_SINGULAR . "[]",
+                        ],
+                    ])->__toArray(),
 {#    "createBulk" => RouteSDKProperties::Factory()
                     ->setResponseClass(Models\{{ class.name }}Model::class)
                     ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
