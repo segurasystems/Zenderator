@@ -1,10 +1,21 @@
 {% for argName,arg in args %}
+{% if arg.type == "AbstractModel" %}
+{% if arg.format == "full"%}
+{% set suffix = "->__toArray()" %}
+{% elseif arg.format == "diff" %}
+{% set suffix = "->__toDirtyArray()" %}
+{% else %}
+{% set suffix = "" %}
+{% endif %}
+{% else %}
+{% set suffix = "" %}
+{% endif %}
 {% if argName == "body" and name == "bodyArgs" %}
 /*
 {{ arg|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 */
-        ${{ name }} = ${{ argName }};
+        ${{ name }} = ${{ argName }}{{ suffix }};
 {% else %}
-        ${{ name }}["{{ argName }}"] = ${{ argName }};
+        ${{ name }}["{{ argName }}"] = ${{ argName }}{{ suffix }};
 {% endif %}
 {% endfor %}
