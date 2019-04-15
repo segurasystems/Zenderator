@@ -1,5 +1,5 @@
 {% for argName,arg in args %}
-{% if arg.type == "AbstractModel" %}
+{% if arg.subType == "AbstractModel" %}
 {% if arg.format == "full"%}
 {% set suffix = "->__toArray()" %}
 {% elseif arg.format == "diff" %}
