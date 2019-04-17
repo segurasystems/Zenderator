@@ -135,6 +135,12 @@ abstract class Base{{ class.name }}Service
     //Related Data
 {% endif %}
 {% for field in related.fields %}
+    /**
+     * @param $pks
+     *
+     * @return mixed|null
+     * @throws \Exception
+     */
     public function get{{ field.related.variableUC }}($pks)
     {
         $select = $this->{{ related.class.nameLC }}AccessLayer->getSelect()
@@ -149,7 +155,7 @@ abstract class Base{{ class.name }}Service
                 )
             )
             ->where(
-                $this->getBasePredicate("l")
+                $this->getBasePredicate()
                     ->addPredicates([
 {% for key in class.primaryKeys %}
 {% if key in SKIP_ARGS %}
