@@ -95,7 +95,7 @@ abstract class Base{{ class.name }}Service
         }
         return parent::getByPK($_pk);
     }
-//SKIP ARG: {{ HAS_SKIP_ARG|json_encode()|raw }}
+
 {% if HAS_SKIP_ARG %}
     protected function prepModelForSave(AbstractModel ${{ class.variable }})
     {
