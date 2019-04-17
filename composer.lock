@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3092b6a79e76f93a490e8cf34e1afa30",
+    "content-hash": "6312ec614e8f009e2f5c1cc6e9845979",
     "packages": [
         {
             "name": "bnf/slim3-psr15",
@@ -953,18 +953,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/segurasystems/AppCore.git",
-                "reference": "355547c77558691b01ad4f61cd27b15253dd4595"
+                "reference": "422334ccfc3f811623ad90720e354ef62bad5b3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/segurasystems/AppCore/zipball/355547c77558691b01ad4f61cd27b15253dd4595",
-                "reference": "355547c77558691b01ad4f61cd27b15253dd4595",
+                "url": "https://api.github.com/repos/segurasystems/AppCore/zipball/422334ccfc3f811623ad90720e354ef62bad5b3f",
+                "reference": "422334ccfc3f811623ad90720e354ef62bad5b3f",
                 "shasum": ""
             },
             "require": {
                 "bnf/slim3-psr15": "^1.0",
                 "ext-json": "*",
-                "gone.io/libcommon": "dev-master",
+                "gone.io/libcommon": "dev-feature/1107-remove-query-builder",
                 "gone.io/sessions": "^1.0",
                 "gone.io/twig-extension-inflection": "^1.0",
                 "gone.io/twig-extension-transform": "^1.0",
@@ -1030,9 +1030,9 @@
                 }
             ],
             "support": {
-                "source": "https://github.com/segurasystems/AppCore/tree/feature/1101-remote-validation"
+                "source": "https://github.com/segurasystems/AppCore/tree/feature/1107-remove-query-builder"
             },
-            "time": "2019-04-15T10:25:03+00:00"
+            "time": "2019-04-17T10:43:48+00:00"
         },
         {
             "name": "gone.io/inflection",
@@ -1074,19 +1074,20 @@
         },
         {
             "name": "gone.io/libcommon",
-            "version": "dev-master",
+            "version": "dev-feature/1107-remove-query-builder",
             "source": {
                 "type": "git",
                 "url": "https://github.com/segurasystems/libCommon.git",
-                "reference": "5a00544d1df1ed34cf7c38e57baf347300775b63"
+                "reference": "0dfcc88a0695979ea9dd56e372978954d3be5e65"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/segurasystems/libCommon/zipball/5a00544d1df1ed34cf7c38e57baf347300775b63",
-                "reference": "5a00544d1df1ed34cf7c38e57baf347300775b63",
+                "url": "https://api.github.com/repos/segurasystems/libCommon/zipball/0dfcc88a0695979ea9dd56e372978954d3be5e65",
+                "reference": "0dfcc88a0695979ea9dd56e372978954d3be5e65",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "guzzlehttp/guzzle": "^6.2.1",
                 "php": "^7.1",
                 "respect/validation": "1.1.29"
@@ -1117,10 +1118,10 @@
             ],
             "description": "Shared assets between various SDK libraries",
             "support": {
-                "source": "https://github.com/segurasystems/libCommon/tree/master",
+                "source": "https://github.com/segurasystems/libCommon/tree/feature/1107-remove-query-builder",
                 "issues": "https://github.com/segurasystems/libCommon/issues"
             },
-            "time": "2019-04-05T10:49:09+00:00"
+            "time": "2019-04-16T16:28:32+00:00"
         },
         {
             "name": "gone.io/sessions",
@@ -4909,16 +4910,16 @@
         },
         {
             "name": "slim/slim",
-            "version": "3.12.0",
+            "version": "3.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/slimphp/Slim.git",
-                "reference": "f4947cc900b6e51cbfda58b9f1247bca2f76f9f0"
+                "reference": "eaee12ef8d0750db62b8c548016d82fb33addb6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/slimphp/Slim/zipball/f4947cc900b6e51cbfda58b9f1247bca2f76f9f0",
-                "reference": "f4947cc900b6e51cbfda58b9f1247bca2f76f9f0",
+                "url": "https://api.github.com/repos/slimphp/Slim/zipball/eaee12ef8d0750db62b8c548016d82fb33addb6b",
+                "reference": "eaee12ef8d0750db62b8c548016d82fb33addb6b",
                 "shasum": ""
             },
             "require": {
@@ -4976,7 +4977,7 @@
                 "micro",
                 "router"
             ],
-            "time": "2019-01-15T13:21:25+00:00"
+            "time": "2019-04-16T16:47:29+00:00"
         },
         {
             "name": "slim/twig-view",
@@ -6085,16 +6086,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v2.7.4",
+            "version": "v2.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "ed9c49220e09bfaeb1ba4d48077c08a7b09908dd"
+                "reference": "91cc2594d3143761ce0399c1caffd0b500ffe5b9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/ed9c49220e09bfaeb1ba4d48077c08a7b09908dd",
-                "reference": "ed9c49220e09bfaeb1ba4d48077c08a7b09908dd",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/91cc2594d3143761ce0399c1caffd0b500ffe5b9",
+                "reference": "91cc2594d3143761ce0399c1caffd0b500ffe5b9",
                 "shasum": ""
             },
             "require": {
@@ -6110,7 +6111,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.7-dev"
+                    "dev-master": "2.8-dev"
                 }
             },
             "autoload": {
@@ -6148,7 +6149,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2019-03-23T14:28:58+00:00"
+            "time": "2019-04-16T17:14:24+00:00"
         },
         {
             "name": "webmozart/assert",
