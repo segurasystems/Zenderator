@@ -2,13 +2,11 @@
 
 namespace {{ class.namespace }}\Services\Base;
 
+use Gone\SDK\Common\Filters\Filter;
 use Gone\AppCore\Validator\AbstractValidator;
 use Gone\AppCore\Abstracts\Service as AbstractService;
 use Gone\AppCore\Interfaces\ServiceInterface as ServiceInterface;
 use Gone\SDK\Common\Abstracts\AbstractModel;
-use Gone\AppCore\QueryBuilder\ConditionGroup;
-use Gone\AppCore\QueryBuilder\Condition;
-use Gone\AppCore\QueryBuilder\Query;
 use \{{ class.namespace }}\AccessLayers;
 use \{{ class.namespace }}\Models;
 {% if "Validators" in config.templates %}
@@ -97,98 +95,37 @@ abstract class Base{{ class.name }}Service
     }
 
 {% if HAS_SKIP_ARG %}
+    protected function prepModelForSave(AbstractModel ${{ class.variable }})
+    {
+        /** @var Models\{{ class.name }}Model ${{ class.variable }} */
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        ${{ class.variable }}->set{{ class.properties[arg].name }}($this->get{{ class.properties[arg].name }}());
+{% endif %}
+{% endfor %}
+        return ${{ class.variable }};
+    }
+
+    protected function getBasePredicate(string $alias = null): ?PredicateSet
+    {
+        if(empty($alias)){
+            $alias = Models\{{ class.name }}Model::TABLE_NAME;
+        }
+        $predicates = [];
+{% for arg in SKIP_ARGS %}
+{% if arg in class.properties|keys %}
+        $predicates[] = new Operator("{$alias}." . Models\{{ class.name }}Model::FIELD_{{ arg|upper }},Operator::OP_EQ, $this->get{{ class.properties[arg].name }}())
+{% endif %}
+{% endfor %}
+        return new PredicateSet($predicates);
+    }
+
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
     abstract protected function get{{ class.properties[arg].name }}();
 
 {% endif %}
 {% endfor %}
-    public function save(AbstractModel ${{ class.variable }})
-    {
-        /** @var Models\{{ class.name }}Model ${{ class.variable }} */
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        ${{ class.variable }}->set{{ class.properties[arg].name }}($this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        return parent::save(${{ class.variable }});
-    }
-
-    public function validate(AbstractModel ${{ class.variable }}, string $scenario = AbstractValidator::SCENARIO_DEFAULT)
-    {
-        /** @var Models\{{ class.name }}Model ${{ class.variable }} */
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        ${{ class.variable }}->set{{ class.properties[arg].name }}($this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        return parent::validate(${{ class.variable }}, $scenario);
-    }
-
-    public function get(Query $filter)
-    {
-        $conditions = [];
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        $conditions[] = $filter->getCondition();
-        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
-        return parent::get($filter);
-    }
-
-    public function count(Query $filter = null) : int
-    {
-        $conditions = [];
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        $conditions[] = $filter->getCondition();
-        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
-        return parent::count($filter);
-    }
-
-    public function getAll(Query $filter = null): array
-    {
-        $conditions = [];
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        $conditions[] = $filter->getCondition();
-        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
-        return parent::getAll($filter);
-    }
-
-    public function getAllField(string $field, Query $filter = null, string $type = null)
-    {
-        $conditions = [];
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        $conditions[] = $filter->getCondition();
-        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
-        return parent::getAllField($field, $filter, $type);
-    }
-
-    public function getAllFields(array $fields, Query $filter = null, array $types = [])
-    {
-        $conditions = [];
-{% for arg in SKIP_ARGS %}
-{% if arg in class.properties|keys %}
-        $conditions[] = new Condition(Models\{{ class.name }}Model::FIELD_{{ arg|upper }}, $this->get{{ class.properties[arg].name }}());
-{% endif %}
-{% endfor %}
-        $conditions[] = $filter->getCondition();
-        $filter->setCondition(new ConditionGroup(ConditionGroup::AND,$conditions));
-        return parent::getAllFields($fields, $filter, $types);
-    }
 
 {% endif %}
 {% for related in class.relatedData %}
