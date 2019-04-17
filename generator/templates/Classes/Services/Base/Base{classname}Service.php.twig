@@ -137,27 +137,33 @@ abstract class Base{{ class.name }}Service
 {% for field in related.fields %}
     public function get{{ field.related.variableUC }}($pks)
     {
-        return $this->{{ related.class.nameLC }}AccessLayer->get(
-            Query::Factory(Models\{{ related.class.name }}Model::TABLE_NAME)
-                ->join(
-                    [Models\{{ class.name }}Model::TABLE_NAME,Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }}],
-                    [Models\{{ related.class.name }}Model::TABLE_NAME,Models\{{ related.class.name }}Model::FIELD_{{ field.related.name|upper }}]
+        $select = $this->{{ related.class.nameLC }}AccessLayer->getSelect()
+            ->join(
+                Models\{{ class.name }}Model::TABLE_NAME,
+                new Operator(
+                    Models\{{ class.name }}Model::TABLE_NAME . "." . Models\{{ class.name }}Model::FIELD_{{ field.local.name|upper }},
+                    Operator::OP_EQ,
+                    Models\{{ related.class.name }}Model::TABLE_NAME . "." . Models\{{ related.class.name }}Model::FIELD_{{ field.related.name|upper }},
+                    Operator::TYPE_IDENTIFIER,
+                    Operator::TYPE_IDENTIFIER
                 )
-                ->where([
+            )
+            ->where(
+                $this->getBasePredicate("l")
+                    ->addPredicates([
 {% for key in class.primaryKeys %}
-                    [
-                        Condition::EQUAL,
-                        Models\{{ class.name }}Model::FIELD_{{ key|upper }},
 {% if key in SKIP_ARGS %}
-                        $this->get{{ key }}(),
 {% else %}
-                        $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}],
+                        new Operator(
+                            Models\{{ class.name }}Model::TABLE_NAME . "." . Models\{{ class.name }}Model::FIELD_{{ key|upper }},
+                            Operator::OP_EQ,
+                            $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}]
+                        ),
 {% endif %}
-                        Models\{{ class.name }}Model::TABLE_NAME
-                    ],
 {% endfor %}
-                ])
-        );
+                    ])
+            );
+        return $this->{{ related.class.nameLC }}AccessLayer->get($select);
     }
 
 {% endfor %}
