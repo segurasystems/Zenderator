@@ -19,6 +19,8 @@ use \{{ class.namespace }}\Cleaners;
 {% endif %}
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Predicate\Operator;
+use Zend\Db\Sql\Predicate\PredicateSet;
 
 {% set SKIP_ARGS = config.routes.skip_argument %}
 
@@ -114,7 +116,7 @@ abstract class Base{{ class.name }}Service
         $predicates = [];
 {% for arg in SKIP_ARGS %}
 {% if arg in class.properties|keys %}
-        $predicates[] = new Operator("{$alias}." . Models\{{ class.name }}Model::FIELD_{{ arg|upper }},Operator::OP_EQ, $this->get{{ class.properties[arg].name }}())
+        $predicates[] = new Operator("{$alias}." . Models\{{ class.name }}Model::FIELD_{{ arg|upper }},Operator::OP_EQ, $this->get{{ class.properties[arg].name }}());
 {% endif %}
 {% endfor %}
         return new PredicateSet($predicates);
