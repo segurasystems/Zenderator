@@ -102,6 +102,9 @@ $router = Router::Instance()
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
+/*
+{{ field.remote|json_encode(128)|raw }}
+*/
     ->addRoute(
         Route::Factory()
             ->setName('{{ class.name }} Get {{ field.remote.variableUC }} Model')
