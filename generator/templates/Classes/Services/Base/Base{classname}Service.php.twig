@@ -203,6 +203,9 @@ abstract class Base{{ class.name }}Service
 {% endfor %}
         ];
 
+/*
+{{ classes[remote.class.name]|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+*/
         if(!empty($pks["{{ field.remote.variablePlural }}ID"])){
 
         }
