@@ -182,7 +182,6 @@ abstract class Base{{ class.name }}Service
     //Remote Data
 
 {% endif %}
-{% set remoteClass = classes[remote.class.name].class %}
 {% for field in remote.fields %}
     /**
      * @param       $pks
@@ -190,7 +189,7 @@ abstract class Base{{ class.name }}Service
      * @return array
      * @throws Exception
      */
-    public function get{{ field.remote.variablePluralUC }}($pks, Query $filter)
+    public function get{{ field.remote.variablePluralUC }}($pks)
     {
         $predicates = [
 {% for key in class.primaryKeys %}
@@ -208,8 +207,12 @@ abstract class Base{{ class.name }}Service
 {% for key in remoteClass.primaryKeys %}
 {% if key in SKIP_ARGS %}
 {% else %}
-        if(!empty($pks["{{ field.remote.variablePlural }}{{ key|upper }}"])){
-
+        if(!empty($pks[Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }}])){
+            $predicates[] = new Operator(
+                Models\{{ remote.class.name }}Model::TABLE_NAME . "." . Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }},
+                Operator::OP_EQ,
+                $pks[Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }}]
+            );
         }
 {% endif %}
 {% endfor %}
