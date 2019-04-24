@@ -147,6 +147,7 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
 {% if loop.first %}
     //Remote Data
 {% endif %}
+{% set remoteClass = classes[remote.class.name].class %}
 {% for field in remote.fields %}
     "get{{ field.remote.variablePluralUC }}" => RouteSDKProperties::Factory()
                     ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
@@ -161,6 +162,40 @@ return [ Models\{{ class.name }}Model::NAME_SINGULAR => [
                             "in" => "query",
                             "required" => true,
                             "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+                        "query" => [
+                            "default" => null,
+                            "description" => "Query object with rules to filter the list results by",
+                            "in" => "header",
+                            "required" => false,
+                            "type" => Query::class,
+                        ],
+                    ])->__toArray(),
+{% endfor %}
+{% for field in remote.fields %}
+    "get{{ field.remote.variableUC }}" => RouteSDKProperties::Factory()
+                    ->setClass(Models\{{ class.name }}Model::NAME_SINGULAR)
+                    ->setFunction('get{{ field.remote.variableUC }}')
+                    ->setReturnsArray(true)
+                    ->setResponseClass(Models\{{ remote.class.name }}Model::class)
+                    ->setArguments([
+{% for key in class.routePKs %}
+                        "{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "required" => true,
+                            "type" => "{{ class.properties[key].phpType }}",
+                        ],
+{% endfor %}
+{% for key in remoteClass.routePKs %}
+                        "{{ remote.class.name }}_{{ key }}" => [
+                            "default" => null,
+                            "description" => "Primary key for model",
+                            "in" => "query",
+                            "required" => true,
+                            "type" => "{{ remoteClass.properties[key].phpType }}",
                         ],
 {% endfor %}
                         "query" => [
