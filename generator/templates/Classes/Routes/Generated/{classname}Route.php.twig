@@ -90,9 +90,6 @@ $router = Router::Instance()
 {% if loop.first %}
     //Remote Data
 {% endif %}
-/*
-{{ remote|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
-*/
 {% for field in remote.fields %}
     ->addRoute(
         Route::Factory()
