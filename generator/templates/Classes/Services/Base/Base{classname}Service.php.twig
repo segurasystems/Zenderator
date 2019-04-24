@@ -182,6 +182,7 @@ abstract class Base{{ class.name }}Service
     //Remote Data
 
 {% endif %}
+{% set remoteClass = classes[remote.class.name].class %}
 {% for field in remote.fields %}
     /**
      * @param       $pks
