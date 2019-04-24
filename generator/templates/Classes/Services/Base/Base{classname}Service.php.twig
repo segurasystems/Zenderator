@@ -182,8 +182,31 @@ abstract class Base{{ class.name }}Service
     //Remote Data
 {% endif %}
 {% for field in remote.fields %}
+    /**
+     * @param       $pks
+     *
+     * @return array
+     * @throws Exception
+     */
     public function get{{ field.remote.variablePluralUC }}($pks, Query $filter)
     {
+        $predicates = [
+{% for key in class.primaryKeys %}
+{% if key in SKIP_ARGS %}
+{% else %}
+            new Operator(
+                Models\{{ class.name }}Model::TABLE_NAME . "." . Models\{{ class.name }}Model::FIELD_{{ key|upper }},
+                Operator::OP_EQ,
+                $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}]
+            ),
+{% endif %}
+{% endfor %}
+        ];
+
+        if(!empty($pks["{{ field.remote.variablePlural }}ID"])){
+
+        }
+
         $select = $this->addressAccessLayer->getSelect()
             ->join(
                 Models\{{ class.name }}Model::TABLE_NAME,
@@ -197,18 +220,7 @@ abstract class Base{{ class.name }}Service
             )
             ->where(
                 $this->getBasePredicate()
-                    ->addPredicates([
-{% for key in class.primaryKeys %}
-{% if key in SKIP_ARGS %}
-{% else %}
-                        new Operator(
-                            Models\{{ class.name }}Model::TABLE_NAME . "." . Models\{{ class.name }}Model::FIELD_{{ key|upper }},
-                            Operator::OP_EQ,
-                            $pks[Models\{{ class.name }}Model::FIELD_{{ key|upper }}]
-                        ),
-{% endif %}
-{% endfor %}
-                    ])
+                    ->addPredicates($predicates)
             );
 
         return $this->addressAccessLayer->getAll($select);

@@ -206,9 +206,10 @@ class Zenderator
         return $this;
     }
 
-    private function addCleanPath($path){
-        $path = APP_ROOT ."/" . $path;
-        if(!in_array($path,$this->pathsToPSR2)){
+    private function addCleanPath($path)
+    {
+        $path = APP_ROOT . "/" . $path;
+        if (!in_array($path, $this->pathsToPSR2)) {
             $this->pathsToPSR2[] = $path;
         }
     }
@@ -475,7 +476,8 @@ class Zenderator
         return $this->getSpecificModelPropertiesConfig($class)[$field] ?? [];
     }
 
-    public function getSpecificModelPropertiesConfig($class){
+    public function getSpecificModelPropertiesConfig($class)
+    {
         return $this->getSpecificModelConfig($class)["properties"] ?? [];
     }
 
@@ -862,20 +864,17 @@ class Zenderator
     {
         echo "Generating Core files for " . count($models) . " models... \n";
         $allModelData = [];
-        /** @var Components\Model $model */
         foreach ($models as $model) {
-            $renderData = $model->getRenderDataset();
-            $allModelData[$model->getClassName()] = $renderData;
-            // "Model" suite
-            $this->makeCoreFilesForModel($model->getClassName(), $renderData);
+            $allModelData[$model->getClassName()] = $model->getRenderDataset();
+        }
+        foreach ($views as $view) {
+            $allModelData[$view->getClassName()] = $view->getRenderDataset();
         }
 
-        foreach ($views as $view) {
-            $renderData = $view->getRenderDataset();
-            $allModelData[$view->getClassName()] = $renderData;
-            // "Model" suite
-            $this->makeCoreFilesForModel($view->getClassName(), $renderData);
-
+        /** @var Components\Model $model */
+        foreach ($allModelData as $class => $renderData) {
+            $renderData["classes"] = $allModelData;
+            $this->makeCoreFilesForModel($class, $renderData);
         }
 
         // "DependencyInjector" suite
@@ -894,7 +893,8 @@ class Zenderator
         return $this;
     }
 
-    public function getConfigModuleCustomLocation($type){
+    public function getConfigModuleCustomLocation($type)
+    {
         $type = $this->getConfig()[strtolower($type)] ?? [];
         return $type["location"] ?? null;
     }
@@ -910,8 +910,8 @@ class Zenderator
             $parts = explode("/", $templateFile);
             $type = $parts[0];
             $base = strtolower($parts[1]) === "base" || strtolower($parts[1]) === "generated";
-            if(!empty($parts[2])){
-                if(strtolower($parts[2]) === "generated"){
+            if (!empty($parts[2])) {
+                if (strtolower($parts[2]) === "generated") {
                     $base = true;
                 }
             }
@@ -920,10 +920,10 @@ class Zenderator
             $fname = implode(".", $fname);
             $customPath = $this->getConfigModuleCustomLocation($type);
             $file = APP_ROOT . "/src/" . implode("/", $parts) . "/";
-            if(!empty($customPath)){
+            if (!empty($customPath)) {
                 $this->addCleanPath($customPath);
                 $this->addCleanPath($customPath . "/Base");
-                $file = APP_ROOT . "/" . $customPath . "/" . implode("/",array_slice($parts,1)) . "/";
+                $file = APP_ROOT . "/" . $customPath . "/" . implode("/", array_slice($parts, 1)) . "/";
             }
             $file .= str_replace("{classname}", $className, $fname);
             if (!isset($printed[$type])) {
