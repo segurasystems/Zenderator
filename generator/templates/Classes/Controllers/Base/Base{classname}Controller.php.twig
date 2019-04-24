@@ -41,6 +41,14 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
     //Related Data
 {% endif %}
 {% for field in related.fields %}
+    /**
+     * @param Request  $request
+     * @param Response $response
+     * @param          $args
+     *
+     * @return Response
+     * @throws \Exception
+     */
     public function {{ field.related.variable }}Request(Request $request, Response $response, $args) : Response
     {
         $pks = [
@@ -81,6 +89,14 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
     //Remote Data
 {% endif %}
 {% for field in remote.fields %}
+    /**
+     * @param Request  $request
+     * @param Response $response
+     * @param          $args
+     *
+     * @return Response
+     * @throws \Exception
+     */
     public function {{ field.remote.variablePlural }}Request(Request $request, Response $response, $args) : Response
     {
         $pks = [
