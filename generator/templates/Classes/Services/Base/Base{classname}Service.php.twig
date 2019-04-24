@@ -205,12 +205,14 @@ abstract class Base{{ class.name }}Service
 {% endfor %}
         ];
 
-/*
-{{ remoteClass.primaryKeys|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
-*/
-        if(!empty($pks["{{ field.remote.variablePlural }}ID"])){
+{% for key in remoteClass.primaryKeys %}
+{% if key in SKIP_ARGS %}
+{% else %}
+        if(!empty($pks["{{ field.remote.variablePlural }}{{ key|upper }}"])){
 
         }
+{% endif %}
+{% endfor %}
 
         $select = $this->addressAccessLayer->getSelect()
             ->join(
