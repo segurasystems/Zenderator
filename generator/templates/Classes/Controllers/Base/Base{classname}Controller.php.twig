@@ -20,12 +20,17 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
     protected $pluralTerm = Models\{{ class.name }}Model::NAME_PLURAL;
 
     /**
+     * BaseLocationController constructor.
+     *
      * @param Services\{{ class.name }}Service ${{ class.variable }}Service
+     *
+     * @throws Exception
      */
     public function __construct(
         Services\{{ class.name }}Service ${{ class.variable }}Service
     )
     {
+        parent::__construct();
         $this->service = ${{ class.variable }}Service;
     }
 
