@@ -180,7 +180,9 @@ abstract class Base{{ class.name }}Service
 {% for remote in class.remoteData %}
 {% if loop.first %}
     //Remote Data
+
 {% endif %}
+{% set remoteClass = classes[remote.class.name] %}
 {% for field in remote.fields %}
     /**
      * @param       $pks
@@ -204,7 +206,7 @@ abstract class Base{{ class.name }}Service
         ];
 
 /*
-{{ classes[remote.class.name].primaryKeys|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+{{ remoteClass.primaryKeys|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 */
         if(!empty($pks["{{ field.remote.variablePlural }}ID"])){
 
