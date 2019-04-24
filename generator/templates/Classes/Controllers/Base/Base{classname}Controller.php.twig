@@ -8,6 +8,7 @@ use \{{ class.namespace }}\Services;
 use \{{ class.namespace }}\Models;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Exception
 
 {% include '_overwrite_warning.twig' %}
 
@@ -47,7 +48,7 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
      * @param          $args
      *
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function {{ field.related.variable }}Request(Request $request, Response $response, $args) : Response
     {
@@ -95,7 +96,7 @@ abstract class Base{{ class.name }}Controller extends AbstractCrudController
      * @param          $args
      *
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function {{ field.remote.variablePlural }}Request(Request $request, Response $response, $args) : Response
     {
