@@ -102,14 +102,11 @@ $router = Router::Instance()
             ->setHttpMethod('GET')
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     )
-/*
-{{ field.remote|json_encode(128)|raw }}
-*/
     ->addRoute(
         Route::Factory()
             ->setName('{{ class.name }} Get {{ field.remote.variableUC }} Model')
             ->setCallback({{ class.name }}Controller::class . ':{{ field.remote.variablePlural }}Request')
-            ->setSdkRef({{ class.name }}Model::NAME_SINGULAR,'get{{ field.remote.variablePluralUC }}')
+            ->setSdkRef({{ class.name }}Model::NAME_SINGULAR,'get{{ field.remote.variableUC }}')
             ->setRouterPattern('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ '{' }}{{ key }}{{ ':[0-9]+}' }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}/{% for key in remoteClass.routePKs %}{{ '{' }}{{ remote.class.name }}_{{ key }}{{ ':[0-9]+}' }}{{ loop.last ? '' : '/' }}{% endfor %}')
             ->setHttpEndpoint('/v1/{{ class.plural|lower }}/{% for key in class.routePKs %}{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}/{{ field.remote.variablePlural }}/{% for key in remoteClass.routePKs %}{{ remote.class.name }}_{{ key }}{{ loop.last ? '' : '/' }}{% endfor %}')
             ->setHttpMethod('GET')
