@@ -208,11 +208,11 @@ abstract class Base{{ class.name }}Service
 {% for key in remoteClass.primaryKeys %}
 {% if key in SKIP_ARGS %}
 {% else %}
-        if(!empty($pks[Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }}])){
+        if(!empty($pks["{{ remote.class.name }}_" . Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }}])){
             $predicates[] = new Operator(
                 Models\{{ remote.class.name }}Model::TABLE_NAME . "." . Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }},
                 Operator::OP_EQ,
-                $pks[Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }}]
+                $pks["{{ remote.class.name }}_" . Models\{{ remote.class.name }}Model::FIELD_{{ key|upper }}]
             );
         }
 {% endif %}
